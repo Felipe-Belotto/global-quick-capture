@@ -1,124 +1,209 @@
 # Global Quick Capture
 
-> Utilitário nativo para Windows de captura rápida de recortes de tela e evidências de QA integradas ao Obsidian, com foco em baixo consumo de recursos e produtividade pelo teclado.
+> Utilitário nativo para Windows inspirado no Raycast e Warp Terminal para captura rápida de tela e evidências de QA, com gravação direta no cofre do Obsidian.
 
-[![Tauri v2](https://img.shields.io/badge/Tauri-v2-1f2937?logo=tauri)](https://tauri.app/)
-[![React](https://img.shields.io/badge/React-19-1f2937?logo=react)](https://react.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-1f2937?logo=tailwindcss)](https://tailwindcss.com/)
-[![Rust](https://img.shields.io/badge/Rust-MSVC-1f2937?logo=rust)](https://www.rust-lang.org/)
-[![License](https://img.shields.io/badge/License-MIT-1f2937.svg)](LICENSE)
-
----
-
-## Visão Geral
-
-O **Global Quick Capture** é um utilitário de sistema projetado para registrar anotações visuais, contextos rápidos e evidências de testes diretamente em arquivos Markdown de um cofre local do Obsidian, sem necessidade de alternar janelas ou manter o Obsidian em execução.
-
-A ferramenta opera em segundo plano através da bandeja do sistema com consumo reduzido de memória (~35 MB em idle) e acionamento global por atalho.
+[![Latest Release](https://img.shields.io/github/v/release/Felipe-Belotto/global-quick-capture?label=Download&color=4f46e5)](https://github.com/Felipe-Belotto/global-quick-capture/releases/latest)
+[![Windows](https://img.shields.io/badge/Plataforma-Windows_10%2F11-0078d4?logo=windows)](https://microsoft.com/windows)
+[![Tauri v2](https://img.shields.io/badge/Tauri-v2-24c8db?logo=tauri)](https://tauri.app/)
+[![React](https://img.shields.io/badge/React-19-61dafb?logo=react)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
+[![License: MIT](https://img.shields.io/badge/Licen%C3%A7a-MIT-10b981.svg)](LICENSE)
 
 ---
 
-## Recursos Principais
+## Sumário
 
-### Captura e Recorte
-- **Atalho Global Customizável**: Acionado por padrão via `Win + Alt + S`, evitando colisões com atalhos de navegadores e IDEs.
-- **Overlay de Recorte com Mira**: Congela a tela com transparência e fornece seleção retangular precisa com exibição de dimensões em pixels.
-- **Cancelamento Rápido**: Tecla `Esc` fecha a interface e descarta o buffer sem persistência em disco.
-
-### Interface de Entrada (Quick Capture Card)
-- **Design Sólido e Focado**: Interface escura de alta fidelidade com transparência sutil e foco automático no campo de resumo.
-- **Campo de Evidências de QA**: Área dedicada para descrição detalhada de comportamentos observados, passos para reprodução e notas técnicas.
-- **Roteamento por Teclado**: Atalhos numéricos (`1` a `9`) para direcionar a nota instantaneamente entre *Daily Note*, *Inbox* ou diretórios de projetos.
-- **Tags Rápidas**: Seleção de identificadores pré-definidos (`#qa`, `#bug`, `#ui`, `#p1`).
-
-### Integração Local com o Obsidian
-- **Zero Dependências**: Gravação direta no sistema de arquivos local (`std::fs`). O Obsidian detecta e sincroniza as alterações nativamente.
-- **Onboarding Guiado**: Detecção automática da estrutura de pastas do cofre e geração de rotas ao selecionar o diretório raiz via diálogo nativo do Windows.
-- **Padronização de Anexos**: Armazenamento automático das imagens PNG em diretórios dedicados (`_attachments` ou pastas de assets do projeto) com links formatados em sintaxe Wiki (`![[clip-...png]]`).
+- [Como Baixar e Instalar](#-como-baixar-e-instalar)
+- [Guia de Primeiro Uso](#-guia-de-primeiro-uso-onboarding)
+- [Fluxo de Uso no Dia a Dia](#-fluxo-de-uso-no-dia-a-dia)
+- [Principais Funcionalidades](#-principais-funcionalidades)
+- [Formato de Saída no Obsidian](#-formato-de-sa%C3%ADda-no-obsidian)
+- [Atalhos de Teclado](#-atalhos-de-teclado)
+- [Configurações e Personalização](#-configura%C3%A7%C3%B5es-e-personaliza%C3%A7%C3%A3o)
+- [Perguntas Frequentes (FAQ)](#-perguntas-frequentes-faq)
+- [Desenvolvimento Local](#-desenvolvimento-local)
+- [Arquitetura do Projeto](#-arquitetura-do-projeto)
 
 ---
 
-## Formato de Persistência
+## 📥 Como Baixar e Instalar
 
-Ao confirmar o envio (`Ctrl + Enter`), a entrada é gravada no arquivo Markdown correspondente seguindo o padrão:
+O aplicativo é distribuído como um instalador executável para Windows (`x64`).
+
+### Passo 1: Download
+Baixe a versão mais recente diretamente na página de lançamentos:
+- **[Baixar Instalador Oficial (.exe)](https://github.com/Felipe-Belotto/global-quick-capture/releases/latest)**
+
+### Passo 2: Instalação
+1. Execute o arquivo baixado (ex: `global-quick-capture_0.1.0_x64-setup.exe`).
+2. Conclua o assistente de instalação padrão do Windows.
+3. O ícone da aplicação será adicionado ao **Menu Iniciar**, à **Área de Trabalho** e ficará ativo na **Bandeja do Sistema (perto do relógio)**.
+
+> **Nota sobre o Windows SmartScreen**: Por ser um binário de código aberto sem certificado corporativo pago da Microsoft, o Windows pode exibir o aviso *"O Windows protegeu o seu computador"*. Basta clicar em **"Mais informações"** e em seguida em **"Executar assim mesmo"**.
+
+---
+
+## 🧭 Guia de Primeiro Uso (Onboarding)
+
+Ao abrir o aplicativo pela primeira vez, o assistente de configuração automática será exibido:
+
+```mermaid
+flowchart LR
+    A["Abrir App"] --> B["Escolher Pasta do Cofre"]
+    B --> C["Escaneamento Automático"]
+    C --> D["Pastas e Rotas Detectadas"]
+    D --> E["Concluir e Usar"]
+```
+
+1. **Selecione o Cofre**: Clique em **"Escolher Pasta do Cofre..."** e aponte para a raiz do seu Obsidian (ex: `C:\Users\seu-nome\Documents\MeuCofre`).
+2. **Identificação Inteligente de Pastas**: O app lê a estrutura do seu cofre em tempo real (como nas IAs Claude e Cursor) e lista suas pastas (`Daily`, `Inbox`, `Projects/QA`, `Frontend`, etc.).
+3. **Atalhos Automáticos**: O assistente sugere atalhos numéricos (`1`, `2`, `3`...) para cada pasta encontrada.
+4. **Finalizar**: Clique em **"Concluir e Começar"**. O app ficará rodando silenciosamente na bandeja.
+
+---
+
+## 🔄 Fluxo de Uso no Dia a Dia
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Dev as Usuário / QA
+    participant OS as Windows
+    participant App as Global Quick Capture
+    participant Vault as Cofre do Obsidian
+
+    Dev->>OS: Pressiona Win + Alt + S
+    OS->>App: Dispara overlay
+    App->>Dev: Tela congela com mira em cruz
+    Dev->>App: Seleciona retângulo da tela
+    App->>Dev: Abre card estilo Warp com thumbnail
+    Dev->>App: Digita resumo + evidências de QA + rota (1-9)
+    Dev->>App: Pressiona Ctrl + Enter
+    App->>Vault: Salva PNG em _attachments/
+    App->>Vault: Dá append no Markdown de destino
+    App->>Dev: Fecha a janela instantaneamente
+```
+
+---
+
+## ⚡ Principais Funcionalidades
+
+### 1. Captura de Tela sem Conflitos
+- Acionamento global via <kbd>Win + Alt + S</kbd> em qualquer tela do Windows.
+- Mira em cruz com máscara escurecida e cálculo de dimensões em pixels em tempo real.
+- Cancelamento imediato com <kbd>Esc</kbd>.
+
+### 2. Card Flutuante Estilo Warp Terminal
+- **Fundo Sólido e Profundo**: Paleta `#0f1117` com 96% de opacidade e efeito *blur*, sem vazamento de texto do fundo.
+- **Autofocus Imediato**: Comece a digitar o resumo da captura assim que soltar o mouse.
+- **Campo Especializado para QA**: Área de texto para descrição detalhada de passos de teste, comportamentos esperados e logs.
+- **Roteamento Ágil via Teclado**: Teclas numéricas alternam o destino instantaneamente:
+  - <kbd>1</kbd> Daily Note (`Daily/YYYY-MM-DD.md`)
+  - <kbd>2</kbd> Inbox (`Inbox.md`)
+  - <kbd>3</kbd> QA / Bugs (`Projects/QA/Bugs/`)
+  - <kbd>4</kbd> a <kbd>9</kbd> Projetos personalizados
+
+### 3. Integração Direta com o Sistema de Arquivos
+- **Zero Plugins no Obsidian**: Não requer Obsidian aberto nem servidor HTTP local.
+- Gravação direta via Rust (`std::fs`). O Obsidian detecta e recarrega os arquivos em tempo real.
+- Imagens salvas como `.png` otimizado com timestamp (`clip-YYYYMMDD-HHmmss.png`).
+
+---
+
+## 📄 Formato de Saída no Obsidian
+
+Cada captura confirmada é adicionada ao final do arquivo Markdown selecionado com sintaxe nativa Wiki-Link:
 
 ```markdown
-### 21:40 - Resumo da Nota / Título do Bug #qa #bug
+### 21:40 - Botão de checkout não responde #qa #bug
 ![[clip-20261013-214012.png]]
-> **QA / Observação**: Comportamento observado ou passos de reprodução registrados no card.
+> **QA / Observação**: Ao clicar em 'Pagar com PIX' na resolução 1440p, a requisição retorna status 422 e o modal fecha sem feedback visual.
 ```
 
 ---
 
-## Arquitetura do Projeto
+## ⌨️ Atalhos de Teclado
 
-A arquitetura adota o padrão **Spec-Driven Agentic Engineering**, com especificações técnicas mantidas no diretório `docs/`:
-
-```
-global-quick-capture/
-├── docs/
-│   ├── 00_PRD.md               # Requisitos do produto, fluxos e critérios de aceite
-│   ├── 01_ARCHITECTURE.md      # Estratégia multi-janela, contratos IPC e stack
-│   ├── 02_DATA_CONTRACTS.md    # Esquemas JSON, resolução de caminhos e templates
-│   ├── 03_ROADMAP.md           # Fila de execução de tarefas
-│   └── AGENT_GUIDELINES.md     # Protocolo operacional para agentes de código
-├── src/                        # Frontend (React 19 + TypeScript + Tailwind CSS v4)
-│   ├── components/
-│   │   ├── OnboardingModal.tsx # Setup inicial com escaneamento de pastas
-│   │   ├── QuickCaptureCard.tsx# Modal principal de preenchimento e rotas
-│   │   ├── SettingsModal.tsx   # Configurações de diretórios e atalhos
-│   │   └── SnippingOverlay.tsx # Overlay de congelamento e recorte
-│   └── types.ts                # Contratos TypeScript de rotas e configurações
-└── src-tauri/                  # Backend Nativo (Rust)
-    ├── src/
-    │   ├── config.rs           # Gerenciamento de preferências em %APPDATA%
-    │   ├── lib.rs              # Registro de atalhos globais, IPC e bandeja
-    │   └── obsidian.rs         # Gravação de arquivos binários e append em Markdown
-    └── tauri.conf.json         # Configuração de janelas nativas
-```
+| Tecla | Escopo | Ação |
+| :--- | :--- | :--- |
+| <kbd>Win + Alt + S</kbd> | Global (Sistema) | Abre o overlay de recorte sobre a tela ativa |
+| <kbd>Esc</kbd> | Janela Ativa | Cancela o recorte ou fecha o modal sem salvar |
+| <kbd>1</kbd> a <kbd>9</kbd> | Card de Captura | Seleciona o projeto ou nota de destino |
+| <kbd>Tab</kbd> | Card de Captura | Alterna entre o campo de título e o campo de notas de QA |
+| <kbd>Ctrl + Enter</kbd> | Card de Captura | Grava a nota no Obsidian e fecha o modal |
 
 ---
 
-## Instalação e Execução
+## ⚙️ Configurações e Personalização
 
-### Pré-requisitos para Desenvolvimento
-- **Node.js**: Versão 20 ou superior
-- **Rust**: Canal estável com o toolchain `x86_64-pc-windows-msvc`
-- **Visual Studio Build Tools**: C++ Build Tools (`VCTools` e Windows 11 SDK)
+Clique no **ícone de engrenagem** no cabeçalho do card ou no menu da bandeja para abrir o painel de configurações:
 
-### Execução Local
+- **Pasta Raiz do Cofre**: Altere o caminho do seu cofre a qualquer momento via botão **"Procurar..."**.
+- **Pasta de Anexos**: Personalize a pasta onde os arquivos `.png` são salvos (padrão: `_attachments`).
+- **Atalho Global Customizado**: Altere a combinação de teclas para a de sua preferência (ex: `Alt+Shift+S`, `Super+Alt+N`, `Ctrl+Alt+S`).
+- **Detectar Novas Pastas**: Botão de recarga que escaneia seu cofre para mapear novas pastas criadas recentemente no Obsidian.
+
+O arquivo de configuração é mantido em formato JSON em:  
+`%APPDATA%\global-quick-capture\config.json`
+
+---
+
+## ❓ Perguntas Frequentes (FAQ)
+
+#### O Obsidian precisa estar aberto para a ferramenta funcionar?
+**Não.** O app lê e grava os arquivos diretamente no disco do seu computador. Quando você abrir o Obsidian, todas as notas e recortes estarão perfeitamente organizados.
+
+#### Quanto de memória o aplicativo consome?
+Aproximadamente **30 a 40 MB de memória RAM** em modo de espera na bandeja, graças ao runtime nativo do Tauri v2 com Webview2.
+
+#### Posso usar em múltiplos monitores?
+**Sim.** O atalho identifica o monitor onde o cursor do mouse estiver ativo no momento do disparo.
+
+#### Como desinstalar?
+Pelo painel padrão do Windows: *Configurações > Aplicativos > Aplicativos Instalados > Global Quick Capture > Desinstalar*.
+
+---
+
+## 💻 Desenvolvimento Local
+
+Caso queira contribuir ou compilar o projeto do zero:
+
+### Requisitos
+- [Node.js](https://nodejs.org/) v20+
+- [Rust](https://www.rust-lang.org/) com o toolchain `x86_64-pc-windows-msvc`
+- Microsoft C++ Build Tools (instalado via Visual Studio Installer)
+
+### Comandos
 
 ```powershell
-# 1. Instalar dependências do frontend
+# Clonar o repositório
+git clone https://github.com/Felipe-Belotto/global-quick-capture.git
+cd global-quick-capture
+
+# Instalar dependências do frontend
 npm install
 
-# 2. Iniciar em modo de desenvolvimento com Hot Reload
+# Iniciar servidor de desenvolvimento com Hot Reload
 npm run tauri dev
-```
 
-### Compilação do Instalador
-
-```powershell
+# Compilar executável e instalador final
 npm run tauri build
 ```
 
-O binário instalador do Windows (`.exe` NSIS e `.msi`) é gerado no diretório:
-`src-tauri/target/release/bundle/nsis/`
+---
+
+## 📐 Arquitetura do Projeto
+
+O desenvolvimento é estruturado através da documentação mantida no diretório [`docs/`](./docs):
+
+- [`docs/00_PRD.md`](./docs/00_PRD.md) — Documento de requisitos de produto e métricas de sucesso.
+- [`docs/01_ARCHITECTURE.md`](./docs/01_ARCHITECTURE.md) — Decisões de arquitetura, multi-janelas e comunicação IPC.
+- [`docs/02_DATA_CONTRACTS.md`](./docs/02_DATA_CONTRACTS.md) — Esquemas de dados, tipagem TypeScript e contratos Rust.
+- [`docs/03_ROADMAP.md`](./docs/03_ROADMAP.md) — Fila viva de execução com status de tarefas.
+- [`docs/AGENT_GUIDELINES.md`](./docs/AGENT_GUIDELINES.md) — Protocolo de governança para agentes autônomos.
 
 ---
 
-## Tabela de Atalhos de Teclado
+## 📜 Licença
 
-| Atalho | Contexto | Ação |
-| :--- | :--- | :--- |
-| `Win + Alt + S` | Global (Windows) | Abre o overlay de recorte sobre a tela atual |
-| `Esc` | Overlay / Card | Cancela a operação e fecha a janela ativa |
-| `1` a `9` | Card de Captura | Seleciona a rota de destino (Daily Note, Inbox ou Projetos) |
-| `Tab` | Card de Captura | Alterna entre o campo de título e o campo de observações de QA |
-| `Ctrl + Enter` | Card de Captura | Salva os dados no Obsidian e fecha a interface |
-
----
-
-## Licença
-
-Este projeto é distribuído sob a licença [MIT](LICENSE).
+Distribuído sob a licença [MIT](LICENSE).
