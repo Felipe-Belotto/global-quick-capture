@@ -5,8 +5,8 @@
 **Snipping tool e captura rápida para Obsidian no Windows.**  
 Inspirado na velocidade do Raycast e na estética refinada do Warp Terminal.
 
-[![Release v0.1.0](https://img.shields.io/badge/Release-v0.1.0-6366f1?style=flat-square&logo=github&logoColor=white)](https://github.com/Felipe-Belotto/global-quick-capture/releases/tag/v0.1.0)
-[![Download .exe](https://img.shields.io/badge/Download-.exe%20(Windows%20x64)-0ea5e9?style=flat-square&logo=windows&logoColor=white)](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.0/Global.Quick.Capture_0.1.0_x64-setup.exe)
+[![Release v0.1.3](https://img.shields.io/badge/Release-v0.1.3-6366f1?style=flat-square&logo=github&logoColor=white)](https://github.com/Felipe-Belotto/global-quick-capture/releases/tag/v0.1.3)
+[![Download .exe](https://img.shields.io/badge/Download-.exe%20(Windows%20x64)-0ea5e9?style=flat-square&logo=windows&logoColor=white)](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.3/Global.Quick.Capture_0.1.3_x64-setup.exe)
 [![Tauri v2](https://img.shields.io/badge/Tauri-v2-14b8a6?style=flat-square&logo=tauri&logoColor=white)](https://tauri.app/)
 [![React 19](https://img.shields.io/badge/React-19-38bdf8?style=flat-square&logo=react&logoColor=white)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-a855f7?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
@@ -53,8 +53,8 @@ Tudo roda nativamente em Rust via Tauri v2, com consumo de memória em torno de 
 
 | Tipo | Arquivo | Plataforma | Link |
 | :--- | :--- | :--- | :--- |
-| **Instalador Oficial (.exe)** | `Global.Quick.Capture_0.1.0_x64-setup.exe` | Windows 10 / 11 (x64) | [Baixar .exe](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.0/Global.Quick.Capture_0.1.0_x64-setup.exe) |
-| **Pacote MSI** | `Global.Quick.Capture_0.1.0_x64_en-US.msi` | Windows 10 / 11 (x64) | [Baixar .msi](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.0/Global.Quick.Capture_0.1.0_x64_en-US.msi) |
+| **Instalador Oficial (.exe)** | `Global.Quick.Capture_0.1.3_x64-setup.exe` | Windows 10 / 11 (x64) | [Baixar .exe](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.3/Global.Quick.Capture_0.1.3_x64-setup.exe) |
+| **Pacote MSI** | `Global.Quick.Capture_0.1.3_x64_en-US.msi` | Windows 10 / 11 (x64) | [Baixar .msi](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.3/Global.Quick.Capture_0.1.3_x64_en-US.msi) |
 | **Artefato da Action (CI)** | `windows-installer.zip` | Windows 10 / 11 (x64) | [Acessar Builds no GitHub Actions](https://github.com/Felipe-Belotto/global-quick-capture/actions) |
 
 ---
@@ -64,7 +64,7 @@ Tudo roda nativamente em Rust via Tauri v2, com consumo de memória em torno de 
 Se o navegador bloquear o download por reputação, você pode baixar e iniciar a instalação em 1 linha no **PowerShell**:
 
 ```powershell
-irm https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.0/Global.Quick.Capture_0.1.0_x64-setup.exe -OutFile "$env:TEMP\setup.exe"; Unblock-File "$env:TEMP\setup.exe"; Start-Process "$env:TEMP\setup.exe"
+irm https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.3/Global.Quick.Capture_0.1.3_x64-setup.exe -OutFile "$env:TEMP\setup.exe"; Unblock-File "$env:TEMP\setup.exe"; Start-Process "$env:TEMP\setup.exe"
 ```
 
 ---
