@@ -23,10 +23,18 @@ fn update_vault_config(config: AppConfig) -> Result<(), String> {
 
 #[tauri::command]
 fn save_snippet_cmd(app: tauri::AppHandle, payload: SaveSnippetPayload) -> Result<(), String> {
-    save_snippet(payload)?;
+    // 1. Esconde a janela imediatamente (zero latência percebida)
     if let Some(card_win) = app.get_webview_window("capture_card") {
         let _ = card_win.hide();
     }
+
+    // 2. Grava em background sem congelar o app
+    std::thread::spawn(move || {
+        if let Err(e) = save_snippet(payload) {
+            eprintln!("Erro ao gravar no Obsidian: {}", e);
+        }
+    });
+
     Ok(())
 }
 
