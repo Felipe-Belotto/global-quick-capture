@@ -29,9 +29,16 @@ fn save_snippet_cmd(app: tauri::AppHandle, payload: SaveSnippetPayload) -> Resul
     }
 
     // 2. Grava em background sem congelar o app
+    let app_handle = app.clone();
     std::thread::spawn(move || {
-        if let Err(e) = save_snippet(payload) {
-            eprintln!("Erro ao gravar no Obsidian: {}", e);
+        match save_snippet(payload) {
+            Ok(()) => {
+                let _ = app_handle.emit("snippet_save_success", ());
+            }
+            Err(e) => {
+                eprintln!("Erro ao gravar no Obsidian: {}", e);
+                let _ = app_handle.emit("snippet_save_error", e);
+            }
         }
     });
 
@@ -125,8 +132,14 @@ fn quick_save_and_copy_cmd(app: tauri::AppHandle, cropped_base64: String) -> Res
             tags: vec![],
         };
 
-        if let Err(e) = obsidian::save_snippet(payload) {
-            eprintln!("Erro no salvamento rápido do Obsidian: {}", e);
+        match obsidian::save_snippet(payload) {
+            Ok(()) => {
+                let _ = app.emit("snippet_save_success", ());
+            }
+            Err(e) => {
+                eprintln!("Erro no salvamento rápido do Obsidian: {}", e);
+                let _ = app.emit("snippet_save_error", e);
+            }
         }
     });
 

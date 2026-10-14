@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { SnippingOverlay } from "./components/SnippingOverlay";
-import { QuickCaptureCard } from "./components/QuickCaptureCard";
+import { SnippingOverlay } from "./features/snipping/components/SnippingOverlay";
+import { QuickCaptureCard } from "./features/capture-card/components/QuickCaptureCard";
 import "./App.css";
 
 export function App() {

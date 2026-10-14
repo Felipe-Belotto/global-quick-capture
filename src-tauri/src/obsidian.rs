@@ -72,28 +72,18 @@ pub fn save_snippet(payload: SaveSnippetPayload) -> Result<(), String> {
         .decode(clean_base64.trim())
         .map_err(|e| format!("Falha ao decodificar imagem base64: {}", e))?;
 
-    let mut img_file = None;
-    for attempt in 0..6 {
-        match fs::File::create(&image_path) {
-            Ok(f) => {
-                img_file = Some(f);
-                break;
-            }
-            Err(_) if attempt < 5 => {
-                std::thread::sleep(std::time::Duration::from_millis(30));
-            }
-            Err(e) => {
-                return Err(format!("Falha ao criar imagem: {}", e));
-            }
-        }
-    }
-
-    if let Some(mut f) = img_file {
+    if let Ok(mut f) = fs::File::create(&image_path) {
         f.write_all(&decoded_bytes)
             .map_err(|e| format!("Falha ao gravar imagem: {}", e))?;
         let _ = f.flush();
-        let _ = f.sync_all();
-        drop(f);
+    } else {
+        // Fallback com uma tentativa curta caso o drive virtual estivesse bloqueando o path
+        std::thread::sleep(std::time::Duration::from_millis(20));
+        let mut f = fs::File::create(&image_path)
+            .map_err(|e| format!("Falha ao criar imagem: {}", e))?;
+        f.write_all(&decoded_bytes)
+            .map_err(|e| format!("Falha ao gravar imagem: {}", e))?;
+        let _ = f.flush();
     }
 
     let dd_mm_yyyy = now.format("%d-%m-%Y").to_string();
@@ -222,33 +212,27 @@ pub fn save_snippet(payload: SaveSnippetPayload) -> Result<(), String> {
 
     let full_to_write = format!("{}{}\n", prefix, entry);
 
-    let mut file = None;
-    for attempt in 0..10 {
-        match OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&target_md_path)
-        {
-            Ok(f) => {
-                file = Some(f);
-                break;
-            }
-            Err(_) if attempt < 9 => {
-                std::thread::sleep(std::time::Duration::from_millis(40));
-            }
-            Err(e) => {
-                return Err(format!("Falha ao abrir nota de destino {}: {}", target_md_path.display(), e));
-            }
-        }
-    }
+    let open_res = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&target_md_path);
 
-    if let Some(mut f) = file {
-        f.write_all(full_to_write.as_bytes())
-            .map_err(|e| format!("Falha ao escrever nota: {}", e))?;
-        let _ = f.flush();
-        let _ = f.sync_all();
-        drop(f);
-    }
+    let mut file = match open_res {
+        Ok(f) => f,
+        Err(_) => {
+            // Pequeno sleep caso o arquivo estivesse com lock transitório do Google Drive / antivírus
+            std::thread::sleep(std::time::Duration::from_millis(30));
+            OpenOptions::new()
+                .create(true)
+                .append(true)
+                .open(&target_md_path)
+                .map_err(|e| format!("Falha ao abrir nota de destino {}: {}", target_md_path.display(), e))?
+        }
+    };
+
+    file.write_all(full_to_write.as_bytes())
+        .map_err(|e| format!("Falha ao escrever nota: {}", e))?;
+    let _ = file.flush();
 
     Ok(())
 }
