@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { Zap } from "lucide-react";
 
 export const SnippingOverlay: React.FC = () => {
   const [screenImage, setScreenImage] = useState<string>("");
@@ -187,21 +188,21 @@ export const SnippingOverlay: React.FC = () => {
       <div className="absolute inset-0 bg-black/45 pointer-events-none" />
 
       <div
-        className={`absolute top-5 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full border text-xs font-mono shadow-2xl flex items-center gap-2 pointer-events-none z-50 transition-all ${
+        className={`absolute top-5 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-[4px] border text-xs font-mono shadow-2xl flex items-center gap-2 pointer-events-none z-50 transition-all ${
           isCtrlHeld
-            ? "bg-[#0f172a]/95 border-[#38bdf8] text-[#7dd3fc] shadow-[0_0_20px_rgba(56,189,248,0.3)]"
-            : "bg-[#0c0d10]/95 border-[#232530] text-[#d4d4d8]"
+            ? "bg-[#2b2622]/95 border-[#f7f5f0] text-[#f7f5f0] shadow-[0_0_20px_rgba(247,245,240,0.15)]"
+            : "bg-[#211d1a]/95 border-[#3f3a36] text-[#dad2c1]"
         }`}
       >
-        <span
-          className={`w-2 h-2 rounded-full ${
-            isCtrlHeld ? "bg-[#38bdf8] animate-ping" : "bg-[#2dd4bf] animate-pulse"
-          }`}
-        />
+        {isCtrlHeld ? (
+          <Zap size={13} className="text-[#f7f5f0] animate-pulse" />
+        ) : (
+          <span className="w-1.5 h-1.5 rounded-full bg-[#dad2c1] animate-pulse" />
+        )}
         <span>
           {isCtrlHeld
-            ? "⚡ MODO RÁPIDO [CTRL] // solte para salvar na nota diária & copiar para a área de transferência"
-            : "quick-capture // arraste para recortar • segure [ctrl] para salvar direto & copiar • [esc] cancelar"}
+            ? "MODO RÁPIDO [CTRL] // solte para salvar na nota diária & copiar para clipboard"
+            : "quick-capture // arraste para recortar • [ctrl] para salvar direto & copiar • [esc] cancelar"}
         </span>
       </div>
 
@@ -209,8 +210,8 @@ export const SnippingOverlay: React.FC = () => {
         <div
           className={`absolute border pointer-events-none transition-[border-color] ${
             isCtrlHeld
-              ? "border-[#38bdf8] shadow-[0_0_0_9999px_rgba(0,0,0,0.55),0_0_15px_rgba(56,189,248,0.4)]"
-              : "border-[#2dd4bf] shadow-[0_0_0_9999px_rgba(0,0,0,0.55)]"
+              ? "border-[#f7f5f0] shadow-[0_0_0_9999px_rgba(0,0,0,0.65),0_0_15px_rgba(247,245,240,0.25)]"
+              : "border-[#dad2c1] shadow-[0_0_0_9999px_rgba(0,0,0,0.65)]"
           }`}
           style={{
             left: `${rect.left}px`,
@@ -220,16 +221,21 @@ export const SnippingOverlay: React.FC = () => {
           }}
         >
           <div
-            className={`absolute -bottom-6 left-0 px-2 py-0.5 rounded border text-[10px] font-mono whitespace-nowrap flex items-center gap-1.5 ${
+            className={`absolute -bottom-6 left-0 px-2 py-0.5 rounded-[3px] border text-[10px] font-mono whitespace-nowrap flex items-center gap-1.5 ${
               isCtrlHeld
-                ? "bg-[#0b1329] border-[#38bdf8] text-[#38bdf8]"
-                : "bg-[#0c0d10] border-[#232530] text-[#2dd4bf]"
+                ? "bg-[#2b2622] border-[#f7f5f0] text-[#f7f5f0]"
+                : "bg-[#211d1a] border-[#383330] text-[#dad2c1]"
             }`}
           >
             <span>
               {rect.width} × {rect.height} px
             </span>
-            {isCtrlHeld && <span className="text-[#93c5fd]">⚡ salvar + copiar</span>}
+            {isCtrlHeld && (
+              <span className="text-[#aea69c] flex items-center gap-1">
+                <Zap size={10} />
+                <span>salvar + copiar</span>
+              </span>
+            )}
           </div>
         </div>
       )}

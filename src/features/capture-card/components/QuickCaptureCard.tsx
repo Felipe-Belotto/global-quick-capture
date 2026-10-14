@@ -12,6 +12,7 @@ import { useVaultAutocomplete } from "../hooks/useVaultAutocomplete";
 import { AutocompletePopover } from "./AutocompletePopover";
 import { OcrButton } from "../../ocr";
 import { AppInfoModal } from "../../updater";
+import { ArrowDownToLine, Maximize2, PenTool, Check } from "lucide-react";
 
 export const QuickCaptureCard: React.FC = () => {
   const [config, setConfig] = useState<AppConfig | null>(null);
@@ -330,16 +331,16 @@ export const QuickCaptureCard: React.FC = () => {
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDropFile}
-        className={`w-full max-w-[680px] bg-[#111216] border rounded-lg shadow-2xl text-[#d4d4d8] flex flex-col font-sans relative transition-all duration-150 ${
-          isDraggingFile ? "border-[#2dd4bf] ring-2 ring-[#2dd4bf]/40" : "border-[#232530]"
+        className={`w-full max-w-[680px] bg-[#211d1a] border rounded-[4px] shadow-2xl text-[#f7f5f0] flex flex-col font-sans relative transition-all duration-150 ${
+          isDraggingFile ? "border-[#2dd4bf] ring-2 ring-[#2dd4bf]/40" : "border-[#3f3a36]"
         }`}
       >
         {/* Overlay visual ao arrastar arquivo de imagem para dentro do card */}
         {isDraggingFile && (
-          <div className="absolute inset-0 bg-[#0c0d10]/90 z-40 rounded-lg flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#2dd4bf] pointer-events-none">
-            <span className="text-3xl animate-bounce">📥</span>
-            <span className="font-mono text-sm text-[#2dd4bf] font-bold">Solte a imagem para carregar</span>
-            <span className="font-mono text-[11px] text-[#71717a]">Suporta PNG, JPG, WEBP</span>
+          <div className="absolute inset-0 bg-[#211d1a]/95 z-40 rounded-[4px] flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#2dd4bf] pointer-events-none">
+            <ArrowDownToLine className="w-7 h-7 text-[#2dd4bf] animate-bounce" strokeWidth={1.75} />
+            <span className="font-mono text-xs text-[#2dd4bf] font-medium tracking-tight">Solte a imagem para carregar</span>
+            <span className="font-mono text-[10px] text-[#aea69c]">Suporta PNG, JPG, WEBP</span>
           </div>
         )}
 
@@ -360,7 +361,7 @@ export const QuickCaptureCard: React.FC = () => {
             <div className="flex flex-col gap-1.5 shrink-0">
               <div
                 onClick={() => imageBase64 && setShowImagePreview(true)}
-                className="group relative w-36 h-28 rounded bg-[#16171f] border border-[#232530] hover:border-[#2dd4bf]/60 flex items-center justify-center overflow-hidden cursor-zoom-in transition"
+                className="group relative w-36 h-28 rounded-[3px] bg-[#262320] border border-[#3f3a36] hover:border-[#2dd4bf]/60 flex items-center justify-center overflow-hidden cursor-zoom-in transition"
                 title="Clique para ver preview ampliado"
               >
                 {imageBase64 ? (
@@ -368,14 +369,15 @@ export const QuickCaptureCard: React.FC = () => {
                     <img
                       src={imageBase64}
                       alt="Recorte"
-                      className="w-full h-full object-cover rounded group-hover:scale-105 transition duration-200"
+                      className="w-full h-full object-cover rounded-[2px] group-hover:scale-105 transition duration-200"
                     />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition font-mono text-[10px] text-[#2dd4bf] gap-1">
-                      <span>🔍</span> ampliar
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition font-mono text-[10px] text-[#2dd4bf] gap-1.5 backdrop-blur-[1px]">
+                      <Maximize2 className="w-3.5 h-3.5" strokeWidth={1.75} />
+                      <span>ampliar</span>
                     </div>
                   </>
                 ) : (
-                  <span className="text-[11px] font-mono text-[#525460]">sem recorte</span>
+                  <span className="text-[11px] font-mono text-[#aea69c]">sem recorte</span>
                 )}
               </div>
 
@@ -383,10 +385,10 @@ export const QuickCaptureCard: React.FC = () => {
               {imageBase64 && (
                 <button
                   onClick={() => setShowAnnotationEditor(true)}
-                  className="w-full py-1 px-2 rounded bg-[#162725] hover:bg-[#1a3834] border border-[#2dd4bf]/40 text-[#2dd4bf] text-[11px] font-mono flex items-center justify-center gap-1 transition cursor-pointer"
+                  className="w-full py-1.5 px-2 rounded-[3px] bg-[#2b2622] hover:bg-[#383330] border border-[#3f3a36] hover:border-[#2dd4bf]/50 text-[#dad2c1] hover:text-[#f7f5f0] text-[11px] font-mono flex items-center justify-center gap-1.5 transition cursor-pointer"
                   title="Desenhar setas, caixas ou censurar senhas/tokens"
                 >
-                  <span>✏️</span>
+                  <PenTool className="w-3 h-3 text-[#2dd4bf]" strokeWidth={1.75} />
                   <span>anotar / blur</span>
                 </button>
               )}
@@ -414,7 +416,7 @@ export const QuickCaptureCard: React.FC = () => {
                 onKeyDown={handleMarkdownKeyDown}
                 placeholder="❯ anotações em Markdown (listas, - [ ], [[links]], #tags)... [ctrl+enter para salvar]"
                 rows={5}
-                className="w-full h-full min-h-[125px] bg-[#16171f] border border-[#232530] focus:border-[#2dd4bf] rounded px-3 py-2.5 text-xs text-[#d4d4d8] placeholder-[#525460] outline-none resize-none transition leading-relaxed"
+                className="w-full h-full min-h-[125px] bg-[#262320] border border-[#3f3a36] focus:border-[#2dd4bf] rounded-[3px] px-3 py-2.5 text-xs text-[#f7f5f0] placeholder-[#aea69c]/60 outline-none resize-none transition leading-relaxed"
                 autoFocus
               />
 
@@ -431,16 +433,16 @@ export const QuickCaptureCard: React.FC = () => {
           </div>
 
           {errorMsg && (
-            <div className="text-xs font-mono text-[#ef4444] bg-[#2a1318] border border-[#4d1f27] px-3 py-1.5 rounded">
+            <div className="text-xs font-mono text-[#f43f5e] bg-[#2b2622] border border-[#f43f5e]/40 px-3 py-1.5 rounded-[3px]">
               ! {errorMsg}
             </div>
           )}
 
           {/* Rodapé: Destino & Ações */}
-          <div className="flex items-center justify-between pt-2 border-t border-[#232530] text-xs font-mono text-[#71717a]">
+          <div className="flex items-center justify-between pt-2 border-t border-[#3f3a36] text-xs font-mono text-[#aea69c]">
             <div className="truncate max-w-[360px]">
               <span className="opacity-60">destino: </span>
-              <span className="text-[#d4d4d8]">
+              <span className="text-[#dad2c1]">
                 {activeRoute?.targetType === "daily_note" && `Daily/${todayFormatted}.md`}
                 {activeRoute?.targetType === "file" && (activeRoute.filePath || "Inbox.md")}
                 {activeRoute?.targetType === "folder" && `${activeRoute.folderPath}/${todayFormatted}.md`}
@@ -450,7 +452,7 @@ export const QuickCaptureCard: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleCancel}
-                className="px-3 py-1 text-[#71717a] hover:text-[#d4d4d8] transition cursor-pointer"
+                className="px-3 py-1.5 text-[#aea69c] hover:text-[#f7f5f0] hover:bg-[#2b2622] rounded-[3px] transition cursor-pointer"
               >
                 cancelar [esc]
               </button>
@@ -458,13 +460,20 @@ export const QuickCaptureCard: React.FC = () => {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className={`px-3.5 py-1.5 rounded font-medium transition cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-[3px] font-medium text-xs font-mono transition cursor-pointer flex items-center gap-1.5 shadow-sm active:translate-y-px ${
                   saveSuccess
-                    ? "bg-[#10b981] text-[#0c0d10]"
-                    : "bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10]"
+                    ? "bg-[#10b981] text-[#211d1a]"
+                    : "bg-[#f7f5f0] hover:bg-[#eae6de] text-[#211d1a]"
                 }`}
               >
-                {saveSuccess ? "salvo!" : "salvar [ctrl+enter] ↵"}
+                {saveSuccess ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-[#211d1a]" strokeWidth={2.5} />
+                    <span>salvo!</span>
+                  </>
+                ) : (
+                  <span>salvar [ctrl+enter] ↵</span>
+                )}
               </button>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Loader2, Copy, Check, FileCode, X, AlertCircle } from "lucide-react";
+import { Loader2, Copy, Check, FileCode, X, AlertCircle, ScanText } from "lucide-react";
 import {
   extractTextFromImage,
   formatAsMarkdownCodeBlock,
@@ -174,7 +174,7 @@ export const OcrButton: React.FC<OcrButtonProps> = ({
           </>
         ) : (
           <>
-            <span>📋</span>
+            <ScanText className="w-3.5 h-3.5 text-[#2dd4bf]" strokeWidth={1.75} />
             <span>OCR / Copiar Texto</span>
           </>
         )}

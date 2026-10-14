@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { AppConfig, ProjectRoute } from "../../../shared/types";
 import { useDraggableWindow } from "../../../shared/hooks/useDraggableWindow";
 import { DragHandle } from "../../../shared/components/DragHandle";
+import { FolderOpen, Check, Folder } from "lucide-react";
 
 interface OnboardingModalProps {
   onComplete: (config: AppConfig) => void;
@@ -118,24 +119,25 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
 
   return (
     <div className="w-full h-full flex items-center justify-center p-4 select-none">
-      <div className="w-full max-w-[640px] bg-[#111216] border border-[#232530] rounded-lg shadow-2xl text-[#d4d4d8] flex flex-col font-sans">
+      <div className="w-full max-w-[640px] bg-[#211d1a] border border-[#3f3a36] rounded-[4px] shadow-2xl text-[#dad2c1] flex flex-col font-sans">
         {/* Header estilo terminal Warp (arrastável nativo) */}
         <div
+          data-tauri-drag-region
           onMouseDown={handleDrag}
-          className="h-10 px-3 bg-[#0c0d10] border-b border-[#232530] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-lg select-none"
+          className="h-10 px-3 bg-[#262320] border-b border-[#383330] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-[4px] select-none"
         >
-          <div className="flex items-center gap-1.5 font-mono text-xs text-[#8e909a]">
+          <div className="flex items-center gap-2 font-mono text-xs text-[#aea69c]">
             <DragHandle />
-            <span className="text-[#2dd4bf]">❯</span>
+            <span className="text-[#dad2c1] font-semibold">❯</span>
             <span>quick-capture</span>
-            <span className="text-[#525460]">/</span>
-            <span className="text-[#d4d4d8]">setup</span>
+            <span className="text-[#5c544d]">/</span>
+            <span className="text-[#f7f5f0] font-medium">setup</span>
           </div>
 
           <div className="flex items-center gap-1.5 opacity-60">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#262833]" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#262833]" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#2dd4bf]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#383330]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#383330]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#f7f5f0]" />
           </div>
         </div>
 
@@ -144,11 +146,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
           {step === "pick" && (
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <span className="font-mono text-xs text-[#2dd4bf]">01 // SELECT_VAULT</span>
-                <h2 className="text-sm font-medium text-white tracking-tight">
+                <span className="font-mono text-xs text-[#aea69c]">01 // SELECT_VAULT</span>
+                <h2 className="text-sm font-medium text-[#f7f5f0] tracking-tight">
                   Selecione o diretório do seu Cofre do Obsidian (Local ou Google Drive)
                 </h2>
-                <p className="text-xs text-[#8e909a] leading-relaxed">
+                <p className="text-xs text-[#aea69c] leading-relaxed">
                   O aplicativo salvará as imagens e fará o append das notas diretamente no cofre selecionado.
                 </p>
               </div>
@@ -158,14 +160,15 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
                   type="text"
                   readOnly
                   value={vaultPath || "Nenhum diretório selecionado..."}
-                  className="flex-1 bg-[#171821] border border-[#262833] rounded px-3 py-2 text-xs font-mono text-[#a1a1aa] outline-none"
+                  className="flex-1 bg-[#1a1715] border border-[#383330] rounded-[3px] px-3 py-2 text-xs font-mono text-[#dad2c1] outline-none"
                 />
                 <button
                   onClick={handlePickFolder}
                   disabled={isScanning}
-                  className="px-4 py-2 bg-[#20222c] hover:bg-[#282b37] active:bg-[#1a1c24] border border-[#323645] text-white rounded text-xs font-mono transition cursor-pointer"
+                  className="px-4 py-2 bg-[#2b2622] hover:bg-[#383330] active:bg-[#1a1715] border border-[#3f3a36] text-[#f7f5f0] rounded-[3px] text-xs font-mono transition cursor-pointer flex items-center gap-1.5"
                 >
-                  {isScanning ? "Escaneando..." : "Procurar..."}
+                  <FolderOpen size={13} className="text-[#dad2c1]" />
+                  <span>{isScanning ? "Escaneando..." : "Procurar..."}</span>
                 </button>
               </div>
             </div>
@@ -174,22 +177,22 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
           {step === "review" && (
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <span className="font-mono text-xs text-[#2dd4bf]">02 // DETECTED_FOLDERS</span>
-                <h2 className="text-sm font-medium text-white tracking-tight">
+                <span className="font-mono text-xs text-[#aea69c]">02 // DETECTED_FOLDERS</span>
+                <h2 className="text-sm font-medium text-[#f7f5f0] tracking-tight">
                   Pastas identificadas no cofre
                 </h2>
-                <p className="text-xs text-[#8e909a]">
+                <p className="text-xs text-[#aea69c]">
                   Selecione quais pastas devem virar rotas de atalho rápido (
-                  <kbd className="font-mono text-[10px] text-zinc-300">1</kbd>-
-                  <kbd className="font-mono text-[10px] text-zinc-300">9</kbd>).
+                  <kbd className="font-mono text-[10px] text-[#dad2c1]">1</kbd>-
+                  <kbd className="font-mono text-[10px] text-[#dad2c1]">9</kbd>).
                 </p>
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 bg-[#171821] border border-[#262833] rounded text-xs font-mono text-[#a1a1aa]">
+              <div className="flex items-center justify-between px-3 py-2 bg-[#1a1715] border border-[#383330] rounded-[3px] text-xs font-mono text-[#dad2c1]">
                 <span className="truncate max-w-[460px]">{vaultPath}</span>
                 <button
                   onClick={handlePickFolder}
-                  className="text-xs text-[#2dd4bf] hover:underline ml-2 cursor-pointer"
+                  className="text-xs text-[#dad2c1] hover:text-[#f7f5f0] hover:underline ml-2 cursor-pointer"
                 >
                   alterar
                 </button>
@@ -203,39 +206,37 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
                       <button
                         key={folder}
                         onClick={() => toggleFolder(folder)}
-                        className={`px-3 py-2.5 rounded border text-left text-xs font-mono transition cursor-pointer flex items-center justify-between ${
+                        className={`px-3 py-2.5 rounded-[3px] border text-left text-xs font-mono transition cursor-pointer flex items-center justify-between ${
                           isSelected
-                            ? "bg-[#172228] border-[#2dd4bf]/40 text-[#e4e4e7]"
-                            : "bg-[#16171f] border-[#232530] text-[#71717a] hover:text-[#a1a1aa] hover:border-[#2f3242]"
+                            ? "bg-[#2b2622] border-[#3f3a36] text-[#f7f5f0]"
+                            : "bg-[#262320] border-[#383330] text-[#aea69c] hover:text-[#dad2c1] hover:border-[#3f3a36]"
                         }`}
                       >
-                        <span className="truncate">{folder}/</span>
-                        <span
-                          className={`text-[10px] ${
-                            isSelected ? "text-[#2dd4bf]" : "text-transparent"
-                          }`}
-                        >
-                          [x]
-                        </span>
+                        <div className="flex items-center gap-1.5 truncate">
+                          <Folder size={12} className={isSelected ? "text-[#f7f5f0]" : "text-[#877e74]"} />
+                          <span className="truncate">{folder}/</span>
+                        </div>
+                        {isSelected && <Check size={12} className="text-[#f7f5f0] shrink-0" />}
                       </button>
                     );
                   })
                 ) : (
-                  <div className="col-span-2 py-4 text-center text-xs font-mono text-[#71717a]">
+                  <div className="col-span-2 py-4 text-center text-xs font-mono text-[#877e74]">
                     Nenhuma subpasta encontrada. Usando Daily Note e Inbox como padrão.
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-[#232530] text-xs font-mono text-[#71717a]">
+              <div className="flex items-center justify-between pt-2 border-t border-[#383330] text-xs font-mono text-[#aea69c]">
                 <span>
-                  Atalho global padrão: <span className="text-[#d4d4d8]">Win + Alt + S</span>
+                  Atalho global padrão: <span className="text-[#f7f5f0]">Win + Alt + S</span>
                 </span>
                 <button
                   onClick={handleFinish}
-                  className="px-4 py-2 bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10] font-medium text-xs rounded transition cursor-pointer"
+                  className="px-4 py-2 bg-[#f7f5f0] hover:bg-white text-[#211d1a] font-medium text-xs rounded-[3px] transition cursor-pointer flex items-center gap-1.5"
                 >
-                  Salvar e Continuar ↵
+                  <Check size={13} />
+                  <span>Salvar e Continuar</span>
                 </button>
               </div>
             </div>

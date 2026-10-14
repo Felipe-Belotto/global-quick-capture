@@ -3,6 +3,7 @@ import { AppConfig, ProjectRoute } from "../../../shared/types";
 import { invoke } from "@tauri-apps/api/core";
 import { useDraggableWindow } from "../../../shared/hooks/useDraggableWindow";
 import { DragHandle } from "../../../shared/components/DragHandle";
+import { X, FolderOpen, RefreshCw, Sparkles, Plus, Trash2, Check, RefreshCcw } from "lucide-react";
 
 interface SettingsModalProps {
   config: AppConfig;
@@ -148,26 +149,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 select-none">
-      <div className="w-full max-w-[620px] max-h-[92vh] bg-[#111216] border border-[#232530] rounded-lg shadow-2xl text-[#d4d4d8] flex flex-col font-mono text-xs overflow-hidden">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 select-none">
+      <div className="w-full max-w-[620px] max-h-[92vh] bg-[#211d1a] border border-[#3f3a36] rounded-[4px] shadow-2xl text-[#dad2c1] flex flex-col font-mono text-xs overflow-hidden">
         {/* Header estilo terminal Warp (arrastável com startDragging nativo) */}
         <div
           data-tauri-drag-region
           onMouseDown={handleDrag}
-          className="h-10 px-3 bg-[#0c0d10] border-b border-[#232530] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-lg shrink-0 select-none"
+          className="h-10 px-3 bg-[#262320] border-b border-[#383330] flex items-center justify-between cursor-grab active:cursor-grabbing shrink-0 select-none"
         >
-          <div className="flex items-center gap-1.5 text-[#8e909a]">
+          <div className="flex items-center gap-2 text-[#aea69c]">
             <DragHandle />
-            <span className="text-[#2dd4bf]">❯</span>
+            <span className="text-[#dad2c1] font-semibold">❯</span>
             <span>quick-capture</span>
-            <span className="text-[#525460]">/</span>
-            <span className="text-[#d4d4d8]">settings</span>
+            <span className="text-[#5c544d]">/</span>
+            <span className="text-[#f7f5f0] font-medium">settings</span>
           </div>
           <button
             onClick={onClose}
-            className="text-[#71717a] hover:text-[#ef4444] px-1.5 py-0.5 rounded hover:bg-[#1f222d] transition cursor-pointer"
+            className="text-[#aea69c] hover:text-[#f7f5f0] p-1 rounded-[3px] hover:bg-[#383330] transition cursor-pointer"
+            title="Fechar"
           >
-            ✕
+            <X size={14} />
           </button>
         </div>
 
@@ -175,20 +177,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
         <div className="p-5 overflow-y-auto flex flex-col gap-4 no-scrollbar">
           {/* Caminho do Vault */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[#8e909a]">vault_path (Cofre Obsidian / Google Drive):</label>
+            <label className="text-[#aea69c]">vault_path (Cofre Obsidian / Google Drive):</label>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={vaultPath}
                 onChange={(e) => setVaultPath(e.target.value)}
                 placeholder="C:\Users\...\ObsidianVault ou G:\Meu Drive\Obsidian"
-                className="flex-1 bg-[#171821] border border-[#262833] focus:border-[#2dd4bf] rounded px-3 py-2 text-white outline-none"
+                className="flex-1 bg-[#1a1715] border border-[#383330] focus:border-[#aea69c] rounded-[3px] px-3 py-2 text-[#f7f5f0] outline-none transition"
               />
               <button
                 onClick={handlePickFolder}
-                className="px-3 py-2 bg-[#20222c] hover:bg-[#282b37] border border-[#323645] text-white rounded transition cursor-pointer"
+                className="px-3 py-2 bg-[#2b2622] hover:bg-[#383330] border border-[#3f3a36] text-[#f7f5f0] rounded-[3px] transition cursor-pointer flex items-center gap-1.5"
               >
-                procurar...
+                <FolderOpen size={13} className="text-[#dad2c1]" />
+                <span>procurar...</span>
               </button>
             </div>
           </div>
@@ -196,73 +199,76 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
           {/* Atalho & Anexos */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[#8e909a]">attachments_dir:</label>
+              <label className="text-[#aea69c]">attachments_dir:</label>
               <input
                 type="text"
                 value={attachmentsFolder}
                 onChange={(e) => setAttachmentsFolder(e.target.value)}
                 placeholder="_attachments"
-                className="w-full bg-[#171821] border border-[#262833] focus:border-[#2dd4bf] rounded px-3 py-2 text-white outline-none"
+                className="w-full bg-[#1a1715] border border-[#383330] focus:border-[#aea69c] rounded-[3px] px-3 py-2 text-[#f7f5f0] outline-none transition"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-[#8e909a]">global_shortcut:</label>
+              <label className="text-[#aea69c]">global_shortcut:</label>
               <input
                 type="text"
                 value={globalShortcut}
                 onChange={(e) => setGlobalShortcut(e.target.value)}
                 placeholder="Super+Alt+S"
-                className="w-full bg-[#171821] border border-[#262833] focus:border-[#2dd4bf] rounded px-3 py-2 text-white outline-none"
+                className="w-full bg-[#1a1715] border border-[#383330] focus:border-[#aea69c] rounded-[3px] px-3 py-2 text-[#f7f5f0] outline-none transition"
               />
             </div>
           </div>
 
           {/* Rotas de Projetos */}
-          <div className="flex flex-col gap-2 pt-1 border-t border-[#232530]">
-            <div className="flex items-center justify-between text-[#8e909a]">
+          <div className="flex flex-col gap-2 pt-1 border-t border-[#383330]">
+            <div className="flex items-center justify-between text-[#aea69c]">
               <span>project_routes:</span>
               <div className="flex items-center gap-2 text-xs">
                 <button
                   type="button"
                   onClick={handleScanFolders}
                   disabled={isScanning}
-                  className="text-[#2dd4bf] hover:underline cursor-pointer"
+                  className="text-[#dad2c1] hover:text-[#f7f5f0] flex items-center gap-1 cursor-pointer transition disabled:opacity-50"
                   title="Detecta novas pastas sem apagar as existentes"
                 >
-                  {isScanning ? "escaneando..." : "[ + detectar ]"}
+                  <Sparkles size={12} />
+                  <span>{isScanning ? "escaneando..." : "detectar"}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => rescanFolders(vaultPath, true)}
                   disabled={isScanning}
-                  className="text-[#f59e0b] hover:underline cursor-pointer"
+                  className="text-[#aea69c] hover:text-[#f7f5f0] flex items-center gap-1 cursor-pointer transition disabled:opacity-50"
                   title="Limpa as rotas antigas e recria a partir deste cofre"
                 >
-                  [ ↺ redefinir ]
+                  <RefreshCcw size={11} />
+                  <span>redefinir</span>
                 </button>
               </div>
             </div>
 
-            <div className="max-h-32 overflow-y-auto flex flex-col gap-1.5 pr-1 no-scrollbar">
+            <div className="max-h-36 overflow-y-auto flex flex-col gap-1.5 pr-1 no-scrollbar">
               {projectRoutes.map((route, idx) => (
                 <div
                   key={route.id}
-                  className="flex items-center justify-between bg-[#16171f] border border-[#232530] px-3 py-1.5 rounded text-xs"
+                  className="flex items-center justify-between bg-[#262320] border border-[#383330] px-3 py-1.5 rounded-[3px] text-xs"
                 >
                   <div className="flex items-center gap-2 truncate">
-                    <span className="text-[#525460]">[{route.keyShortcut || idx + 1}]</span>
-                    <span className="text-white truncate">{route.label}</span>
-                    <span className="text-[#525460] truncate">
+                    <span className="text-[#877e74] font-mono">[{route.keyShortcut || idx + 1}]</span>
+                    <span className="text-[#f7f5f0] truncate">{route.label}</span>
+                    <span className="text-[#877e74] truncate">
                       ({route.folderPath || route.filePath || "Daily"})
                     </span>
                   </div>
                   {route.id !== "daily" && route.id !== "inbox" && (
                     <button
                       onClick={() => handleDeleteRoute(route.id)}
-                      className="text-[#525460] hover:text-[#ef4444] transition cursor-pointer px-1"
+                      className="text-[#877e74] hover:text-[#f87171] transition cursor-pointer p-0.5 rounded"
+                      title="Remover rota"
                     >
-                      [x]
+                      <Trash2 size={12} />
                     </button>
                   )}
                 </div>
@@ -276,30 +282,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
                 value={newRouteLabel}
                 onChange={(e) => setNewRouteLabel(e.target.value)}
                 placeholder="nome (ex: QA/Bugs)"
-                className="w-1/3 bg-[#171821] border border-[#262833] rounded px-2.5 py-1.5 text-white outline-none"
+                className="w-1/3 bg-[#1a1715] border border-[#383330] rounded-[3px] px-2.5 py-1.5 text-[#f7f5f0] outline-none"
               />
               <input
                 type="text"
                 value={newRoutePath}
                 onChange={(e) => setNewRoutePath(e.target.value)}
                 placeholder="pasta (ex: Projects/QA)"
-                className="flex-1 bg-[#171821] border border-[#262833] rounded px-2.5 py-1.5 text-white outline-none"
+                className="flex-1 bg-[#1a1715] border border-[#383330] rounded-[3px] px-2.5 py-1.5 text-[#f7f5f0] outline-none"
               />
               <button
                 onClick={handleAddRoute}
-                className="px-3 py-1.5 bg-[#20222c] hover:bg-[#282b37] border border-[#323645] text-white rounded transition cursor-pointer"
+                className="px-3 py-1.5 bg-[#2b2622] hover:bg-[#383330] border border-[#3f3a36] text-[#f7f5f0] rounded-[3px] transition cursor-pointer flex items-center gap-1"
               >
-                + add
+                <Plus size={12} />
+                <span>add</span>
               </button>
             </div>
           </div>
 
           {/* Versão e Verificação de Atualizações */}
-          <div className="pt-3 border-t border-[#232530] flex items-center justify-between text-xs">
+          <div className="pt-3 border-t border-[#383330] flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
-              <span className="text-[#8e909a]">versão_instalada:</span>
-              <span className="text-white font-mono bg-[#16171f] px-2 py-0.5 rounded border border-[#232530]">
-                v0.1.3
+              <span className="text-[#aea69c]">versão_instalada:</span>
+              <span className="text-[#f7f5f0] font-mono bg-[#262320] px-2 py-0.5 rounded-[3px] border border-[#383330]">
+                v0.1.4
               </span>
             </div>
             <button
@@ -311,28 +318,29 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
                   window.open("https://github.com/felipe-belotto/global-quick-capture/releases", "_blank");
                 }
               }}
-              className="text-[#2dd4bf] hover:underline cursor-pointer flex items-center gap-1.5"
+              className="text-[#dad2c1] hover:text-[#f7f5f0] cursor-pointer flex items-center gap-1.5 transition"
             >
-              <span>⟳</span>
-              <span>[ verificar atualizações & status ]</span>
+              <RefreshCw size={12} />
+              <span>verificar atualizações & status</span>
             </button>
           </div>
         </div>
 
         {/* Rodapé */}
-        <div className="h-12 px-5 bg-[#0c0d10] border-t border-[#232530] flex items-center justify-end gap-2 shrink-0">
+        <div className="h-12 px-5 bg-[#262320] border-t border-[#383330] flex items-center justify-end gap-2 shrink-0">
           <button
             onClick={onClose}
-            className="px-3 py-1.5 text-[#71717a] hover:text-[#d4d4d8] transition cursor-pointer"
+            className="px-3 py-1.5 text-[#aea69c] hover:text-[#f7f5f0] rounded-[3px] transition cursor-pointer"
           >
             cancelar
           </button>
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="px-4 py-1.5 bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10] font-medium rounded transition cursor-pointer"
+            className="px-4 py-1.5 bg-[#f7f5f0] hover:bg-white text-[#211d1a] font-medium rounded-[3px] transition cursor-pointer flex items-center gap-1.5"
           >
-            salvar ↵
+            <Check size={13} />
+            <span>salvar</span>
           </button>
         </div>
       </div>

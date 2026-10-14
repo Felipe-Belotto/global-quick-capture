@@ -1,4 +1,5 @@
 import React from "react";
+import { GripVertical } from "lucide-react";
 import { useDraggableWindow } from "../hooks/useDraggableWindow";
 
 interface DragHandleProps {
@@ -17,22 +18,9 @@ export const DragHandle: React.FC<DragHandleProps> = ({
       data-tauri-drag-region
       onMouseDown={onMouseDown}
       title={title}
-      className={`flex items-center justify-center cursor-grab active:cursor-grabbing select-none text-[#525460] hover:text-[#2dd4bf] transition-colors p-1 rounded hover:bg-[#1a1c24] ${className}`}
+      className={`flex items-center justify-center cursor-grab active:cursor-grabbing select-none text-[#aea69c] hover:text-[#f7f5f0] transition-colors p-1 rounded-[3px] hover:bg-[#383330] ${className}`}
     >
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="opacity-70 group-hover:opacity-100"
-      >
-        <circle cx="8.5" cy="6" r="2" />
-        <circle cx="15.5" cy="6" r="2" />
-        <circle cx="8.5" cy="12" r="2" />
-        <circle cx="15.5" cy="12" r="2" />
-        <circle cx="8.5" cy="18" r="2" />
-        <circle cx="15.5" cy="18" r="2" />
-      </svg>
+      <GripVertical className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100" strokeWidth={1.75} />
     </div>
   );
 };

@@ -1,5 +1,15 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import {
+  ArrowRight,
+  Square,
+  EyeOff,
+  Highlighter,
+  Type,
+  Pencil,
+  Undo2,
+  Check,
+} from "lucide-react";
+import {
   drawArrow,
   drawHighlightRect,
   applyPixelate,
@@ -405,115 +415,114 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-3 select-none"
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex flex-col items-center justify-center p-3 select-none"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[740px] bg-[#111216] border border-[#232530] rounded-lg shadow-2xl flex flex-col overflow-hidden font-mono text-xs"
+        className="w-full max-w-[740px] bg-[#211d1a] border border-[#3f3a36] rounded-[4px] shadow-2xl flex flex-col overflow-hidden font-mono text-xs"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Barra de Ferramentas Estilo Warp */}
-        <div className="h-11 px-3 bg-[#0c0d10] border-b border-[#232530] flex items-center justify-between">
+        <div className="h-11 px-3 bg-[#262320] border-b border-[#383330] flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <span className="text-[#2dd4bf] font-bold mr-1">✏️</span>
             <button
               onClick={() => selectTool("arrow")}
-              className={`px-2 py-1 rounded transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2 py-1 rounded-[3px] transition cursor-pointer flex items-center gap-1.5 ${
                 activeTool === "arrow"
-                  ? "bg-[#1f222d] border border-[#323645] text-[#2dd4bf]"
-                  : "text-[#71717a] hover:text-[#d4d4d8]"
+                  ? "bg-[#383330] border border-[#3f3a36] text-[#f7f5f0]"
+                  : "text-[#aea69c] hover:text-[#dad2c1] hover:bg-[#2b2622]"
               }`}
               title="Seta (A)"
             >
-              <span>➔</span>
+              <ArrowRight size={13} />
               <span>seta</span>
-              <kbd className="text-[9px] bg-[#16171f] px-1 py-0.2 rounded text-[#525460] border border-[#232530]">
+              <kbd className="text-[9px] bg-[#1a1715] px-1 py-0.2 rounded-[2px] text-[#877e74] border border-[#383330]">
                 A
               </kbd>
             </button>
             <button
               onClick={() => selectTool("rect")}
-              className={`px-2 py-1 rounded transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2 py-1 rounded-[3px] transition cursor-pointer flex items-center gap-1.5 ${
                 activeTool === "rect"
-                  ? "bg-[#1f222d] border border-[#323645] text-[#2dd4bf]"
-                  : "text-[#71717a] hover:text-[#d4d4d8]"
+                  ? "bg-[#383330] border border-[#3f3a36] text-[#f7f5f0]"
+                  : "text-[#aea69c] hover:text-[#dad2c1] hover:bg-[#2b2622]"
               }`}
               title="Retângulo (R)"
             >
-              <span>▢</span>
+              <Square size={13} />
               <span>retângulo</span>
-              <kbd className="text-[9px] bg-[#16171f] px-1 py-0.2 rounded text-[#525460] border border-[#232530]">
+              <kbd className="text-[9px] bg-[#1a1715] px-1 py-0.2 rounded-[2px] text-[#877e74] border border-[#383330]">
                 R
               </kbd>
             </button>
             <button
               onClick={() => selectTool("blur")}
-              className={`px-2 py-1 rounded transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2 py-1 rounded-[3px] transition cursor-pointer flex items-center gap-1.5 ${
                 activeTool === "blur"
-                  ? "bg-[#1f222d] border border-[#323645] text-[#2dd4bf]"
-                  : "text-[#71717a] hover:text-[#d4d4d8]"
+                  ? "bg-[#383330] border border-[#3f3a36] text-[#f7f5f0]"
+                  : "text-[#aea69c] hover:text-[#dad2c1] hover:bg-[#2b2622]"
               }`}
               title="Censurar / Pixelar senhas ou dados sensíveis (B)"
             >
-              <span>▓</span>
+              <EyeOff size={13} />
               <span>blur</span>
-              <kbd className="text-[9px] bg-[#16171f] px-1 py-0.2 rounded text-[#525460] border border-[#232530]">
+              <kbd className="text-[9px] bg-[#1a1715] px-1 py-0.2 rounded-[2px] text-[#877e74] border border-[#383330]">
                 B
               </kbd>
             </button>
             <button
               onClick={() => selectTool("highlighter")}
-              className={`px-2 py-1 rounded transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2 py-1 rounded-[3px] transition cursor-pointer flex items-center gap-1.5 ${
                 activeTool === "highlighter"
-                  ? "bg-[#1f222d] border border-[#323645] text-[#2dd4bf]"
-                  : "text-[#71717a] hover:text-[#d4d4d8]"
+                  ? "bg-[#383330] border border-[#3f3a36] text-[#f7f5f0]"
+                  : "text-[#aea69c] hover:text-[#dad2c1] hover:bg-[#2b2622]"
               }`}
               title="Marca-Texto semi-transparente (H)"
             >
-              <span>🖍</span>
+              <Highlighter size={13} />
               <span>marca-texto</span>
-              <kbd className="text-[9px] bg-[#16171f] px-1 py-0.2 rounded text-[#525460] border border-[#232530]">
+              <kbd className="text-[9px] bg-[#1a1715] px-1 py-0.2 rounded-[2px] text-[#877e74] border border-[#383330]">
                 H
               </kbd>
             </button>
             <button
               onClick={() => selectTool("text")}
-              className={`px-2 py-1 rounded transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2 py-1 rounded-[3px] transition cursor-pointer flex items-center gap-1.5 ${
                 activeTool === "text"
-                  ? "bg-[#1f222d] border border-[#323645] text-[#2dd4bf]"
-                  : "text-[#71717a] hover:text-[#d4d4d8]"
+                  ? "bg-[#383330] border border-[#3f3a36] text-[#f7f5f0]"
+                  : "text-[#aea69c] hover:text-[#dad2c1] hover:bg-[#2b2622]"
               }`}
               title="Legenda / Nota Rápida (T)"
             >
-              <span className="font-bold">T</span>
+              <Type size={13} />
               <span>texto</span>
-              <kbd className="text-[9px] bg-[#16171f] px-1 py-0.2 rounded text-[#525460] border border-[#232530]">
+              <kbd className="text-[9px] bg-[#1a1715] px-1 py-0.2 rounded-[2px] text-[#877e74] border border-[#383330]">
                 T
               </kbd>
             </button>
             <button
               onClick={() => selectTool("pen")}
-              className={`px-2 py-1 rounded transition cursor-pointer flex items-center gap-1 ${
+              className={`px-2 py-1 rounded-[3px] transition cursor-pointer flex items-center gap-1 ${
                 activeTool === "pen"
-                  ? "bg-[#1f222d] border border-[#323645] text-[#2dd4bf]"
-                  : "text-[#71717a] hover:text-[#d4d4d8]"
+                  ? "bg-[#383330] border border-[#3f3a36] text-[#f7f5f0]"
+                  : "text-[#aea69c] hover:text-[#dad2c1] hover:bg-[#2b2622]"
               }`}
               title="Desenho Livre"
             >
-              <span>✎</span>
+              <Pencil size={13} />
               <span>desenho</span>
             </button>
           </div>
 
           <div className="flex items-center gap-2">
             {/* Seletor de cores */}
-            <div className="flex items-center gap-1 bg-[#16171f] px-2 py-0.5 rounded border border-[#232530]">
+            <div className="flex items-center gap-1.5 bg-[#1a1715] px-2 py-1 rounded-[3px] border border-[#383330]">
               {["#ef4444", "#38bdf8", "#2dd4bf", "#eab308"].map((c) => (
                 <button
                   key={c}
                   onClick={() => setColor(c)}
                   className={`w-3.5 h-3.5 rounded-full transition cursor-pointer ${
-                    color === c ? "scale-125 ring-2 ring-white/50" : "opacity-60 hover:opacity-100"
+                    color === c ? "scale-110 ring-1 ring-white/80" : "opacity-60 hover:opacity-100"
                   }`}
                   style={{ backgroundColor: c }}
                 />
@@ -523,11 +532,12 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
             <button
               onClick={handleUndo}
               disabled={history.length <= 1}
-              className="px-2 py-1 rounded text-[#71717a] hover:text-[#d4d4d8] disabled:opacity-30 transition cursor-pointer flex items-center gap-1"
+              className="px-2 py-1 rounded-[3px] text-[#aea69c] hover:text-[#f7f5f0] hover:bg-[#2b2622] disabled:opacity-30 transition cursor-pointer flex items-center gap-1.5"
               title="Desfazer (Ctrl+Z)"
             >
-              <span>↺ desfazer</span>
-              <kbd className="text-[9px] bg-[#16171f] px-1 py-0.2 rounded text-[#525460] border border-[#232530]">
+              <Undo2 size={12} />
+              <span>desfazer</span>
+              <kbd className="text-[9px] bg-[#1a1715] px-1 py-0.2 rounded-[2px] text-[#877e74] border border-[#383330]">
                 ^Z
               </kbd>
             </button>
@@ -535,14 +545,14 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
         </div>
 
         {/* Área de Visualização do Canvas com Aspect Ratio preservado */}
-        <div className="p-3 bg-[#0a0a0d] flex items-center justify-center max-h-[300px] overflow-hidden">
+        <div className="p-3 bg-[#181513] flex items-center justify-center max-h-[300px] overflow-hidden">
           <div ref={canvasContainerRef} className="relative inline-flex items-center justify-center">
             <canvas
               ref={canvasRef}
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
-              className={`max-w-full max-h-[280px] object-contain rounded border border-[#232530] shadow-md ${
+              className={`max-w-full max-h-[280px] object-contain rounded-[3px] border border-[#383330] shadow-md ${
                 activeTool === "text" ? "cursor-text" : "cursor-crosshair"
               }`}
             />
@@ -578,7 +588,7 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
                     handleCommitText(textInput.value, textInput.canvasX, textInput.canvasY);
                   }}
                   placeholder="digite a legenda... (Enter)"
-                  className="px-2 py-0.5 bg-[#0c0d10]/95 border border-[#2dd4bf] rounded shadow-2xl text-xs font-mono outline-none min-w-[130px] max-w-[240px]"
+                  className="px-2 py-0.5 bg-[#211d1a]/95 border border-[#3f3a36] rounded-[3px] shadow-2xl text-xs font-mono outline-none min-w-[130px] max-w-[240px]"
                   style={{ color }}
                   autoFocus
                 />
@@ -588,8 +598,8 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
         </div>
 
         {/* Rodapé de Ações */}
-        <div className="h-10 px-4 bg-[#0c0d10] border-t border-[#232530] flex items-center justify-between">
-          <span className="text-[#525460] text-[11px]">
+        <div className="h-10 px-4 bg-[#262320] border-t border-[#383330] flex items-center justify-between">
+          <span className="text-[#877e74] text-[11px]">
             {activeTool === "blur" && "arraste sobre senhas ou dados sensíveis para pixelar [B]"}
             {activeTool === "highlighter" && "arraste sobre o texto para destacar com marca-texto [H]"}
             {activeTool === "text" && "clique na imagem para digitar uma legenda/nota rápida [T]"}
@@ -600,15 +610,16 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-2.5 py-1 text-[#71717a] hover:text-[#d4d4d8] transition cursor-pointer"
+              className="px-2.5 py-1 text-[#aea69c] hover:text-[#f7f5f0] rounded-[3px] transition cursor-pointer"
             >
               cancelar
             </button>
             <button
               onClick={handleApply}
-              className="px-3 py-1 bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10] font-medium rounded transition cursor-pointer"
+              className="px-3 py-1 bg-[#f7f5f0] hover:bg-white text-[#211d1a] font-medium rounded-[3px] transition cursor-pointer flex items-center gap-1.5"
             >
-              aplicar alterações ✓
+              <Check size={13} />
+              <span>aplicar</span>
             </button>
           </div>
         </div>
