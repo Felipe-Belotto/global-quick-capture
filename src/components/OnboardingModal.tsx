@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { AppConfig, ProjectRoute } from "../types";
-import { FolderOpen, Sparkles, CheckCircle2, ArrowRight, ShieldCheck, Tag } from "lucide-react";
 
 interface OnboardingModalProps {
   onComplete: (config: AppConfig) => void;
@@ -14,13 +13,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const [step, setStep] = useState<"pick" | "review">("pick");
 
-  // Escanear pastas quando o caminho for escolhido
   const scanFolders = async (path: string) => {
     setIsScanning(true);
     try {
       const folders = await invoke<string[]>("scan_vault_folders_cmd", { vaultPath: path });
       setDetectedFolders(folders);
-      // Seleciona automaticamente pastas comuns como Daily, Inbox, Projects, QA
       const autoSelected = folders.filter((f) => {
         const lower = f.toLowerCase();
         return (
@@ -59,7 +56,6 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
   };
 
   const handleFinish = async () => {
-    // Montar rotas de projetos com base nas pastas selecionadas
     const routes: ProjectRoute[] = [
       {
         id: "daily",
@@ -117,149 +113,121 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
 
   return (
     <div className="w-full h-full flex items-center justify-center p-4 select-none">
-      <div className="w-full max-w-[620px] bg-[#0f1117]/96 backdrop-blur-2xl border border-white/[0.09] rounded-2xl shadow-[0_30px_70px_rgba(0,0,0,0.85)] p-6 text-zinc-100 flex flex-col gap-5 animate-in fade-in zoom-in-95 duration-200">
+      <div className="w-full max-w-[640px] bg-[#111216] border border-[#232530] rounded-lg shadow-2xl text-[#d4d4d8] flex flex-col font-sans">
         
-        {/* Header estilo Warp Terminal */}
-        <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <div>
-              <h1 className="text-sm font-semibold tracking-wide text-zinc-100 flex items-center gap-2">
-                <span>Configurar Cofre do Obsidian</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-mono">
-                  Setup
-                </span>
-              </h1>
-              <p className="text-xs text-zinc-400">
-                Conecte seu diretório local para escanear e rotear projetos instantaneamente.
-              </p>
-            </div>
+        {/* Header estilo terminal Warp (arrastável) */}
+        <div
+          data-tauri-drag-region
+          className="h-10 px-4 bg-[#0c0d10] border-b border-[#232530] flex items-center justify-between cursor-move rounded-t-lg"
+        >
+          <div data-tauri-drag-region className="flex items-center gap-2 font-mono text-xs text-[#8e909a]">
+            <span className="text-[#2dd4bf]">❯</span>
+            <span>quick-capture</span>
+            <span className="text-[#525460]">/</span>
+            <span className="text-[#d4d4d8]">setup</span>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-zinc-700/80" />
-            <span className="w-2.5 h-2.5 rounded-full bg-zinc-700/80" />
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 animate-pulse" />
+          <div data-tauri-drag-region className="flex items-center gap-1.5 opacity-60">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#262833]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#262833]" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#2dd4bf]" />
           </div>
         </div>
 
-        {/* Passo 1: Selecionar Pasta do Cofre */}
-        {step === "pick" && (
-          <div className="flex flex-col gap-4 py-2">
-            <div className="p-4 rounded-xl bg-zinc-900/60 border border-white/[0.06] flex flex-col gap-3">
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 shrink-0">
-                  <FolderOpen className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-xs font-semibold text-zinc-200">Onde fica o seu Cofre?</h3>
-                  <p className="text-xs text-zinc-400 mt-0.5 leading-relaxed">
-                    Clique no botão abaixo para abrir a janela nativa do Windows e apontar para a pasta raiz do seu Obsidian.
-                  </p>
-                </div>
+        {/* Conteúdo */}
+        <div className="p-5 flex flex-col gap-5">
+          {step === "pick" && (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <span className="font-mono text-xs text-[#2dd4bf]">01 // SELECT_VAULT</span>
+                <h2 className="text-sm font-medium text-white tracking-tight">
+                  Selecione o diretório do seu Cofre do Obsidian
+                </h2>
+                <p className="text-xs text-[#8e909a] leading-relaxed">
+                  O aplicativo salvará as imagens e fará o append das notas diretamente no sistema de arquivos local.
+                </p>
               </div>
 
-              <button
-                onClick={handlePickFolder}
-                disabled={isScanning}
-                className="w-full mt-2 py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white font-medium text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
-              >
-                <FolderOpen className="w-4 h-4" />
-                <span>{isScanning ? "Escaneando pastas..." : "Escolher Pasta do Cofre..."}</span>
-              </button>
-            </div>
-
-            <div className="text-[11px] text-zinc-500 text-center">
-              Acesso 100% local direto no disco • Zero plugins do Obsidian necessários
-            </div>
-          </div>
-        )}
-
-        {/* Passo 2: Pastas Detectadas & Revisão */}
-        {step === "review" && (
-          <div className="flex flex-col gap-4 py-1">
-            {/* Caminho Selecionado */}
-            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-zinc-900/80 border border-white/[0.08] text-xs">
-              <div className="flex items-center gap-2 truncate max-w-[420px]">
-                <FolderOpen className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="font-mono text-zinc-300 text-[11px] truncate">{vaultPath}</span>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={vaultPath || "Nenhum diretório selecionado..."}
+                  className="flex-1 bg-[#171821] border border-[#262833] rounded px-3 py-2 text-xs font-mono text-[#a1a1aa] outline-none"
+                />
+                <button
+                  onClick={handlePickFolder}
+                  disabled={isScanning}
+                  className="px-4 py-2 bg-[#20222c] hover:bg-[#282b37] active:bg-[#1a1c24] border border-[#323645] text-white rounded text-xs font-mono transition cursor-pointer"
+                >
+                  {isScanning ? "Escaneando..." : "Procurar..."}
+                </button>
               </div>
-              <button
-                onClick={handlePickFolder}
-                className="text-[11px] text-indigo-400 hover:text-indigo-300 font-medium ml-2 cursor-pointer"
-              >
-                Alterar
-              </button>
             </div>
+          )}
 
-            {/* Pastas Identificadas */}
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-zinc-300 flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
-                  Pastas Identificadas ({detectedFolders.length}):
-                </span>
-                <span className="text-[11px] text-zinc-500">
-                  Selecione as que deseja transformar em atalho
-                </span>
+          {step === "review" && (
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <span className="font-mono text-xs text-[#2dd4bf]">02 // DETECTED_FOLDERS</span>
+                <h2 className="text-sm font-medium text-white tracking-tight">
+                  Pastas identificadas no cofre
+                </h2>
+                <p className="text-xs text-[#8e909a]">
+                  Selecione quais pastas devem virar rotas de atalho rápido (<kbd className="font-mono text-[10px] text-zinc-300">1</kbd>-<kbd className="font-mono text-[10px] text-zinc-300">9</kbd>).
+                </p>
               </div>
 
-              <div className="max-h-44 overflow-y-auto grid grid-cols-2 gap-2 p-1 no-scrollbar">
+              <div className="flex items-center justify-between px-3 py-2 bg-[#171821] border border-[#262833] rounded text-xs font-mono text-[#a1a1aa]">
+                <span className="truncate max-w-[460px]">{vaultPath}</span>
+                <button
+                  onClick={handlePickFolder}
+                  className="text-xs text-[#2dd4bf] hover:underline ml-2 cursor-pointer"
+                >
+                  alterar
+                </button>
+              </div>
+
+              <div className="max-h-44 overflow-y-auto grid grid-cols-2 gap-2 pr-1 no-scrollbar">
                 {detectedFolders.length > 0 ? (
                   detectedFolders.map((folder) => {
-                    const selected = selectedFolders.includes(folder);
+                    const isSelected = selectedFolders.includes(folder);
                     return (
                       <button
                         key={folder}
                         onClick={() => toggleFolder(folder)}
-                        className={`p-2.5 rounded-xl border text-left flex items-center justify-between gap-2 transition-all cursor-pointer ${
-                          selected
-                            ? "bg-indigo-600/20 border-indigo-500/40 text-zinc-100 shadow-sm"
-                            : "bg-zinc-900/40 border-white/[0.05] text-zinc-400 hover:bg-zinc-800/40 hover:text-zinc-200"
+                        className={`px-3 py-2.5 rounded border text-left text-xs font-mono transition cursor-pointer flex items-center justify-between ${
+                          isSelected
+                            ? "bg-[#172228] border-[#2dd4bf]/40 text-[#e4e4e7]"
+                            : "bg-[#16171f] border-[#232530] text-[#71717a] hover:text-[#a1a1aa] hover:border-[#2f3242]"
                         }`}
                       >
-                        <div className="truncate">
-                          <span className="text-xs font-mono font-medium block truncate">
-                            {folder}
-                          </span>
-                        </div>
-                        {selected && (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                        )}
+                        <span className="truncate">{folder}/</span>
+                        <span className={`text-[10px] ${isSelected ? "text-[#2dd4bf]" : "text-transparent"}`}>
+                          [x]
+                        </span>
                       </button>
                     );
                   })
                 ) : (
-                  <div className="col-span-2 text-center text-xs text-zinc-500 py-4">
-                    Nenhuma subpasta encontrada. Usaremos Daily Note e Inbox como padrão.
+                  <div className="col-span-2 py-4 text-center text-xs font-mono text-[#71717a]">
+                    Nenhuma subpasta encontrada. Usando Daily Note e Inbox como padrão.
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* Atalho Padrão Informativo */}
-            <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-zinc-900/40 border border-white/[0.05] text-xs text-zinc-400">
-              <div className="flex items-center gap-2">
-                <Tag className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Atalho de captura:</span>
+              <div className="flex items-center justify-between pt-2 border-t border-[#232530] text-xs font-mono text-[#71717a]">
+                <span>Atalho global padrão: <span className="text-[#d4d4d8]">Win + Alt + S</span></span>
+                <button
+                  onClick={handleFinish}
+                  className="px-4 py-2 bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10] font-medium text-xs rounded transition cursor-pointer"
+                >
+                  Salvar e Continuar ↵
+                </button>
               </div>
-              <kbd className="px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-200 border border-zinc-700 font-mono text-[11px]">
-                Win + Alt + S
-              </kbd>
             </div>
-
-            {/* Botão de Finalização */}
-            <button
-              onClick={handleFinish}
-              className="w-full mt-1 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all cursor-pointer"
-            >
-              <span>Concluir e Começar</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+          )}
+        </div>
 
       </div>
     </div>

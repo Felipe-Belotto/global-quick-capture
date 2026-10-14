@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { AppConfig, SaveSnippetPayload } from "../types";
-import { Send, X, Folder, Calendar, Tag, ShieldAlert, Sparkles, Check, Settings as SettingsIcon } from "lucide-react";
 import { SettingsModal } from "./SettingsModal";
 import { OnboardingModal } from "./OnboardingModal";
 
@@ -31,7 +30,7 @@ export const QuickCaptureCard: React.FC = () => {
           setSelectedRouteId(loaded.defaultRouteId);
         }
 
-        // Se o caminho for o padrão não configurado, abre o onboarding
+        // Se o caminho não existir ou for o padrão fictício, abre o onboarding
         if (
           !loaded.vaultPath ||
           loaded.vaultPath.includes("seu-usuario") ||
@@ -45,7 +44,6 @@ export const QuickCaptureCard: React.FC = () => {
     };
     fetchConfig();
 
-    // Ouvinte para receber o recorte recém-tirado
     const unlisten = listen<string>("load_snip_image", (event) => {
       setImageBase64(event.payload);
       setTitle("");
@@ -64,7 +62,7 @@ export const QuickCaptureCard: React.FC = () => {
 
   const handleSave = useCallback(async () => {
     if (!title.trim() && !message.trim()) {
-      setErrorMsg("Digite um resumo ou observação.");
+      setErrorMsg("Digite um título ou observação.");
       return;
     }
 
@@ -143,7 +141,6 @@ export const QuickCaptureCard: React.FC = () => {
     );
   };
 
-  // Se estiver em modo de Onboarding
   if (showOnboarding) {
     return (
       <OnboardingModal
@@ -157,176 +154,156 @@ export const QuickCaptureCard: React.FC = () => {
 
   return (
     <div className="w-full h-full flex items-center justify-center p-3 select-none">
-      {/* Container estilo Warp Terminal com transparência sutil e profundidade sólida */}
-      <div className="w-full max-w-[660px] bg-[#0f1117]/96 backdrop-blur-2xl border border-white/[0.09] rounded-2xl shadow-[0_30px_70px_rgba(0,0,0,0.85)] p-5 text-zinc-100 flex flex-col gap-3.5 transition-all animate-in fade-in zoom-in-95 duration-150">
+      <div className="w-full max-w-[680px] bg-[#111216] border border-[#232530] rounded-lg shadow-2xl text-[#d4d4d8] flex flex-col font-sans">
         
-        {/* Top Header: Rotas de Projetos com Teclas de Atalho */}
-        <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
-          <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 no-scrollbar">
+        {/* Header estilo terminal Warp (arrastável) */}
+        <div
+          data-tauri-drag-region
+          className="h-10 px-3 bg-[#0c0d10] border-b border-[#232530] flex items-center justify-between cursor-move rounded-t-lg"
+        >
+          {/* Rotas de projetos estilo abas de terminal */}
+          <div data-tauri-drag-region className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
+            <span data-tauri-drag-region className="font-mono text-xs text-[#2dd4bf] mr-1">❯</span>
             {config?.projectRoutes.map((route, idx) => {
               const isSelected = route.id === selectedRouteId;
               return (
                 <button
                   key={route.id}
                   onClick={() => setSelectedRouteId(route.id)}
-                  className={`px-2.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+                  className={`px-2.5 py-1 rounded text-xs font-mono transition cursor-pointer flex items-center gap-1.5 ${
                     isSelected
-                      ? "bg-indigo-600/90 text-white shadow-md shadow-indigo-600/25 border border-indigo-400/40"
-                      : "bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800/80 hover:text-zinc-200 border border-white/[0.04]"
+                      ? "bg-[#1f222d] border border-[#323645] text-white shadow-sm"
+                      : "text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#16171f]"
                   }`}
                 >
-                  <span className="font-mono text-[10px] opacity-70">
-                    [{route.keyShortcut || idx + 1}]
-                  </span>
-                  {route.targetType === "daily_note" && <Calendar className="w-3.5 h-3.5" />}
-                  {route.targetType === "file" && <Folder className="w-3.5 h-3.5" />}
-                  {route.targetType === "folder" && (
-                    <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
-                  )}
-                  <span className="tracking-tight">{route.label}</span>
+                  <span className="opacity-50">{route.keyShortcut || idx + 1}:</span>
+                  <span>{route.label.toLowerCase()}</span>
                 </button>
               );
             })}
           </div>
 
-          <div className="flex items-center gap-1 shrink-0 ml-2">
+          {/* Ações da Janela */}
+          <div className="flex items-center gap-2 pl-2">
             <button
               onClick={() => setShowSettings(true)}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 transition cursor-pointer"
-              title="Configurações do Vault & Projetos"
+              className="text-xs font-mono text-[#71717a] hover:text-[#d4d4d8] px-1.5 py-0.5 rounded hover:bg-[#1f222d] transition cursor-pointer"
+              title="Configurações (Vault e Atalhos)"
             >
-              <SettingsIcon className="w-3.5 h-3.5" />
+              [config]
             </button>
             <button
               onClick={handleCancel}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 transition cursor-pointer"
+              className="text-xs font-mono text-[#71717a] hover:text-[#ef4444] px-1.5 py-0.5 rounded hover:bg-[#1f222d] transition cursor-pointer"
               title="Fechar (Esc)"
             >
-              <X className="w-4 h-4" />
+              ✕
             </button>
           </div>
         </div>
 
-        {/* Corpo Principal: Thumbnail + Inputs */}
-        <div className="flex gap-3.5">
-          {/* Thumbnail do Recorte */}
-          <div className="w-32 h-28 rounded-xl bg-[#141620] border border-white/[0.08] flex items-center justify-center overflow-hidden shrink-0 relative group shadow-inner">
-            {imageBase64 ? (
-              <img
-                src={imageBase64}
-                alt="Recorte"
-                className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition duration-300"
+        {/* Corpo Principal */}
+        <div className="p-4 flex flex-col gap-3">
+          <div className="flex gap-3">
+            {/* Thumbnail do Recorte */}
+            <div className="w-32 h-28 rounded bg-[#16171f] border border-[#232530] flex items-center justify-center overflow-hidden shrink-0">
+              {imageBase64 ? (
+                <img
+                  src={imageBase64}
+                  alt="Recorte"
+                  className="w-full h-full object-cover rounded"
+                />
+              ) : (
+                <span className="text-[11px] font-mono text-[#525460]">sem recorte</span>
+              )}
+            </div>
+
+            {/* Campos de Entrada */}
+            <div className="flex-1 flex flex-col gap-2 font-mono">
+              <input
+                ref={titleInputRef}
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSave();
+                  }
+                }}
+                placeholder="❯ resumo rápido / título do bug..."
+                className="w-full bg-[#16171f] border border-[#232530] focus:border-[#2dd4bf] rounded px-3 py-2 text-xs text-white placeholder-[#525460] outline-none transition"
+                autoFocus
               />
-            ) : (
-              <div className="text-[11px] text-zinc-500 flex flex-col items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
-                <span className="font-mono text-[10px]">Sem Recorte</span>
-              </div>
-            )}
+
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="❯ notas de qa, passos de reprodução, logs adicionais..."
+                rows={2}
+                className="w-full bg-[#16171f] border border-[#232530] focus:border-[#2dd4bf] rounded px-3 py-2 text-xs text-[#d4d4d8] placeholder-[#525460] outline-none resize-none transition"
+              />
+            </div>
           </div>
 
-          {/* Campos de Entrada */}
-          <div className="flex-1 flex flex-col gap-2.5">
-            {/* Título com Autofocus */}
-            <input
-              ref={titleInputRef}
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSave();
-                }
-              }}
-              placeholder="Resumo do recorte / Título do bug..."
-              className="w-full bg-[#141620] border border-white/[0.08] focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/40 rounded-xl px-3.5 py-2.5 text-xs text-zinc-100 placeholder-zinc-500 outline-none transition"
-              autoFocus
-            />
-
-            {/* Mensagem / Observações de QA */}
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Observação detalhada de QA, passos de teste ou contexto..."
-              rows={2}
-              className="w-full bg-[#141620]/80 border border-white/[0.06] focus:border-indigo-500/60 rounded-xl px-3.5 py-2 text-xs text-zinc-200 placeholder-zinc-600 outline-none resize-none transition"
-            />
+          {/* Tags */}
+          <div className="flex items-center gap-1.5 text-xs font-mono">
+            <span className="text-[#525460] text-[11px]">tags:</span>
+            {["qa", "bug", "ui", "p1", "daily"].map((tag) => {
+              const active = selectedTags.includes(tag);
+              return (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`px-2 py-0.5 rounded text-[11px] transition cursor-pointer ${
+                    active
+                      ? "bg-[#172228] text-[#2dd4bf] border border-[#2dd4bf]/40"
+                      : "bg-[#16171f] text-[#71717a] hover:text-[#d4d4d8] border border-[#232530]"
+                  }`}
+                >
+                  #{tag}
+                </button>
+              );
+            })}
           </div>
-        </div>
 
-        {/* Tags Rápidas */}
-        <div className="flex items-center gap-1.5 text-xs text-zinc-400 pt-0.5">
-          <Tag className="w-3.5 h-3.5 text-zinc-500 ml-1" />
-          <span className="text-[11px] text-zinc-500">Tags:</span>
-          {["qa", "bug", "ui", "p1", "daily"].map((tag) => {
-            const active = selectedTags.includes(tag);
-            return (
+          {errorMsg && (
+            <div className="text-xs font-mono text-[#ef4444] bg-[#2a1318] border border-[#4d1f27] px-3 py-1.5 rounded">
+              ! {errorMsg}
+            </div>
+          )}
+
+          {/* Rodapé: Destino & Ações */}
+          <div className="flex items-center justify-between pt-2 border-t border-[#232530] text-xs font-mono text-[#71717a]">
+            <div className="truncate max-w-[360px]">
+              <span className="opacity-60">destino: </span>
+              <span className="text-[#d4d4d8]">
+                {activeRoute?.targetType === "daily_note" && "Daily/YYYY-MM-DD.md"}
+                {activeRoute?.targetType === "file" && (activeRoute.filePath || "Inbox.md")}
+                {activeRoute?.targetType === "folder" && `${activeRoute.folderPath}/YYYY-MM-DD_nota.md`}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
               <button
-                key={tag}
-                onClick={() => toggleTag(tag)}
-                className={`px-2 py-0.5 rounded-md text-[11px] font-mono transition cursor-pointer ${
-                  active
-                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/40"
-                    : "bg-zinc-900/80 text-zinc-500 hover:text-zinc-300 border border-white/[0.05]"
+                onClick={handleCancel}
+                className="px-3 py-1 text-[#71717a] hover:text-[#d4d4d8] transition cursor-pointer"
+              >
+                cancelar [esc]
+              </button>
+
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className={`px-3.5 py-1.5 rounded font-medium transition cursor-pointer ${
+                  saveSuccess
+                    ? "bg-[#10b981] text-[#0c0d10]"
+                    : "bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10]"
                 }`}
               >
-                #{tag}
+                {saveSuccess ? "salvo!" : "salvar [ctrl+enter] ↵"}
               </button>
-            );
-          })}
-        </div>
-
-        {/* Mensagem de Erro (se houver) */}
-        {errorMsg && (
-          <div className="text-xs text-rose-400 bg-rose-950/40 border border-rose-900/60 px-3 py-1.5 rounded-xl">
-            {errorMsg}
-          </div>
-        )}
-
-        {/* Rodapé: Destino & Ações */}
-        <div className="flex items-center justify-between pt-2 border-t border-white/[0.08] text-xs text-zinc-500">
-          <div className="flex items-center gap-1.5 truncate max-w-[360px]">
-            <span className="text-zinc-500 text-[11px]">↳ Destino:</span>
-            <span className="text-zinc-300 font-mono text-[11px] truncate">
-              {activeRoute?.targetType === "daily_note" && "Daily/YYYY-MM-DD.md"}
-              {activeRoute?.targetType === "file" && (activeRoute.filePath || "Inbox.md")}
-              {activeRoute?.targetType === "folder" &&
-                `${activeRoute.folderPath}/YYYY-MM-DD_nota.md`}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleCancel}
-              className="px-2.5 py-1.5 text-zinc-400 hover:text-zinc-200 text-xs transition cursor-pointer"
-            >
-              Cancelar (Esc)
-            </button>
-
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              className={`px-4 py-2 rounded-xl font-medium text-xs flex items-center gap-1.5 transition-all shadow-md cursor-pointer ${
-                saveSuccess
-                  ? "bg-emerald-600 text-white shadow-emerald-600/30"
-                  : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30 active:scale-[0.99]"
-              }`}
-            >
-              {saveSuccess ? (
-                <>
-                  <Check className="w-3.5 h-3.5" />
-                  <span>Salvo no Obsidian!</span>
-                </>
-              ) : (
-                <>
-                  <Send className="w-3.5 h-3.5" />
-                  <span>
-                    Salvar <kbd className="font-mono text-[10px] opacity-70">Ctrl+Enter</kbd>
-                  </span>
-                </>
-              )}
-            </button>
+            </div>
           </div>
         </div>
 

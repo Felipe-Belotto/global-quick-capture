@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { AppConfig, ProjectRoute } from "../types";
 import { invoke } from "@tauri-apps/api/core";
-import { X, Save, FolderOpen, Plus, Trash2, RefreshCw } from "lucide-react";
 
 interface SettingsModalProps {
   config: AppConfig;
@@ -105,146 +104,153 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
   };
 
   return (
-    <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-3">
-      <div className="w-full max-w-[620px] max-h-[92vh] bg-[#0f1117]/98 border border-white/[0.09] rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.85)] p-5 text-zinc-100 flex flex-col gap-4 overflow-y-auto no-scrollbar">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 select-none">
+      <div className="w-full max-w-[620px] max-h-[92vh] bg-[#111216] border border-[#232530] rounded-lg shadow-2xl text-[#d4d4d8] flex flex-col font-mono text-xs overflow-hidden">
         
-        {/* Header estilo Warp */}
-        <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.08]">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
-              <FolderOpen className="w-3.5 h-3.5" />
-            </div>
-            <div>
-              <h2 className="text-xs font-semibold text-zinc-100">Configurações do Cofre & Atalhos</h2>
-              <p className="text-[11px] text-zinc-400">Gerencie diretórios locais e rotas de envio rápido</p>
-            </div>
+        {/* Header estilo terminal Warp (arrastável) */}
+        <div
+          data-tauri-drag-region
+          className="h-10 px-4 bg-[#0c0d10] border-b border-[#232530] flex items-center justify-between cursor-move rounded-t-lg shrink-0"
+        >
+          <div data-tauri-drag-region className="flex items-center gap-2 text-[#8e909a]">
+            <span className="text-[#2dd4bf]">❯</span>
+            <span>quick-capture</span>
+            <span className="text-[#525460]">/</span>
+            <span className="text-[#d4d4d8]">settings</span>
           </div>
-          <button onClick={onClose} className="p-1 text-zinc-400 hover:text-zinc-200 rounded cursor-pointer">
-            <X className="w-4 h-4" />
+          <button
+            onClick={onClose}
+            className="text-[#71717a] hover:text-[#ef4444] px-1.5 py-0.5 rounded hover:bg-[#1f222d] transition cursor-pointer"
+          >
+            ✕
           </button>
         </div>
 
-        {/* Caminho do Vault com Botão de Navegar */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[11px] text-zinc-300 font-medium">Pasta Raiz do Vault (Obsidian)</label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={vaultPath}
-              onChange={(e) => setVaultPath(e.target.value)}
-              placeholder="Ex: C:\Users\nome\Documents\MeuCofre"
-              className="flex-1 bg-zinc-900/90 border border-white/[0.08] focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-zinc-200 outline-none font-mono"
-            />
-            <button
-              onClick={handlePickFolder}
-              className="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-medium flex items-center gap-1.5 shrink-0 transition cursor-pointer"
-            >
-              <FolderOpen className="w-3.5 h-3.5" />
-              <span>Procurar...</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Atalho Global & Pasta de Anexos */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* Formulário com scroll limpo */}
+        <div className="p-5 overflow-y-auto flex flex-col gap-4 no-scrollbar">
+          {/* Caminho do Vault */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] text-zinc-300 font-medium">Pasta de Anexos</label>
-            <input
-              type="text"
-              value={attachmentsFolder}
-              onChange={(e) => setAttachmentsFolder(e.target.value)}
-              placeholder="_attachments"
-              className="w-full bg-zinc-900/90 border border-white/[0.08] focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-zinc-200 outline-none font-mono"
-            />
+            <label className="text-[#8e909a]">vault_path:</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={vaultPath}
+                onChange={(e) => setVaultPath(e.target.value)}
+                placeholder="C:\Users\...\ObsidianVault"
+                className="flex-1 bg-[#171821] border border-[#262833] focus:border-[#2dd4bf] rounded px-3 py-2 text-white outline-none"
+              />
+              <button
+                onClick={handlePickFolder}
+                className="px-3 py-2 bg-[#20222c] hover:bg-[#282b37] border border-[#323645] text-white rounded transition cursor-pointer"
+              >
+                procurar...
+              </button>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[11px] text-zinc-300 font-medium">Atalho de Captura</label>
-            <input
-              type="text"
-              value={globalShortcut}
-              onChange={(e) => setGlobalShortcut(e.target.value)}
-              placeholder="Super+Alt+S"
-              className="w-full bg-zinc-900/90 border border-white/[0.08] focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-zinc-200 outline-none font-mono"
-            />
-          </div>
-        </div>
+          {/* Atalho & Anexos */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[#8e909a]">attachments_dir:</label>
+              <input
+                type="text"
+                value={attachmentsFolder}
+                onChange={(e) => setAttachmentsFolder(e.target.value)}
+                placeholder="_attachments"
+                className="w-full bg-[#171821] border border-[#262833] focus:border-[#2dd4bf] rounded px-3 py-2 text-white outline-none"
+              />
+            </div>
 
-        {/* Gerenciar Rotas de Projetos */}
-        <div className="flex flex-col gap-2 pt-1">
-          <div className="flex items-center justify-between">
-            <label className="text-[11px] text-zinc-300 font-medium">Rotas de Projetos Cadastradas</label>
-            <button
-              onClick={handleScanFolders}
-              disabled={isScanning}
-              className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 cursor-pointer font-medium"
-            >
-              <RefreshCw className={`w-3 h-3 ${isScanning ? "animate-spin" : ""}`} />
-              <span>Detectar Novas Pastas</span>
-            </button>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[#8e909a]">global_shortcut:</label>
+              <input
+                type="text"
+                value={globalShortcut}
+                onChange={(e) => setGlobalShortcut(e.target.value)}
+                placeholder="Super+Alt+S"
+                className="w-full bg-[#171821] border border-[#262833] focus:border-[#2dd4bf] rounded px-3 py-2 text-white outline-none"
+              />
+            </div>
           </div>
-          
-          <div className="max-h-32 overflow-y-auto flex flex-col gap-1.5 pr-1 no-scrollbar">
-            {projectRoutes.map((route, idx) => (
-              <div key={route.id} className="flex items-center justify-between bg-zinc-900/70 border border-white/[0.06] px-2.5 py-1.5 rounded-lg text-xs">
-                <div className="flex items-center gap-2 truncate">
-                  <span className="font-mono text-zinc-500 text-[10px]">[{route.keyShortcut || idx + 1}]</span>
-                  <span className="font-medium text-zinc-200 truncate">{route.label}</span>
-                  <span className="text-[10px] text-zinc-500 font-mono truncate">({route.folderPath || route.filePath || "Daily"})</span>
+
+          {/* Rotas de Projetos */}
+          <div className="flex flex-col gap-2 pt-1 border-t border-[#232530]">
+            <div className="flex items-center justify-between text-[#8e909a]">
+              <span>project_routes:</span>
+              <button
+                onClick={handleScanFolders}
+                disabled={isScanning}
+                className="text-[#2dd4bf] hover:underline cursor-pointer"
+              >
+                {isScanning ? "escaneando..." : "[ escanear cofre ]"}
+              </button>
+            </div>
+
+            <div className="max-h-32 overflow-y-auto flex flex-col gap-1.5 pr-1 no-scrollbar">
+              {projectRoutes.map((route, idx) => (
+                <div
+                  key={route.id}
+                  className="flex items-center justify-between bg-[#16171f] border border-[#232530] px-3 py-1.5 rounded text-xs"
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="text-[#525460]">[{route.keyShortcut || idx + 1}]</span>
+                    <span className="text-white truncate">{route.label}</span>
+                    <span className="text-[#525460] truncate">
+                      ({route.folderPath || route.filePath || "Daily"})
+                    </span>
+                  </div>
+                  {route.id !== "daily" && route.id !== "inbox" && (
+                    <button
+                      onClick={() => handleDeleteRoute(route.id)}
+                      className="text-[#525460] hover:text-[#ef4444] transition cursor-pointer px-1"
+                    >
+                      [x]
+                    </button>
+                  )}
                 </div>
-                {route.id !== "daily" && route.id !== "inbox" && (
-                  <button
-                    onClick={() => handleDeleteRoute(route.id)}
-                    className="text-zinc-600 hover:text-rose-400 transition p-1 cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          {/* Adicionar Rota Manual */}
-          <div className="flex gap-2 pt-1">
-            <input
-              type="text"
-              value={newRouteLabel}
-              onChange={(e) => setNewRouteLabel(e.target.value)}
-              placeholder="Rótulo (ex: QA/Bugs)"
-              className="w-1/3 bg-zinc-900/90 border border-white/[0.08] rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 outline-none"
-            />
-            <input
-              type="text"
-              value={newRoutePath}
-              onChange={(e) => setNewRoutePath(e.target.value)}
-              placeholder="Pasta (ex: Projects/QA)"
-              className="flex-1 bg-zinc-900/90 border border-white/[0.08] rounded-lg px-2.5 py-1.5 text-xs text-zinc-200 outline-none font-mono"
-            />
-            <button
-              onClick={handleAddRoute}
-              className="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded-lg text-xs flex items-center gap-1 cursor-pointer"
-            >
-              <Plus className="w-3 h-3" />
-              <span>Add</span>
-            </button>
+            {/* Adicionar Rota Manual */}
+            <div className="flex gap-2 pt-1">
+              <input
+                type="text"
+                value={newRouteLabel}
+                onChange={(e) => setNewRouteLabel(e.target.value)}
+                placeholder="nome (ex: QA/Bugs)"
+                className="w-1/3 bg-[#171821] border border-[#262833] rounded px-2.5 py-1.5 text-white outline-none"
+              />
+              <input
+                type="text"
+                value={newRoutePath}
+                onChange={(e) => setNewRoutePath(e.target.value)}
+                placeholder="pasta (ex: Projects/QA)"
+                className="flex-1 bg-[#171821] border border-[#262833] rounded px-2.5 py-1.5 text-white outline-none"
+              />
+              <button
+                onClick={handleAddRoute}
+                className="px-3 py-1.5 bg-[#20222c] hover:bg-[#282b37] border border-[#323645] text-white rounded transition cursor-pointer"
+              >
+                + add
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Rodapé */}
-        <div className="flex justify-end gap-2 pt-2 border-t border-white/[0.08]">
+        <div className="h-12 px-5 bg-[#0c0d10] border-t border-[#232530] flex items-center justify-end gap-2 shrink-0">
           <button
             onClick={onClose}
-            className="px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition cursor-pointer"
+            className="px-3 py-1.5 text-[#71717a] hover:text-[#d4d4d8] transition cursor-pointer"
           >
-            Cancelar
+            cancelar
           </button>
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-medium flex items-center gap-1.5 shadow-md shadow-indigo-600/30 transition cursor-pointer"
+            className="px-4 py-1.5 bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10] font-medium rounded transition cursor-pointer"
           >
-            <Save className="w-3.5 h-3.5" />
-            <span>Salvar</span>
+            salvar ↵
           </button>
         </div>
 
