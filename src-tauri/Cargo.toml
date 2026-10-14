@@ -23,6 +23,7 @@ dirs = "6.0"
 image = { version = "0.25", default-features = false, features = ["png"] }
 base64 = "0.22"
 rfd = "0.17.2"
+xcap = "0.9.8"
 
 [profile.release]
 codegen-units = 1

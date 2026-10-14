@@ -1,3 +1,4 @@
+pub mod capture;
 pub mod config;
 pub mod obsidian;
 
@@ -40,10 +41,13 @@ fn list_vault_nodes_cmd(vault_path: Option<String>) -> Vec<VaultNode> {
 
 #[tauri::command]
 fn trigger_capture(app: tauri::AppHandle) -> Result<(), String> {
+    // 1. Tira o print da tela antes de abrir a janela para congelar o estado real
+    let screen_b64 = capture::capture_primary_screen().unwrap_or_default();
+
     if let Some(overlay) = app.get_webview_window("snipping_overlay") {
         let _ = overlay.show();
         let _ = overlay.set_focus();
-        let _ = overlay.emit("start_snip", ());
+        let _ = overlay.emit("start_snip", screen_b64);
     }
     Ok(())
 }
