@@ -24,6 +24,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
 
   return (
     <div
+      data-tauri-drag-region
       onMouseDown={handleDrag}
       className="h-10 px-3 bg-[#0c0d10] border-b border-[#232530] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-lg select-none"
     >

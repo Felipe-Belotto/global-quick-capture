@@ -134,6 +134,7 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
       <div className="w-full max-w-[560px] h-full max-h-[540px] bg-[#111216] border border-[#232530] rounded-lg shadow-2xl text-[#d4d4d8] flex flex-col overflow-hidden mx-auto">
         {/* Terminal Header */}
         <div
+          data-tauri-drag-region
           onMouseDown={handleDrag}
           className="h-10 px-3 bg-[#0c0d10] border-b border-[#232530] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-lg shrink-0"
         >

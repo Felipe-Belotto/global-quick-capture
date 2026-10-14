@@ -440,6 +440,11 @@ fn show_settings_window(app: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn start_dragging_window(window: tauri::WebviewWindow) -> Result<(), String> {
+    window.start_dragging().map_err(|e| e.to_string())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -459,7 +464,8 @@ pub fn run() {
             get_system_app_info,
             show_about_window,
             hide_about_window,
-            show_settings_window
+            show_settings_window,
+            start_dragging_window
         ])
         .setup(|app| {
             // 1. Registrar Atalho Global dinâmico do config (padrão Win + Alt + S)

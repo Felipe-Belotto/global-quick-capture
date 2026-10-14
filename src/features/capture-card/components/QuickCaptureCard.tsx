@@ -26,9 +26,45 @@ export const QuickCaptureCard: React.FC = () => {
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showAbout, setShowAbout] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
+  const [isDraggingFile, setIsDraggingFile] = useState<boolean>(false);
 
   const descInputRef = useRef<HTMLTextAreaElement | null>(null);
   const isSavingRef = useRef<boolean>(false);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer.types.includes("Files")) {
+      setIsDraggingFile(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingFile(false);
+  };
+
+  const handleDropFile = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingFile(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            setImageBase64(event.target.result as string);
+            setShowImagePreview(false);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  };
 
   const autocomplete = useVaultAutocomplete({
     value: description,
@@ -290,8 +326,23 @@ export const QuickCaptureCard: React.FC = () => {
 
   return (
     <div className="w-full h-full flex items-center justify-center p-3 select-none">
-      <div className="w-full max-w-[680px] bg-[#111216] border border-[#232530] rounded-lg shadow-2xl text-[#d4d4d8] flex flex-col font-sans">
-        
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDropFile}
+        className={`w-full max-w-[680px] bg-[#111216] border rounded-lg shadow-2xl text-[#d4d4d8] flex flex-col font-sans relative transition-all duration-150 ${
+          isDraggingFile ? "border-[#2dd4bf] ring-2 ring-[#2dd4bf]/40" : "border-[#232530]"
+        }`}
+      >
+        {/* Overlay visual ao arrastar arquivo de imagem para dentro do card */}
+        {isDraggingFile && (
+          <div className="absolute inset-0 bg-[#0c0d10]/90 z-40 rounded-lg flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#2dd4bf] pointer-events-none">
+            <span className="text-3xl animate-bounce">📥</span>
+            <span className="font-mono text-sm text-[#2dd4bf] font-bold">Solte a imagem para carregar</span>
+            <span className="font-mono text-[11px] text-[#71717a]">Suporta PNG, JPG, WEBP</span>
+          </div>
+        )}
+
         {/* Cabeçalho Modular com Drag Handle e Tabs */}
         <CardHeader
           config={config}

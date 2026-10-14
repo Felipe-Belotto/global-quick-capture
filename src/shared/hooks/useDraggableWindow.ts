@@ -1,5 +1,6 @@
 import React, { useCallback } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { invoke } from "@tauri-apps/api/core";
 
 export function useDraggableWindow() {
   const onMouseDown = useCallback(async (e: React.MouseEvent) => {
@@ -13,8 +14,12 @@ export function useDraggableWindow() {
     try {
       const appWindow = getCurrentWindow();
       await appWindow.startDragging();
-    } catch (err) {
-      console.warn("Falha ao iniciar arraste da janela nativa:", err);
+    } catch {
+      try {
+        await invoke("start_dragging_window");
+      } catch (err) {
+        console.warn("Falha ao iniciar arraste da janela nativa:", err);
+      }
     }
   }, []);
 
@@ -22,8 +27,12 @@ export function useDraggableWindow() {
     try {
       const appWindow = getCurrentWindow();
       await appWindow.startDragging();
-    } catch (err) {
-      console.warn("Falha ao arrastar janela:", err);
+    } catch {
+      try {
+        await invoke("start_dragging_window");
+      } catch (err) {
+        console.warn("Falha ao arrastar janela:", err);
+      }
     }
   }, []);
 

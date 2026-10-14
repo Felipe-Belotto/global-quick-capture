@@ -152,6 +152,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
       <div className="w-full max-w-[620px] max-h-[92vh] bg-[#111216] border border-[#232530] rounded-lg shadow-2xl text-[#d4d4d8] flex flex-col font-mono text-xs overflow-hidden">
         {/* Header estilo terminal Warp (arrastável com startDragging nativo) */}
         <div
+          data-tauri-drag-region
           onMouseDown={handleDrag}
           className="h-10 px-3 bg-[#0c0d10] border-b border-[#232530] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-lg shrink-0 select-none"
         >

@@ -14,6 +14,7 @@ export const DragHandle: React.FC<DragHandleProps> = ({
 
   return (
     <div
+      data-tauri-drag-region
       onMouseDown={onMouseDown}
       title={title}
       className={`flex items-center justify-center cursor-grab active:cursor-grabbing select-none text-[#525460] hover:text-[#2dd4bf] transition-colors p-1 rounded hover:bg-[#1a1c24] ${className}`}
