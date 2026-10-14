@@ -1,0 +1,14 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Permissões para as janelas de captura e card",
+  "windows": ["snipping_overlay", "capture_card", "*"],
+  "permissions": [
+    "core:default",
+    "opener:default",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-set-focus",
+    "core:event:default"
+  ]
+}
