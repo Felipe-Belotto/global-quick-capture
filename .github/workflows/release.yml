@@ -29,9 +29,10 @@ jobs:
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './src-tauri -> target'
+          shared-key: 'windows-tauri'
 
       - name: Install Frontend Dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Tauri Windows Installer
         uses: tauri-apps/tauri-action@v0

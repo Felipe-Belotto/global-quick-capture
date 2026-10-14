@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Design System & Telas // Global Quick Capture</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+          },
+          colors: {
+            app: {
+              bg: '#0c0d10',
+              surface: '#111216',
+              input: '#16171f',
+              inputAlt: '#171821',
+              hover: '#1f222d',
+              btn: '#20222c',
+              border: '#232530',
+              borderAlt: '#262833',
+              borderMuted: '#323645',
+              accent: 'var(--accent-color, #2dd4bf)',
+              accentDark: '#172228',
+              accentHover: 'var(--accent-hover, #25b5a3)',
+              text: '#d4d4d8',
+              muted: '#71717a',
+              dim: '#525460',
+              label: '#8e909a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --accent-color: #2dd4bf;
+      --accent-hover: #25b5a3;
+    }
+    body {
+      background-color: #08090b;
+      color: #e4e4e7;
+      font-family: 'Inter', sans-serif;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #232530;
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #323645;
+    }
+    .grid-bg {
+      background-image: radial-gradient(rgba(45, 212, 191, 0.08) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .glow-accent {
+      box-shadow: 0 0 25px -5px rgba(45, 212, 191, 0.25);
+    }
+    .clip-crosshair {
+      cursor: crosshair;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col custom-scroll antialiased selection:bg-[#2dd4bf]/20 selection:text-[#2dd4bf]">
+
+  <!-- TOAST NOTIFICATION DE CÓPIA -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2.5 bg-[#111216] border border-[#2dd4bf]/40 px-4 py-2.5 rounded-lg shadow-2xl text-xs font-mono text-white">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-[#2dd4bf]"></i>
+    <span id="toast-text">Copiado para o clipboard!</span>
+  </div>
+
+  <!-- TOP NAV & HEADER -->
+  <header class="sticky top-0 z-40 bg-[#0c0d10]/90 backdrop-blur-md border-b border-[#232530]">
+    <div class="max-w-[1700px] mx-auto px-4 lg:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand & Project -->
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-[#16171f] border border-[#2dd4bf]/40 flex items-center justify-center text-[#2dd4bf] shadow-sm">
+          <i data-lucide="crop" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-sm font-semibold text-white tracking-tight">Global Quick Capture</h1>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#172228] text-[#2dd4bf] border border-[#2dd4bf]/30">v0.1.0 • Design System</span>
+          </div>
+          <p class="text-[11px] text-[#71717a] font-mono">Warp Terminal / Obsidian Desktop Specs</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-1 bg-[#111216] border border-[#232530] p-1 rounded-lg">
+        <button onclick="switchTab('screens')" id="tab-btn-screens" class="px-3 py-1.5 rounded text-xs font-medium transition flex items-center gap-2 bg-[#1f222d] text-white">
+          <i data-lucide="layout" class="w-3.5 h-3.5 text-[#2dd4bf]"></i>
+          <span>Telas do App</span>
+        </button>
+        <button onclick="switchTab('canvas')" id="tab-btn-canvas" class="px-3 py-1.5 rounded text-xs font-medium transition flex items-center gap-2 text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#16171f]">
+          <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+          <span>Visão Geral (Canvas)</span>
+        </button>
+        <button onclick="switchTab('tokens')" id="tab-btn-tokens" class="px-3 py-1.5 rounded text-xs font-medium transition flex items-center gap-2 text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#16171f]">
+          <i data-lucide="palette" class="w-3.5 h-3.5"></i>
+          <span>Tokens & Componentes</span>
+        </button>
+        <button onclick="switchTab('ux-refactor')" id="tab-btn-ux-refactor" class="px-3 py-1.5 rounded text-xs font-medium transition flex items-center gap-2 text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#16171f]">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Guia de Refatoração UX</span>
+        </button>
+      </nav>
+
+      <!-- Quick Theme & Shortcut Tools -->
+      <div class="flex items-center gap-2">
+        <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#16171f] border border-[#232530] text-[11px] font-mono text-[#8e909a]">
+          <span>Gatilho:</span>
+          <kbd class="px-1.5 py-0.5 rounded bg-[#20222c] text-white border border-[#323645]">Win+Alt+S</kbd>
+        </div>
+
+        <!-- Cor de Destaque Seletor -->
+        <div class="relative group">
+          <button class="w-8 h-8 rounded-lg bg-[#16171f] border border-[#232530] flex items-center justify-center hover:border-[#323645]" title="Mudar Acento Visual">
+            <span class="w-3.5 h-3.5 rounded-full bg-[#2dd4bf] shadow-sm" id="accent-preview-dot"></span>
+          </button>
+          <div class="absolute right-0 top-full mt-2 w-48 bg-[#111216] border border-[#232530] rounded-lg shadow-xl p-2 hidden group-hover:block z-50">
+            <p class="text-[10px] font-mono text-[#71717a] px-2 py-1 uppercase">Tema de Acento</p>
+            <div class="grid grid-cols-4 gap-1.5 p-1">
+              <button onclick="setThemeAccent('#2dd4bf', '#25b5a3', 'Teal')" class="w-8 h-8 rounded bg-[#2dd4bf] hover:scale-105 transition" title="Warp Teal (Padrão)"></button>
+              <button onclick="setThemeAccent('#a855f7', '#9333ea', 'Obsidian Purple')" class="w-8 h-8 rounded bg-[#a855f7] hover:scale-105 transition" title="Obsidian Purple"></button>
+              <button onclick="setThemeAccent('#38bdf8', '#0284c7', 'Sky Blue')" class="w-8 h-8 rounded bg-[#38bdf8] hover:scale-105 transition" title="Sky Blue"></button>
+              <button onclick="setThemeAccent('#fbbf24', '#f59e0b', 'Amber Gold')" class="w-8 h-8 rounded bg-[#fbbf24] hover:scale-105 transition" title="Amber Gold"></button>
+            </div>
+          </div>
+        </div>
+
+        <a href="../README.md" class="px-3 py-1.5 rounded-lg bg-[#16171f] border border-[#232530] hover:bg-[#1f222d] text-xs font-mono text-[#d4d4d8] flex items-center gap-1.5 transition">
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+          <span class="hidden md:inline">Docs</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-[1700px] w-full mx-auto px-4 lg:px-8 py-6">
+
+    <!-- ================================================================= -->
+    <!-- ABA 1: SHOWCASE DE TELAS INDIVIDUAIS (INTERATIVO) -->
+    <!-- ================================================================= -->
+    <section id="section-screens" class="space-y-6">
+      
+      <!-- Sub-barra seletora de Tela Ativa -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-[#111216] p-2.5 rounded-xl border border-[#232530]">
+        <div class="flex items-center gap-1.5 overflow-x-auto custom-scroll py-0.5">
+          <span class="text-xs font-mono text-[#71717a] px-2">TELA ATIVA:</span>
+          <button onclick="showScreen('capture-card')" id="btn-screen-capture-card" class="px-3 py-1.5 rounded-md text-xs font-mono transition bg-[#1f222d] border border-[#323645] text-white flex items-center gap-2">
+            <span class="text-[#2dd4bf]">01</span> Quick Capture Card
+          </button>
+          <button onclick="showScreen('snipping-overlay')" id="btn-screen-snipping-overlay" class="px-3 py-1.5 rounded-md text-xs font-mono transition text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#16171f] flex items-center gap-2">
+            <span class="text-[#2dd4bf]">02</span> Snipping Overlay
+          </button>
+          <button onclick="showScreen('settings-modal')" id="btn-screen-settings-modal" class="px-3 py-1.5 rounded-md text-xs font-mono transition text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#16171f] flex items-center gap-2">
+            <span class="text-[#2dd4bf]">03</span> Settings Modal
+          </button>
+          <button onclick="showScreen('onboarding-modal')" id="btn-screen-onboarding-modal" class="px-3 py-1.5 rounded-md text-xs font-mono transition text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#16171f] flex items-center gap-2">
+            <span class="text-[#2dd4bf]">04</span> Onboarding Setup
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="copyCurrentScreenCode()" class="px-2.5 py-1 text-xs font-mono rounded bg-[#16171f] hover:bg-[#1f222d] border border-[#232530] text-[#a1a1aa] hover:text-white flex items-center gap-1.5 transition">
+            <i data-lucide="code" class="w-3.5 h-3.5"></i>
+            <span>Copiar JSX/HTML</span>
+          </button>
+          <button onclick="toggleCardStatesModal()" class="px-2.5 py-1 text-xs font-mono rounded bg-[#16171f] hover:bg-[#1f222d] border border-[#232530] text-[#a1a1aa] hover:text-white flex items-center gap-1.5 transition">
+            <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+            <span>Estados Rápidos</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- PAINEL DA TELA SELECIONADA -->
+      <div class="relative min-h-[580px] rounded-2xl bg-[#090a0d] border border-[#232530] p-6 lg:p-12 flex items-center justify-center grid-bg overflow-hidden shadow-2xl">
+
+        <!-- ============================================================== -->
+        <!-- VIEW 1: QUICK CAPTURE CARD -->
+        <!-- ============================================================== -->
+        <div id="view-capture-card" class="w-full max-w-[680px] flex flex-col transition-all duration-300">
+          
+          <div class="mb-3 flex items-center justify-between text-xs font-mono text-[#71717a] px-1">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              <span class="text-[#d4d4d8]">Componente: <code class="text-[#2dd4bf]">QuickCaptureCard.tsx</code></span>
+            </div>
+            <span>Janela Flutuante: 680px × Auto</span>
+          </div>
+
+          <!-- O CARD REAL -->
+          <div class="w-full bg-[#111216] border border-[#232530] rounded-lg shadow-2xl text-[#d4d4d8] flex flex-col font-sans transition-all duration-200" id="live-quick-card">
+            
+            <!-- Header estilo terminal Warp (arrastável) -->
+            <div class="h-10 px-3 bg-[#0c0d10] border-b border-[#232530] flex items-center justify-between cursor-move rounded-t-lg select-none">
+              <!-- Rotas de projetos estilo abas de terminal -->
+              <div class="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5" id="card-routes-container">
+                <span class="font-mono text-xs text-[#2dd4bf] mr-1">❯</span>
+                
+                <button onclick="selectRoute('daily')" id="route-btn-daily" class="px-2.5 py-1 rounded text-xs font-mono transition cursor-pointer flex items-center gap-1.5 bg-[#1f222d] border border-[#323645] text-white shadow-sm">
+                  <span class="opacity-50">1:</span>
+                  <span>daily</span>
+                </button>
+
+                <button onclick="selectRoute('inbox')" id="route-btn-inbox" class="px-2.5 py-1 rounded text-xs font-mono transition cursor-pointer flex items-center gap-1.5 text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#16171f]">
+                  <span class="opacity-50">2:</span>
+                  <span>inbox</span>
+                </button>
+
+                <button onclick="selectRoute('qa')" id="route-btn-qa" class="px-2.5 py-1 rounded text-xs font-mono transition cursor-pointer flex items-center gap-1.5 text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#16171f]">
+                  <span class="opacity-50">3:</span>
+                  <span>qa / bugs</span>
+                </button>
+
+                <button onclick="selectRoute('design')" id="route-btn-design" class="px-2.5 py-1 rounded text-xs font-mono transition cursor-pointer flex items-center gap-1.5 text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#16171f]">
+                  <span class="opacity-50">4:</span>
+                  <span>design system</span>
+                </button>
+              </div>
+
+              <!-- Ações da Janela -->
+              <div class="flex items-center gap-2 pl-2">
+                <button onclick="showScreen('settings-modal')" class="text-xs font-mono text-[#71717a] hover:text-[#d4d4d8] px-1.5 py-0.5 rounded hover:bg-[#1f222d] transition cursor-pointer" title="Configurações">
+                  [config]
+                </button>
+                <button onclick="simulateCancel()" class="text-xs font-mono text-[#71717a] hover:text-[#ef4444] px-1.5 py-0.5 rounded hover:bg-[#1f222d] transition cursor-pointer" title="Fechar (Esc)">
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <!-- Corpo Principal -->
+            <div class="p-4 flex flex-col gap-3">
+              <div class="flex gap-3">
+                <!-- Thumbnail do Recorte -->
+                <div class="w-32 h-28 rounded bg-[#16171f] border border-[#232530] flex flex-col items-center justify-center overflow-hidden shrink-0 relative group">
+                  <img id="card-thumb-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80" alt="Recorte" class="w-full h-full object-cover rounded opacity-90 group-hover:scale-105 transition duration-300">
+                  <div class="absolute bottom-1 right-1 bg-black/80 px-1.5 py-0.5 rounded text-[9px] font-mono text-[#2dd4bf]">
+                    720×480
+                  </div>
+                </div>
+
+                <!-- Campos de Entrada -->
+                <div class="flex-1 flex flex-col gap-2 font-mono">
+                  <input
+                    id="card-input-title"
+                    type="text"
+                    value="Bug no botão de checkout do checkout v2"
+                    placeholder="❯ resumo rápido / título do bug..."
+                    class="w-full bg-[#16171f] border border-[#232530] focus:border-[#2dd4bf] rounded px-3 py-2 text-xs text-white placeholder-[#525460] outline-none transition"
+                  />
+
+                  <textarea
+                    id="card-input-desc"
+                    rows="2"
+                    placeholder="❯ notas de qa, passos de reprodução, logs adicionais..."
+                    class="w-full bg-[#16171f] border border-[#232530] focus:border-[#2dd4bf] rounded px-3 py-2 text-xs text-[#d4d4d8] placeholder-[#525460] outline-none resize-none transition"
+                  >Ao clicar com atalho rápido, o modal perde o foco se houver 2 monitores ativos.</textarea>
+                </div>
+              </div>
+
+              <!-- Tags -->
+              <div class="flex items-center gap-1.5 text-xs font-mono">
+                <span class="text-[#525460] text-[11px]">tags:</span>
+                <div class="flex flex-wrap gap-1.5" id="tags-container">
+                  <button onclick="toggleTagBtn(this)" class="tag-pill px-2 py-0.5 rounded text-[11px] transition cursor-pointer bg-[#172228] text-[#2dd4bf] border border-[#2dd4bf]/40" data-active="true">#qa</button>
+                  <button onclick="toggleTagBtn(this)" class="tag-pill px-2 py-0.5 rounded text-[11px] transition cursor-pointer bg-[#172228] text-[#2dd4bf] border border-[#2dd4bf]/40" data-active="true">#bug</button>
+                  <button onclick="toggleTagBtn(this)" class="tag-pill px-2 py-0.5 rounded text-[11px] transition cursor-pointer bg-[#16171f] text-[#71717a] hover:text-[#d4d4d8] border border-[#232530]" data-active="false">#ui</button>
+                  <button onclick="toggleTagBtn(this)" class="tag-pill px-2 py-0.5 rounded text-[11px] transition cursor-pointer bg-[#16171f] text-[#71717a] hover:text-[#d4d4d8] border border-[#232530]" data-active="false">#p1</button>
+                  <button onclick="toggleTagBtn(this)" class="tag-pill px-2 py-0.5 rounded text-[11px] transition cursor-pointer bg-[#16171f] text-[#71717a] hover:text-[#d4d4d8] border border-[#232530]" data-active="false">#daily</button>
+                </div>
+              </div>
+
+              <!-- Mensagem de Erro (Condicional) -->
+              <div id="card-error-alert" class="hidden text-xs font-mono text-[#ef4444] bg-[#2a1318] border border-[#4d1f27] px-3 py-1.5 rounded flex items-center justify-between">
+                <span>! Digite um título ou observação antes de salvar.</span>
+                <button onclick="dismissError()" class="text-xs hover:text-white">✕</button>
+              </div>
+
+              <!-- Rodapé: Destino & Ações -->
+              <div class="flex items-center justify-between pt-2 border-t border-[#232530] text-xs font-mono text-[#71717a]">
+                <div class="truncate max-w-[360px]">
+                  <span class="opacity-60">destino: </span>
+                  <span id="route-dest-label" class="text-[#d4d4d8]">Daily/2026-10-13.md</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <button onclick="simulateCancel()" class="px-3 py-1 text-[#71717a] hover:text-[#d4d4d8] transition cursor-pointer">
+                    cancelar [esc]
+                  </button>
+
+                  <button id="card-btn-save" onclick="simulateSaveAction()" class="px-3.5 py-1.5 rounded font-medium transition cursor-pointer bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10] flex items-center gap-1.5">
+                    <span>salvar [ctrl+enter] ↵</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Dica interativa -->
+          <div class="mt-4 p-3 rounded-lg bg-[#111216]/60 border border-[#232530] text-[11px] font-mono text-[#71717a] flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i data-lucide="keyboard" class="w-4 h-4 text-[#2dd4bf]"></i>
+              <span>Atalhos rápidos do card: <kbd class="px-1 py-0.5 bg-[#16171f] rounded text-[#d4d4d8]">1-9</kbd> troca de rota • <kbd class="px-1 py-0.5 bg-[#16171f] rounded text-[#d4d4d8]">Ctrl+Enter</kbd> salva • <kbd class="px-1 py-0.5 bg-[#16171f] rounded text-[#d4d4d8]">Esc</kbd> cancela</span>
+            </div>
+            <button onclick="triggerCardRandomFill()" class="text-[#2dd4bf] hover:underline">Preencher demo</button>
+          </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- VIEW 2: SNIPPING OVERLAY INTERATIVO -->
+        <!-- ============================================================== -->
+        <div id="view-snipping-overlay" class="hidden w-full max-w-[900px] h-[520px] rounded-xl border border-[#232530] relative overflow-hidden clip-crosshair select-none bg-zinc-950 flex flex-col justify-between" onmousedown="startSnipDrag(event)" onmousemove="updateSnipDrag(event)" onmouseup="endSnipDrag(event)">
+          
+          <!-- Imagem simulada de fundo (desktop) -->
+          <div class="absolute inset-0 bg-[#0f1117] flex items-center justify-center pointer-events-none opacity-80" style="background: radial-gradient(circle at 50% 50%, #161822 0%, #0d0e12 100%);">
+            <div class="w-4/5 h-3/5 border border-dashed border-[#232530] rounded-lg p-6 flex flex-col gap-3">
+              <div class="flex gap-2">
+                <span class="w-3 h-3 rounded-full bg-red-500/40"></span>
+                <span class="w-3 h-3 rounded-full bg-yellow-500/40"></span>
+                <span class="w-3 h-3 rounded-full bg-green-500/40"></span>
+              </div>
+              <div class="h-6 w-1/3 bg-[#232530]/60 rounded"></div>
+              <div class="h-24 w-full bg-[#181a24]/60 rounded"></div>
+              <p class="text-xs font-mono text-[#525460]">Área simulada do Desktop. Clique e arraste para simular o recorte com mouse!</p>
+            </div>
+          </div>
+
+          <!-- Máscara escura global -->
+          <div class="absolute inset-0 bg-black/50 pointer-events-none"></div>
+
+          <!-- Pill de Status Superior estilo Warp -->
+          <div class="relative top-4 mx-auto px-4 py-1.5 rounded-full bg-[#0c0d10]/95 border border-[#232530] text-xs font-mono text-[#d4d4d8] shadow-2xl flex items-center gap-2 pointer-events-none z-30">
+            <span class="w-2 h-2 rounded-full bg-[#2dd4bf] animate-pulse"></span>
+            <span>quick-capture // arraste para recortar • [esc] cancelar</span>
+          </div>
+
+          <!-- Caixa de Seleção Dinâmica (Simulada ou Estática) -->
+          <div id="snip-box" class="absolute border border-[#2dd4bf] shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] pointer-events-none z-20" style="left: 20%; top: 25%; width: 420px; height: 260px;">
+            <!-- Dimensões Tooltip -->
+            <div id="snip-dimensions" class="absolute -bottom-6 right-0 bg-[#0c0d10] border border-[#232530] text-[#2dd4bf] text-[10px] font-mono px-2 py-0.5 rounded shadow">
+              420 × 260 px
+            </div>
+            <!-- Marcadores nos 4 cantos -->
+            <div class="absolute -top-1 -left-1 w-2 h-2 bg-[#2dd4bf] rounded-xs"></div>
+            <div class="absolute -top-1 -right-1 w-2 h-2 bg-[#2dd4bf] rounded-xs"></div>
+            <div class="absolute -bottom-1 -left-1 w-2 h-2 bg-[#2dd4bf] rounded-xs"></div>
+            <div class="absolute -bottom-1 -right-1 w-2 h-2 bg-[#2dd4bf] rounded-xs"></div>
+          </div>
+
+          <!-- Rodapé com instruções -->
+          <div class="relative p-3 text-center text-xs font-mono text-[#71717a] z-30 pointer-events-none">
+            Solte o botão esquerdo para concluir o recorte e acionar o <span class="text-[#2dd4bf]">QuickCaptureCard</span>.
+          </div>
+
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- VIEW 3: SETTINGS MODAL -->
+        <!-- ============================================================== -->
+        <div id="view-settings-modal" class="hidden w-full max-w-[620px] transition-all">
+          <div class="mb-3 flex items-center justify-between text-xs font-mono text-[#71717a] px-1">
+            <span class="text-[#d4d4d8]">Componente: <code class="text-[#2dd4bf]">SettingsModal.tsx</code></span>
+            <span>Configurações do Cofre & Rotas</span>
+          </div>
+
+          <div class="w-full bg-[#111216] border border-[#232530] rounded-lg shadow-2xl text-[#d4d4d8] flex flex-col font-mono text-xs overflow-hidden">
+            <!-- Header estilo terminal Warp -->
+            <div class="h-10 px-4 bg-[#0c0d10] border-b border-[#232530] flex items-center justify-between cursor-move rounded-t-lg shrink-0">
+              <div class="flex items-center gap-2 text-[#8e909a]">
+                <span class="text-[#2dd4bf]">❯</span>
+                <span>quick-capture</span>
+                <span class="text-[#525460]">/</span>
+                <span class="text-[#d4d4d8]">settings</span>
+              </div>
+              <button onclick="showScreen('capture-card')" class="text-[#71717a] hover:text-[#ef4444] px-1.5 py-0.5 rounded hover:bg-[#1f222d] transition cursor-pointer">
+                ✕
+              </button>
+            </div>
+
+            <!-- Formulário -->
+            <div class="p-5 flex flex-col gap-4 max-h-[460px] overflow-y-auto custom-scroll">
+              
+              <!-- Caminho do Vault -->
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[#8e909a]">vault_path:</label>
+                <div class="flex gap-2">
+                  <input
+                    type="text"
+                    value="C:\Users\Felipe\Documents\ObsidianVault"
+                    class="flex-1 bg-[#171821] border border-[#262833] focus:border-[#2dd4bf] rounded px-3 py-2 text-white outline-none"
+                  />
+                  <button class="px-3 py-2 bg-[#20222c] hover:bg-[#282b37] border border-[#323645] text-white rounded transition cursor-pointer">
+                    procurar...
+                  </button>
+                </div>
+              </div>
+
+              <!-- Atalho & Anexos -->
+              <div class="grid grid-cols-2 gap-3">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[#8e909a]">attachments_dir:</label>
+                  <input
+                    type="text"
+                    value="_attachments"
+                    class="w-full bg-[#171821] border border-[#262833] focus:border-[#2dd4bf] rounded px-3 py-2 text-white outline-none"
+                  />
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[#8e909a]">global_shortcut:</label>
+                  <input
+                    type="text"
+                    value="Super+Alt+S"
+                    class="w-full bg-[#171821] border border-[#262833] focus:border-[#2dd4bf] rounded px-3 py-2 text-white outline-none"
+                  />
+                </div>
+              </div>
+
+              <!-- Rotas de Projetos -->
+              <div class="flex flex-col gap-2 pt-1 border-t border-[#232530]">
+                <div class="flex items-center justify-between text-[#8e909a]">
+                  <span>project_routes:</span>
+                  <button class="text-[#2dd4bf] hover:underline cursor-pointer flex items-center gap-1">
+                    <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                    <span>[ escanear cofre ]</span>
+                  </button>
+                </div>
+
+                <div class="max-h-36 overflow-y-auto flex flex-col gap-1.5 pr-1 custom-scroll" id="settings-routes-list">
+                  <div class="flex items-center justify-between bg-[#16171f] border border-[#232530] px-3 py-1.5 rounded text-xs">
+                    <div class="flex items-center gap-2 truncate">
+                      <span class="text-[#525460]">[1]</span>
+                      <span class="text-white">Daily Note</span>
+                      <span class="text-[#525460]">(Daily/YYYY-MM-DD.md)</span>
+                    </div>
+                    <span class="text-[10px] text-[#525460]">fixo</span>
+                  </div>
+
+                  <div class="flex items-center justify-between bg-[#16171f] border border-[#232530] px-3 py-1.5 rounded text-xs">
+                    <div class="flex items-center gap-2 truncate">
+                      <span class="text-[#525460]">[2]</span>
+                      <span class="text-white">Inbox</span>
+                      <span class="text-[#525460]">(Inbox.md)</span>
+                    </div>
+                    <span class="text-[10px] text-[#525460]">fixo</span>
+                  </div>
+
+                  <div class="flex items-center justify-between bg-[#16171f] border border-[#232530] px-3 py-1.5 rounded text-xs">
+                    <div class="flex items-center gap-2 truncate">
+                      <span class="text-[#525460]">[3]</span>
+                      <span class="text-white">QA / Bugs</span>
+                      <span class="text-[#525460]">(Projects/QA)</span>
+                    </div>
+                    <button class="text-[#525460] hover:text-[#ef4444] transition cursor-pointer px-1">[x]</button>
+                  </div>
+                </div>
+
+                <!-- Adicionar Rota Manual -->
+                <div class="flex gap-2 pt-1">
+                  <input
+                    type="text"
+                    placeholder="nome (ex: Squad Alpha)"
+                    class="w-1/3 bg-[#171821] border border-[#262833] rounded px-2.5 py-1.5 text-white outline-none"
+                  />
+                  <input
+                    type="text"
+                    placeholder="pasta (ex: Projects/Alpha)"
+                    class="flex-1 bg-[#171821] border border-[#262833] rounded px-2.5 py-1.5 text-white outline-none"
+                  />
+                  <button class="px-3 py-1.5 bg-[#20222c] hover:bg-[#282b37] border border-[#323645] text-white rounded transition cursor-pointer">
+                    + add
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Rodapé -->
+            <div class="h-12 px-5 bg-[#0c0d10] border-t border-[#232530] flex items-center justify-end gap-2 shrink-0">
+              <button onclick="showScreen('capture-card')" class="px-3 py-1.5 text-[#71717a] hover:text-[#d4d4d8] transition cursor-pointer">
+                cancelar
+              </button>
+              <button onclick="showScreen('capture-card'); showToast('Configurações salvas com sucesso!')" class="px-4 py-1.5 bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10] font-medium rounded transition cursor-pointer">
+                salvar ↵
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- VIEW 4: ONBOARDING SETUP MODAL -->
+        <!-- ============================================================== -->
+        <div id="view-onboarding-modal" class="hidden w-full max-w-[640px] transition-all">
+          <div class="mb-3 flex items-center justify-between text-xs font-mono text-[#71717a] px-1">
+            <span class="text-[#d4d4d8]">Componente: <code class="text-[#2dd4bf]">OnboardingModal.tsx</code></span>
+            <span>Primeira Execução / Setup Inicial</span>
+          </div>
+
+          <div class="w-full bg-[#111216] border border-[#232530] rounded-lg shadow-2xl text-[#d4d4d8] flex flex-col font-sans">
+            <!-- Header estilo terminal Warp -->
+            <div class="h-10 px-4 bg-[#0c0d10] border-b border-[#232530] flex items-center justify-between cursor-move rounded-t-lg">
+              <div class="flex items-center gap-2 font-mono text-xs text-[#8e909a]">
+                <span class="text-[#2dd4bf]">❯</span>
+                <span>quick-capture</span>
+                <span class="text-[#525460]">/</span>
+                <span class="text-[#d4d4d8]">setup</span>
+              </div>
+              <div class="flex items-center gap-1.5 opacity-60">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#262833]"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#262833]"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#2dd4bf]"></span>
+              </div>
+            </div>
+
+            <!-- Conteúdo com Steps -->
+            <div class="p-5 flex flex-col gap-5">
+              
+              <!-- Toggle de Passos para demonstração -->
+              <div class="flex gap-2 p-1 bg-[#0c0d10] border border-[#232530] rounded-md font-mono text-xs">
+                <button onclick="setOnboardingStep(1)" id="ob-step-btn-1" class="flex-1 py-1 rounded bg-[#1f222d] text-white">Etapa 1: Selecionar Cofre</button>
+                <button onclick="setOnboardingStep(2)" id="ob-step-btn-2" class="flex-1 py-1 rounded text-[#71717a] hover:text-white">Etapa 2: Pastas & Rotas</button>
+              </div>
+
+              <!-- PASSO 1 -->
+              <div id="onboarding-step-1" class="flex flex-col gap-4">
+                <div class="flex flex-col gap-1">
+                  <span class="font-mono text-xs text-[#2dd4bf]">01 // SELECT_VAULT</span>
+                  <h2 class="text-sm font-medium text-white tracking-tight">
+                    Selecione o diretório do seu Cofre do Obsidian
+                  </h2>
+                  <p class="text-xs text-[#8e909a] leading-relaxed">
+                    O aplicativo salvará as imagens e fará o append das notas diretamente no sistema de arquivos local.
+                  </p>
+                </div>
+
+                <div class="flex gap-2">
+                  <input
+                    type="text"
+                    readonly
+                    value="C:\Users\Felipe\ObsidianVault"
+                    class="flex-1 bg-[#171821] border border-[#262833] rounded px-3 py-2 text-xs font-mono text-[#a1a1aa] outline-none"
+                  />
+                  <button onclick="setOnboardingStep(2)" class="px-4 py-2 bg-[#20222c] hover:bg-[#282b37] border border-[#323645] text-white rounded text-xs font-mono transition cursor-pointer">
+                    Procurar...
+                  </button>
+                </div>
+              </div>
+
+              <!-- PASSO 2 -->
+              <div id="onboarding-step-2" class="hidden flex flex-col gap-4">
+                <div class="flex flex-col gap-1">
+                  <span class="font-mono text-xs text-[#2dd4bf]">02 // DETECTED_FOLDERS</span>
+                  <h2 class="text-sm font-medium text-white tracking-tight">
+                    Pastas identificadas no cofre
+                  </h2>
+                  <p class="text-xs text-[#8e909a]">
+                    Selecione quais pastas devem virar rotas de atalho rápido (<kbd class="font-mono text-[10px] text-zinc-300">1</kbd>-<kbd class="font-mono text-[10px] text-zinc-300">9</kbd>).
+                  </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 max-h-44 overflow-y-auto custom-scroll pr-1">
+                  <button class="px-3 py-2.5 rounded border text-left text-xs font-mono flex items-center justify-between bg-[#172228] border-[#2dd4bf]/40 text-[#e4e4e7]">
+                    <span class="truncate">Daily/</span>
+                    <span class="text-[10px] text-[#2dd4bf]">[x]</span>
+                  </button>
+                  <button class="px-3 py-2.5 rounded border text-left text-xs font-mono flex items-center justify-between bg-[#172228] border-[#2dd4bf]/40 text-[#e4e4e7]">
+                    <span class="truncate">Inbox/</span>
+                    <span class="text-[10px] text-[#2dd4bf]">[x]</span>
+                  </button>
+                  <button class="px-3 py-2.5 rounded border text-left text-xs font-mono flex items-center justify-between bg-[#172228] border-[#2dd4bf]/40 text-[#e4e4e7]">
+                    <span class="truncate">Projects/QA/</span>
+                    <span class="text-[10px] text-[#2dd4bf]">[x]</span>
+                  </button>
+                  <button class="px-3 py-2.5 rounded border text-left text-xs font-mono flex items-center justify-between bg-[#16171f] border-[#232530] text-[#71717a] hover:text-[#a1a1aa]">
+                    <span class="truncate">Archives/</span>
+                    <span class="text-[10px] text-transparent">[x]</span>
+                  </button>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-[#232530] text-xs font-mono text-[#71717a]">
+                  <span>Atalho global padrão: <span class="text-[#d4d4d8]">Win + Alt + S</span></span>
+                  <button onclick="showScreen('capture-card'); showToast('Setup inicial concluído!')" class="px-4 py-2 bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10] font-medium text-xs rounded transition cursor-pointer">
+                    Salvar e Continuar ↵
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================================================================= -->
+    <!-- ABA 2: VISÃO GERAL (CANVAS / PANORAMA DE TODAS AS TELAS) -->
+    <!-- ================================================================= -->
+    <section id="section-canvas" class="hidden space-y-8">
+      
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-semibold text-white tracking-tight">Panorama do Fluxo Completo</h2>
+          <p class="text-xs text-[#71717a] font-mono">Visão panorâmica de todos os estados e telas do Global Quick Capture</p>
+        </div>
+        <span class="text-xs font-mono text-[#2dd4bf] px-3 py-1 bg-[#172228] border border-[#2dd4bf]/30 rounded-full">Fluxo de 3 Etapas: Gatilho ➔ Recorte ➔ Card ➔ Obsidian</span>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        
+        <!-- CARD NO CANVAS 1: Snipping Overlay -->
+        <div class="bg-[#111216] border border-[#232530] rounded-xl p-5 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono text-[#2dd4bf]">TELA 01 // OVERLAY NATIVO</span>
+            <span class="text-[11px] font-mono text-[#71717a]">Fullscreen Transparente</span>
+          </div>
+          <div class="h-64 rounded-lg bg-zinc-950 border border-[#232530] relative overflow-hidden flex items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/60"></div>
+            <div class="border border-[#2dd4bf] w-56 h-36 relative z-10 shadow-[0_0_0_999px_rgba(0,0,0,0.4)] flex items-center justify-center">
+              <span class="text-[10px] font-mono text-[#2dd4bf] bg-black/80 px-2 py-0.5 rounded">Área Selecionada (Crosshair)</span>
+            </div>
+            <div class="absolute top-3 px-3 py-1 rounded-full bg-[#0c0d10] border border-[#232530] text-[10px] font-mono text-[#d4d4d8] z-20">
+              quick-capture // arraste para recortar • [esc] cancelar
+            </div>
+          </div>
+          <p class="text-xs text-[#8e909a] leading-relaxed">
+            Congela os monitores ativos com Direct3D 11, exibe uma máscara com 50% de opacidade e calcula o recorte exato considerando o DPI scaling do Windows.
+          </p>
+        </div>
+
+        <!-- CARD NO CANVAS 2: Quick Capture Card -->
+        <div class="bg-[#111216] border border-[#232530] rounded-xl p-5 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono text-[#2dd4bf]">TELA 02 // QUICK CAPTURE CARD</span>
+            <span class="text-[11px] font-mono text-[#71717a]">Modal Flutuante Centralizado</span>
+          </div>
+          <div class="rounded-lg bg-[#0c0d10] border border-[#232530] p-4 flex flex-col gap-2.5 font-mono text-xs">
+            <div class="flex items-center justify-between border-b border-[#232530] pb-2 text-[11px]">
+              <div class="flex gap-2 text-white">
+                <span class="text-[#2dd4bf]">❯</span>
+                <span class="px-2 py-0.5 bg-[#1f222d] rounded text-white">[1] daily</span>
+                <span class="text-[#71717a]">[2] inbox</span>
+                <span class="text-[#71717a]">[3] qa</span>
+              </div>
+              <span class="text-[#71717a]">[config]</span>
+            </div>
+            <div class="flex gap-2.5">
+              <div class="w-20 h-16 bg-[#16171f] border border-[#232530] rounded flex items-center justify-center text-[10px] text-[#525460]">
+                thumb
+              </div>
+              <div class="flex-1 flex flex-col gap-1.5">
+                <div class="h-6 bg-[#16171f] border border-[#232530] rounded px-2 flex items-center text-[11px] text-zinc-300">❯ título rápido...</div>
+                <div class="h-8 bg-[#16171f] border border-[#232530] rounded px-2 flex items-center text-[10px] text-zinc-500">❯ notas de qa...</div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-1 border-t border-[#232530] text-[10px]">
+              <span class="text-[#71717a]">destino: Daily/YYYY-MM-DD.md</span>
+              <span class="px-2.5 py-1 bg-[#2dd4bf] text-black font-semibold rounded">salvar ↵</span>
+            </div>
+          </div>
+          <p class="text-xs text-[#8e909a] leading-relaxed">
+            Card principal de operação. Focado em uso de teclado: digitação imediata, atalhos numéricos de destino e salvamento sem necessidade do mouse.
+          </p>
+        </div>
+
+        <!-- CARD NO CANVAS 3: Settings Modal -->
+        <div class="bg-[#111216] border border-[#232530] rounded-xl p-5 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono text-[#2dd4bf]">TELA 03 // SETTINGS MODAL</span>
+            <span class="text-[11px] font-mono text-[#71717a]">Gerenciador de Rotas & Vault</span>
+          </div>
+          <div class="rounded-lg bg-[#0c0d10] border border-[#232530] p-4 flex flex-col gap-2 font-mono text-xs">
+            <div class="text-[11px] text-[#8e909a]">vault_path: C:\Users\...\ObsidianVault</div>
+            <div class="flex gap-2 text-[11px] text-[#8e909a]">
+              <span class="flex-1">attachments: _attachments</span>
+              <span class="flex-1">shortcut: Super+Alt+S</span>
+            </div>
+            <div class="p-2 bg-[#16171f] border border-[#232530] rounded text-[10px] flex flex-col gap-1">
+              <div class="flex justify-between text-zinc-400"><span>[1] Daily Note</span><span>Daily/</span></div>
+              <div class="flex justify-between text-zinc-400"><span>[2] Inbox</span><span>Inbox.md</span></div>
+              <div class="flex justify-between text-zinc-400"><span>[3] QA / Bugs</span><span>Projects/QA</span></div>
+            </div>
+          </div>
+          <p class="text-xs text-[#8e909a] leading-relaxed">
+            Permite trocar a pasta de anexos, modificar o atalho global e re-escanear pastas do Obsidian para gerar rotas com tags pré-configuradas.
+          </p>
+        </div>
+
+        <!-- CARD NO CANVAS 4: Onboarding Modal -->
+        <div class="bg-[#111216] border border-[#232530] rounded-xl p-5 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono text-[#2dd4bf]">TELA 04 // ONBOARDING WIZARD</span>
+            <span class="text-[11px] font-mono text-[#71717a]">Assistente Zero-Config</span>
+          </div>
+          <div class="rounded-lg bg-[#0c0d10] border border-[#232530] p-4 flex flex-col gap-2 font-mono text-xs">
+            <div class="flex items-center gap-1.5 text-[#2dd4bf] text-[11px]">
+              <span>01 // SELECT_VAULT</span>
+            </div>
+            <div class="h-7 bg-[#171821] border border-[#262833] rounded px-2 flex items-center justify-between text-[10px] text-zinc-400">
+              <span>Selecione a pasta do cofre...</span>
+              <span class="px-2 py-0.5 bg-[#20222c] text-white rounded">procurar</span>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5 pt-1 text-[10px]">
+              <div class="p-1.5 bg-[#172228] border border-[#2dd4bf]/40 rounded text-zinc-200">Daily/ [x]</div>
+              <div class="p-1.5 bg-[#172228] border border-[#2dd4bf]/40 rounded text-zinc-200">Projects/QA/ [x]</div>
+            </div>
+          </div>
+          <p class="text-xs text-[#8e909a] leading-relaxed">
+            Garante que um novo usuário configure o cofre em menos de 10 segundos sem precisar editar arquivos de texto ou JSON manualmente.
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================================================================= -->
+    <!-- ABA 3: DESIGN TOKENS & COMPONENTES ATÔMICOS -->
+    <!-- ================================================================= -->
+    <section id="section-tokens" class="hidden space-y-10">
+      
+      <!-- Paleta de Cores -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between border-b border-[#232530] pb-2">
+          <div>
+            <h3 class="text-sm font-semibold text-white tracking-tight">Cores & Tokens de Superfície</h3>
+            <p class="text-xs text-[#71717a] font-mono">Clique em qualquer swatch para copiar o código HEX</p>
+          </div>
+          <span class="text-xs font-mono text-[#71717a]">Escuro Profundo (Warp Palette)</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          
+          <div onclick="copyText('#0c0d10', 'HEX #0c0d10 copiado!')" class="group bg-[#0c0d10] border border-[#232530] p-3 rounded-lg cursor-pointer hover:border-[#2dd4bf]/50 transition">
+            <div class="h-10 rounded bg-[#0c0d10] border border-[#232530] mb-2 flex items-center justify-center text-[10px] font-mono text-[#71717a]">Header / Bars</div>
+            <div class="text-xs font-mono font-medium text-white">app-bg</div>
+            <div class="text-[11px] font-mono text-[#71717a]">#0c0d10</div>
+          </div>
+
+          <div onclick="copyText('#111216', 'HEX #111216 copiado!')" class="group bg-[#111216] border border-[#232530] p-3 rounded-lg cursor-pointer hover:border-[#2dd4bf]/50 transition">
+            <div class="h-10 rounded bg-[#111216] border border-[#232530] mb-2 flex items-center justify-center text-[10px] font-mono text-[#71717a]">Card Surface</div>
+            <div class="text-xs font-mono font-medium text-white">app-surface</div>
+            <div class="text-[11px] font-mono text-[#71717a]">#111216</div>
+          </div>
+
+          <div onclick="copyText('#16171f', 'HEX #16171f copiado!')" class="group bg-[#16171f] border border-[#232530] p-3 rounded-lg cursor-pointer hover:border-[#2dd4bf]/50 transition">
+            <div class="h-10 rounded bg-[#16171f] border border-[#232530] mb-2 flex items-center justify-center text-[10px] font-mono text-[#71717a]">Inputs / Subs</div>
+            <div class="text-xs font-mono font-medium text-white">app-input</div>
+            <div class="text-[11px] font-mono text-[#71717a]">#16171f</div>
+          </div>
+
+          <div onclick="copyText('#2dd4bf', 'HEX #2dd4bf copiado!')" class="group bg-[#111216] border border-[#232530] p-3 rounded-lg cursor-pointer hover:border-[#2dd4bf]/50 transition">
+            <div class="h-10 rounded bg-[#2dd4bf] mb-2 flex items-center justify-center text-[10px] font-mono text-[#0c0d10] font-bold">Accent Primary</div>
+            <div class="text-xs font-mono font-medium text-[#2dd4bf]">teal-400</div>
+            <div class="text-[11px] font-mono text-[#71717a]">#2dd4bf</div>
+          </div>
+
+          <div onclick="copyText('#172228', 'HEX #172228 copiado!')" class="group bg-[#111216] border border-[#232530] p-3 rounded-lg cursor-pointer hover:border-[#2dd4bf]/50 transition">
+            <div class="h-10 rounded bg-[#172228] border border-[#2dd4bf]/30 mb-2 flex items-center justify-center text-[10px] font-mono text-[#2dd4bf]">Active Pill</div>
+            <div class="text-xs font-mono font-medium text-white">accent-dark</div>
+            <div class="text-[11px] font-mono text-[#71717a]">#172228</div>
+          </div>
+
+          <div onclick="copyText('#232530', 'HEX #232530 copiado!')" class="group bg-[#111216] border border-[#232530] p-3 rounded-lg cursor-pointer hover:border-[#2dd4bf]/50 transition">
+            <div class="h-10 rounded bg-[#232530] mb-2 flex items-center justify-center text-[10px] font-mono text-[#71717a]">Border</div>
+            <div class="text-xs font-mono font-medium text-white">app-border</div>
+            <div class="text-[11px] font-mono text-[#71717a]">#232530</div>
+          </div>
+
+          <div onclick="copyText('#10b981', 'HEX #10b981 copiado!')" class="group bg-[#111216] border border-[#232530] p-3 rounded-lg cursor-pointer hover:border-[#2dd4bf]/50 transition">
+            <div class="h-10 rounded bg-[#10b981] mb-2 flex items-center justify-center text-[10px] font-mono text-black font-bold">Success</div>
+            <div class="text-xs font-mono font-medium text-emerald-400">emerald-500</div>
+            <div class="text-[11px] font-mono text-[#71717a]">#10b981</div>
+          </div>
+
+          <div onclick="copyText('#ef4444', 'HEX #ef4444 copiado!')" class="group bg-[#111216] border border-[#232530] p-3 rounded-lg cursor-pointer hover:border-[#2dd4bf]/50 transition">
+            <div class="h-10 rounded bg-[#ef4444] mb-2 flex items-center justify-center text-[10px] font-mono text-white font-bold">Danger / Close</div>
+            <div class="text-xs font-mono font-medium text-red-400">red-500</div>
+            <div class="text-[11px] font-mono text-[#71717a]">#ef4444</div>
+          </div>
+
+          <div onclick="copyText('#71717a', 'HEX #71717a copiado!')" class="group bg-[#111216] border border-[#232530] p-3 rounded-lg cursor-pointer hover:border-[#2dd4bf]/50 transition">
+            <div class="h-10 rounded bg-[#71717a] mb-2 flex items-center justify-center text-[10px] font-mono text-black">Muted Text</div>
+            <div class="text-xs font-mono font-medium text-white">zinc-500</div>
+            <div class="text-[11px] font-mono text-[#71717a]">#71717a</div>
+          </div>
+
+          <div onclick="copyText('#d4d4d8', 'HEX #d4d4d8 copiado!')" class="group bg-[#111216] border border-[#232530] p-3 rounded-lg cursor-pointer hover:border-[#2dd4bf]/50 transition">
+            <div class="h-10 rounded bg-[#d4d4d8] mb-2 flex items-center justify-center text-[10px] font-mono text-black">Body Text</div>
+            <div class="text-xs font-mono font-medium text-white">zinc-300</div>
+            <div class="text-[11px] font-mono text-[#71717a]">#d4d4d8</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Componentes Atômicos -->
+      <div class="space-y-6">
+        <div class="border-b border-[#232530] pb-2">
+          <h3 class="text-sm font-semibold text-white tracking-tight">Componentes & Micro-Interações</h3>
+          <p class="text-xs text-[#71717a] font-mono">Padrões de UI reutilizáveis em todos os cards e modais</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
+          <!-- Botões -->
+          <div class="bg-[#111216] border border-[#232530] p-4 rounded-xl flex flex-col gap-3">
+            <span class="text-xs font-mono text-[#2dd4bf]">01 // BUTTONS</span>
+            <div class="flex flex-col gap-2">
+              <button class="w-full px-3.5 py-1.5 rounded font-mono text-xs font-medium bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10] transition">
+                Primary: salvar [ctrl+enter] ↵
+              </button>
+              <button class="w-full px-3.5 py-1.5 rounded font-mono text-xs font-medium bg-[#10b981] text-[#0c0d10] transition">
+                Success: salvo com sucesso! ✓
+              </button>
+              <button class="w-full px-3.5 py-1.5 rounded font-mono text-xs font-medium bg-[#20222c] hover:bg-[#282b37] border border-[#323645] text-white transition">
+                Secondary: procurar cofre...
+              </button>
+              <button class="w-full px-3.5 py-1.5 rounded font-mono text-xs text-[#71717a] hover:text-[#d4d4d8] transition text-center">
+                Ghost / Cancel: cancelar [esc]
+              </button>
+            </div>
+          </div>
+
+          <!-- Tags & Badges -->
+          <div class="bg-[#111216] border border-[#232530] p-4 rounded-xl flex flex-col gap-3">
+            <span class="text-xs font-mono text-[#2dd4bf]">02 // TAGS & PILLS</span>
+            <div class="flex flex-wrap gap-2 items-center">
+              <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-[#172228] text-[#2dd4bf] border border-[#2dd4bf]/40">#qa (ativo)</span>
+              <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-[#16171f] text-[#71717a] border border-[#232530]">#bug (inativo)</span>
+              <span class="px-2.5 py-1 rounded text-xs font-mono bg-[#1f222d] border border-[#323645] text-white">1: daily</span>
+              <span class="px-2 py-0.5 rounded-full bg-[#0c0d10] border border-[#232530] text-[10px] font-mono text-[#2dd4bf] flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#2dd4bf] animate-ping"></span>
+                ready
+              </span>
+            </div>
+            <div class="pt-2 text-[11px] font-mono text-[#71717a]">
+              Pills com prefixo numérico permitem seleção via tecla direta de 1 a 9 sem clique.
+            </div>
+          </div>
+
+          <!-- Inputs Estilo Terminal -->
+          <div class="bg-[#111216] border border-[#232530] p-4 rounded-xl flex flex-col gap-3">
+            <span class="text-xs font-mono text-[#2dd4bf]">03 // TERMINAL INPUTS</span>
+            <div class="flex flex-col gap-2 font-mono text-xs">
+              <input
+                type="text"
+                placeholder="❯ input focado..."
+                value="❯ resumo rápido do recorte..."
+                class="w-full bg-[#16171f] border border-[#2dd4bf] rounded px-3 py-1.5 text-white outline-none shadow-[0_0_10px_rgba(45,212,191,0.15)]"
+              />
+              <input
+                type="text"
+                placeholder="❯ input normal..."
+                class="w-full bg-[#16171f] border border-[#232530] rounded px-3 py-1.5 text-zinc-400 outline-none"
+              />
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- ================================================================= -->
+    <!-- ABA 4: GUIA DE REFATORAÇÃO & MELHORIA DE EXPERIÊNCIA (UX) -->
+    <!-- ================================================================= -->
+    <section id="section-ux-refactor" class="hidden space-y-8">
+      
+      <div class="bg-gradient-to-r from-[#172228] to-[#111216] border border-[#2dd4bf]/30 p-6 rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-mono text-[#2dd4bf] uppercase tracking-wider">Roadmap de UX & Refatoração</span>
+          <h2 class="text-lg font-bold text-white tracking-tight mt-1">Como Elevar a Experiência do Global Quick Capture</h2>
+          <p class="text-xs text-[#a1a1aa] mt-1">Diagnóstico prático e sugestões prontas para implementação na UI</p>
+        </div>
+        <button onclick="switchTab('screens')" class="px-4 py-2 bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10] font-semibold text-xs font-mono rounded-lg transition shrink-0">
+          Testar no Playground ➔
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- PONTO 1: Feedback Visual e Atalhos -->
+        <div class="bg-[#111216] border border-[#232530] p-5 rounded-xl flex flex-col gap-3">
+          <div class="w-8 h-8 rounded bg-[#172228] border border-[#2dd4bf]/40 flex items-center justify-center text-[#2dd4bf]">
+            <i data-lucide="zap" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-sm font-semibold text-white">1. Micro-Feedback & Hints de Atalho</h3>
+          <p class="text-xs text-[#8e909a] leading-relaxed">
+            Usuários avançados esperam não encostar no mouse. Adicionar pequenos badges <kbd class="px-1 text-[10px] bg-[#16171f] text-zinc-300 rounded border border-[#232530]">1</kbd> nas abas e um indicador de <kbd class="px-1 text-[10px] bg-[#16171f] text-zinc-300 rounded border border-[#232530]">Tab</kbd> para alternar entre título e observação acelera o fluxo em 3x.
+          </p>
+          <div class="mt-auto pt-3 border-t border-[#232530] text-[11px] font-mono text-[#2dd4bf]">
+            Status: Parcialmente implementado
+          </div>
+        </div>
+
+        <!-- PONTO 2: Ferramentas de Anotação no Recorte -->
+        <div class="bg-[#111216] border border-[#232530] p-5 rounded-xl flex flex-col gap-3">
+          <div class="w-8 h-8 rounded bg-[#172228] border border-[#2dd4bf]/40 flex items-center justify-center text-[#2dd4bf]">
+            <i data-lucide="edit-3" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-sm font-semibold text-white">2. Anotação Rápida no Recorte</h3>
+          <p class="text-xs text-[#8e909a] leading-relaxed">
+            Para QA e bug report, desenhar uma seta vermelha ou retângulo sobre o erro antes de salvar poupa texto. Adicionar uma toolbar mínima no próprio Card (Seta, Retângulo, Highlight, Desfocar/Blur).
+          </p>
+          <div class="mt-auto pt-3 border-t border-[#232530] text-[11px] font-mono text-amber-400">
+            Sugestão v0.2.0 (Próxima Sprint)
+          </div>
+        </div>
+
+        <!-- PONTO 3: Animações de Transição & Suavidade -->
+        <div class="bg-[#111216] border border-[#232530] p-5 rounded-xl flex flex-col gap-3">
+          <div class="w-8 h-8 rounded bg-[#172228] border border-[#2dd4bf]/40 flex items-center justify-center text-[#2dd4bf]">
+            <i data-lucide="eye" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-sm font-semibold text-white">3. Sensação "Raycast-Smooth"</h3>
+          <p class="text-xs text-[#8e909a] leading-relaxed">
+            Ao pressionar <kbd class="px-1 text-[10px] bg-[#16171f] text-zinc-300 rounded">Ctrl+Enter</kbd>, em vez de fechar abruptamente, fazer o botão piscar em verde esmeralda com <code class="text-zinc-200">scale(0.98)</code> por 150ms e fazer fade out suave da janela.
+          </p>
+          <div class="mt-auto pt-3 border-t border-[#232530] text-[11px] font-mono text-emerald-400">
+            Fácil Aplicação (Via CSS/Tauri)
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Checklist de Refatoração de Código -->
+      <div class="bg-[#111216] border border-[#232530] p-6 rounded-2xl flex flex-col gap-4">
+        <h3 class="text-sm font-semibold text-white tracking-tight flex items-center gap-2">
+          <i data-lucide="check-square" class="w-4 h-4 text-[#2dd4bf]"></i>
+          <span>Checklist Prático para Refatoração do Front-end</span>
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+          <label class="flex items-center gap-2.5 p-3 rounded-lg bg-[#16171f] border border-[#232530] cursor-pointer hover:border-[#323645]">
+            <input type="checkbox" checked class="accent-[#2dd4bf] rounded">
+            <span class="text-zinc-300">Padronizar fontes mono com <code class="text-[#2dd4bf]">JetBrains Mono</code> ou <code class="text-[#2dd4bf]">Consolas</code></span>
+          </label>
+          <label class="flex items-center gap-2.5 p-3 rounded-lg bg-[#16171f] border border-[#232530] cursor-pointer hover:border-[#323645]">
+            <input type="checkbox" checked class="accent-[#2dd4bf] rounded">
+            <span class="text-zinc-300">Centralizar cores em variáveis CSS/Tailwind config</span>
+          </label>
+          <label class="flex items-center gap-2.5 p-3 rounded-lg bg-[#16171f] border border-[#232530] cursor-pointer hover:border-[#323645]">
+            <input type="checkbox" checked class="accent-[#2dd4bf] rounded">
+            <span class="text-zinc-300">Suporte a múltiplos monitores com DPI scaling no overlay</span>
+          </label>
+          <label class="flex items-center gap-2.5 p-3 rounded-lg bg-[#16171f] border border-[#232530] cursor-pointer hover:border-[#323645]">
+            <input type="checkbox" class="accent-[#2dd4bf] rounded">
+            <span class="text-zinc-300">Adicionar confirmação sutil com som ou toast nativo</span>
+          </label>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL FLUTUANTE DE CONTROLE DE ESTADOS DO CARD -->
+  <div id="states-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-[#111216] border border-[#232530] rounded-xl shadow-2xl p-5 font-mono text-xs flex flex-col gap-4">
+      <div class="flex items-center justify-between border-b border-[#232530] pb-2 text-white">
+        <span class="text-[#2dd4bf]">❯ Simular Estados do Card</span>
+        <button onclick="toggleCardStatesModal()" class="text-zinc-500 hover:text-white">✕</button>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <button onclick="setCardState('empty')" class="p-2.5 rounded bg-[#16171f] hover:bg-[#1f222d] border border-[#232530] text-left text-zinc-300 transition">
+          1. Estado Inicial / Vazio (Sem texto)
+        </button>
+        <button onclick="setCardState('filled')" class="p-2.5 rounded bg-[#16171f] hover:bg-[#1f222d] border border-[#232530] text-left text-zinc-300 transition">
+          2. Estado Preenchido com QA Data
+        </button>
+        <button onclick="setCardState('saving')" class="p-2.5 rounded bg-[#16171f] hover:bg-[#1f222d] border border-[#232530] text-left text-zinc-300 transition">
+          3. Estado Salvando (Spinner / Loading)
+        </button>
+        <button onclick="setCardState('success')" class="p-2.5 rounded bg-[#16171f] hover:bg-[#1f222d] border border-[#232530] text-left text-emerald-400 transition">
+          4. Estado de Sucesso (Salvo!)
+        </button>
+        <button onclick="setCardState('error')" class="p-2.5 rounded bg-[#16171f] hover:bg-[#1f222d] border border-[#232530] text-left text-red-400 transition">
+          5. Estado de Erro / Alerta
+        </button>
+      </div>
+
+      <div class="pt-2 text-[11px] text-zinc-500 text-center">
+        Clique em um estado para aplicá-lo instantaneamente na tela ativa.
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT DE INTERAÇÕES -->
+  <script>
+    // Inicializar ícones Lucide
+    lucide.createIcons();
+
+    // Trocar Abas Principais
+    function switchTab(tabId) {
+      const tabs = ['screens', 'canvas', 'tokens', 'ux-refactor'];
+      tabs.forEach(t => {
+        const sec = document.getElementById(`section-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (sec && btn) {
+          if (t === tabId) {
+            sec.classList.remove('hidden');
+            btn.className = "px-3 py-1.5 rounded text-xs font-medium transition flex items-center gap-2 bg-[#1f222d] text-white";
+          } else {
+            sec.classList.add('hidden');
+            btn.className = "px-3 py-1.5 rounded text-xs font-medium transition flex items-center gap-2 text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#16171f]";
+          }
+        }
+      });
+      lucide.createIcons();
+    }
+
+    // Trocar Tela Individual
+    function showScreen(screenId) {
+      const screens = ['capture-card', 'snipping-overlay', 'settings-modal', 'onboarding-modal'];
+      screens.forEach(s => {
+        const view = document.getElementById(`view-${s}`);
+        const btn = document.getElementById(`btn-screen-${s}`);
+        if (view && btn) {
+          if (s === screenId) {
+            view.classList.remove('hidden');
+            btn.className = "px-3 py-1.5 rounded-md text-xs font-mono transition bg-[#1f222d] border border-[#323645] text-white flex items-center gap-2";
+          } else {
+            view.classList.add('hidden');
+            btn.className = "px-3 py-1.5 rounded-md text-xs font-mono transition text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#16171f] flex items-center gap-2";
+          }
+        }
+      });
+      lucide.createIcons();
+    }
+
+    // Selecionar Rota no Card
+    function selectRoute(route) {
+      const routes = {
+        daily: { label: 'Daily/2026-10-13.md', btnId: 'route-btn-daily' },
+        inbox: { label: 'Inbox.md', btnId: 'route-btn-inbox' },
+        qa: { label: 'Projects/QA/2026-10-13_bug.md', btnId: 'route-btn-qa' },
+        design: { label: 'Projects/DesignSystem/Notes.md', btnId: 'route-btn-design' }
+      };
+
+      Object.keys(routes).forEach(r => {
+        const btn = document.getElementById(routes[r].btnId);
+        if (btn) {
+          if (r === route) {
+            btn.className = "px-2.5 py-1 rounded text-xs font-mono transition cursor-pointer flex items-center gap-1.5 bg-[#1f222d] border border-[#323645] text-white shadow-sm";
+            document.getElementById('route-dest-label').innerText = routes[r].label;
+          } else {
+            btn.className = "px-2.5 py-1 rounded text-xs font-mono transition cursor-pointer flex items-center gap-1.5 text-[#71717a] hover:text-[#d4d4d8] hover:bg-[#16171f]";
+          }
+        }
+      });
+    }
+
+    // Toggle de Tags
+    function toggleTagBtn(btn) {
+      const isActive = btn.getAttribute('data-active') === 'true';
+      if (isActive) {
+        btn.setAttribute('data-active', 'false');
+        btn.className = "tag-pill px-2 py-0.5 rounded text-[11px] transition cursor-pointer bg-[#16171f] text-[#71717a] hover:text-[#d4d4d8] border border-[#232530]";
+      } else {
+        btn.setAttribute('data-active', 'true');
+        btn.className = "tag-pill px-2 py-0.5 rounded text-[11px] transition cursor-pointer bg-[#172228] text-[#2dd4bf] border border-[#2dd4bf]/40";
+      }
+    }
+
+    // Ação de Salvar Simulada
+    function simulateSaveAction() {
+      const titleInput = document.getElementById('card-input-title');
+      const errorAlert = document.getElementById('card-error-alert');
+      const saveBtn = document.getElementById('card-btn-save');
+
+      if (!titleInput.value.trim()) {
+        errorAlert.classList.remove('hidden');
+        return;
+      }
+
+      errorAlert.classList.add('hidden');
+      saveBtn.innerHTML = `<span>salvando...</span>`;
+      saveBtn.className = "px-3.5 py-1.5 rounded font-medium transition cursor-pointer bg-zinc-700 text-white flex items-center gap-1.5";
+
+      setTimeout(() => {
+        saveBtn.innerHTML = `<span>salvo! ✓</span>`;
+        saveBtn.className = "px-3.5 py-1.5 rounded font-medium transition cursor-pointer bg-[#10b981] text-[#0c0d10] flex items-center gap-1.5";
+        showToast("Snippet e anexo gravados no cofre!");
+
+        setTimeout(() => {
+          saveBtn.innerHTML = `<span>salvar [ctrl+enter] ↵</span>`;
+          saveBtn.className = "px-3.5 py-1.5 rounded font-medium transition cursor-pointer bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10] flex items-center gap-1.5";
+        }, 1500);
+      }, 500);
+    }
+
+    function dismissError() {
+      document.getElementById('card-error-alert').classList.add('hidden');
+    }
+
+    function simulateCancel() {
+      showToast("Operação cancelada [Esc] — Janela descarregada.");
+    }
+
+    function triggerCardRandomFill() {
+      document.getElementById('card-input-title').value = "Inconsistência de contraste na barra de status";
+      document.getElementById('card-input-desc').value = "O texto de atalho precisa de pelo menos 4.5:1 de contraste para modo acessível WCAG.";
+      document.getElementById('card-error-alert').classList.add('hidden');
+      showToast("Card preenchido com dados de exemplo!");
+    }
+
+    // Controle de Passos Onboarding
+    function setOnboardingStep(step) {
+      const step1 = document.getElementById('onboarding-step-1');
+      const step2 = document.getElementById('onboarding-step-2');
+      const btn1 = document.getElementById('ob-step-btn-1');
+      const btn2 = document.getElementById('ob-step-btn-2');
+
+      if (step === 1) {
+        step1.classList.remove('hidden');
+        step2.classList.add('hidden');
+        btn1.className = "flex-1 py-1 rounded bg-[#1f222d] text-white";
+        btn2.className = "flex-1 py-1 rounded text-[#71717a] hover:text-white";
+      } else {
+        step1.classList.add('hidden');
+        step2.classList.remove('hidden');
+        btn2.className = "flex-1 py-1 rounded bg-[#1f222d] text-white";
+        btn1.className = "flex-1 py-1 rounded text-[#71717a] hover:text-white";
+      }
+    }
+
+    // Simulador de Arrastar e Recortar no Snipping Overlay
+    let isSnipDragging = false;
+    let snipStartX = 0;
+    let snipStartY = 0;
+
+    function startSnipDrag(e) {
+      const overlay = document.getElementById('view-snipping-overlay');
+      const rect = overlay.getBoundingClientRect();
+      isSnipDragging = true;
+      snipStartX = e.clientX - rect.left;
+      snipStartY = e.clientY - rect.top;
+      
+      const box = document.getElementById('snip-box');
+      box.style.left = `${snipStartX}px`;
+      box.style.top = `${snipStartY}px`;
+      box.style.width = '0px';
+      box.style.height = '0px';
+    }
+
+    function updateSnipDrag(e) {
+      if (!isSnipDragging) return;
+      const overlay = document.getElementById('view-snipping-overlay');
+      const rect = overlay.getBoundingClientRect();
+      const currentX = e.clientX - rect.left;
+      const currentY = e.clientY - rect.top;
+
+      const left = Math.min(snipStartX, currentX);
+      const top = Math.min(snipStartY, currentY);
+      const width = Math.abs(currentX - snipStartX);
+      const height = Math.abs(currentY - snipStartY);
+
+      const box = document.getElementById('snip-box');
+      box.style.left = `${left}px`;
+      box.style.top = `${top}px`;
+      box.style.width = `${width}px`;
+      box.style.height = `${height}px`;
+
+      document.getElementById('snip-dimensions').innerText = `${Math.round(width)} × ${Math.round(height)} px`;
+    }
+
+    function endSnipDrag(e) {
+      if (!isSnipDragging) return;
+      isSnipDragging = false;
+      showToast("Recorte finalizado! Enviando buffer para o Card...");
+      setTimeout(() => {
+        showScreen('capture-card');
+      }, 400);
+    }
+
+    // Modal de Estados
+    function toggleCardStatesModal() {
+      const modal = document.getElementById('states-modal');
+      modal.classList.toggle('hidden');
+    }
+
+    function setCardState(state) {
+      toggleCardStatesModal();
+      showScreen('capture-card');
+      const titleInput = document.getElementById('card-input-title');
+      const descInput = document.getElementById('card-input-desc');
+      const errorAlert = document.getElementById('card-error-alert');
+      const saveBtn = document.getElementById('card-btn-save');
+
+      if (state === 'empty') {
+        titleInput.value = '';
+        descInput.value = '';
+        errorAlert.classList.add('hidden');
+        showToast("Estado: Vazio");
+      } else if (state === 'filled') {
+        triggerCardRandomFill();
+      } else if (state === 'saving') {
+        saveBtn.innerHTML = `<span>salvando...</span>`;
+        saveBtn.className = "px-3.5 py-1.5 rounded font-medium transition cursor-pointer bg-zinc-700 text-white flex items-center gap-1.5";
+        showToast("Estado: Salvando...");
+      } else if (state === 'success') {
+        saveBtn.innerHTML = `<span>salvo! ✓</span>`;
+        saveBtn.className = "px-3.5 py-1.5 rounded font-medium transition cursor-pointer bg-[#10b981] text-[#0c0d10] flex items-center gap-1.5";
+        showToast("Estado: Sucesso");
+      } else if (state === 'error') {
+        titleInput.value = '';
+        errorAlert.classList.remove('hidden');
+        showToast("Estado: Erro de Validação");
+      }
+    }
+
+    // Mudar Acento Visual em tempo real
+    function setThemeAccent(primary, hover, name) {
+      document.documentElement.style.setProperty('--accent-color', primary);
+      document.documentElement.style.setProperty('--accent-hover', hover);
+      document.getElementById('accent-preview-dot').style.backgroundColor = primary;
+      showToast(`Tema alterado para: ${name}`);
+    }
+
+    // Toast de Notificação
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-text');
+      text.innerText = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0');
+        toast.classList.remove('translate-y-0', 'opacity-100');
+      }, 2500);
+    }
+
+    // Copiar Texto para Clipboard
+    function copyText(text, successMsg) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(successMsg || "Copiado para o clipboard!");
+      });
+    }
+
+    function copyCurrentScreenCode() {
+      const activeScreen = document.querySelector('#section-screens > div.relative > div:not(.hidden)');
+      if (activeScreen) {
+        copyText(activeScreen.outerHTML, "Código HTML da tela copiado!");
+      }
+    }
+  </script>
+</body>
+</html>

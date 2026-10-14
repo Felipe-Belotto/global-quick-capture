@@ -134,7 +134,18 @@ As configurações são persistidas em:
 
 ---
 
-## Compilação Local
+## Design System & Guia de UI/UX
+
+O projeto conta com um documento interativo standalone de Design System contendo todas as telas, tokens, micro-interações e laboratório de estados para refatoração visual e melhoria contínua de UX:
+
+- **Acesse o arquivo**: Abra diretamente no seu navegador [`docs/design-system.html`](docs/design-system.html) ou acerte a rota `/design-system.html` com o Vite em execução.
+- **Conteúdo incluído**:
+  - 🖥️ **Showcase de Telas**: Quick Capture Card, Snipping Tool Overlay (com simulação de recorte por drag), Settings Modal e Onboarding Wizard.
+  - 🖼️ **Visão Panorama (Canvas)**: Comparativo de layout de todas as interfaces.
+  - 🎨 **Design Tokens**: Paleta completa de cores (com clique para copiar HEX), tipografia mono/sans e componentes atômicos.
+  - 💡 **Roadmap de UX**: Diagnóstico e sugestões para elevar a experiência visual (micro-feedbacks, animações de fechamento, anotações rápidas).
+
+---
 
 ```powershell
 # 1. Clonar repositório
