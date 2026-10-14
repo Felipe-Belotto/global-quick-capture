@@ -8,9 +8,9 @@ import { OnboardingModal } from "./OnboardingModal";
 export const QuickCaptureCard: React.FC = () => {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [selectedRouteId, setSelectedRouteId] = useState<string>("daily");
-  const [description, setDescription] = useState<string>("" );
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [description, setDescription] = useState<string>("");
   const [imageBase64, setImageBase64] = useState<string>("");
+  const [showImagePreview, setShowImagePreview] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -46,6 +46,7 @@ export const QuickCaptureCard: React.FC = () => {
     const unlisten = listen<string>("load_snip_image", (event) => {
       setImageBase64(event.payload);
       setDescription("");
+      setShowImagePreview(false);
       setSaveSuccess(false);
       setErrorMsg(null);
       setTimeout(() => {
@@ -69,7 +70,7 @@ export const QuickCaptureCard: React.FC = () => {
       title: description.trim() ? description.trim().split("\n")[0].slice(0, 40) : "Captura",
       message: description.trim() || undefined,
       routeId: selectedRouteId,
-      tags: selectedTags,
+      tags: [],
     };
 
     try {
@@ -82,7 +83,7 @@ export const QuickCaptureCard: React.FC = () => {
       setErrorMsg(String(err));
       setIsSaving(false);
     }
-  }, [description, imageBase64, selectedRouteId, selectedTags]);
+  }, [description, imageBase64, selectedRouteId]);
 
   const handleCancel = useCallback(async () => {
     try {
@@ -92,10 +93,13 @@ export const QuickCaptureCard: React.FC = () => {
     }
   }, []);
 
+  // Atalhos de teclado
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (showSettings) {
+        if (showImagePreview) {
+          setShowImagePreview(false);
+        } else if (showSettings) {
           setShowSettings(false);
         } else {
           handleCancel();
@@ -118,21 +122,84 @@ export const QuickCaptureCard: React.FC = () => {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [handleCancel, handleSave, config, showSettings]);
+  }, [handleCancel, handleSave, config, showSettings, showImagePreview]);
+
+  // Suporte a markdown no textarea (Tab e continuação de listas)
+  const handleMarkdownKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      handleSave();
+      return;
+    }
+
+    // Suporte a Tab para indentar em Markdown (2 espaços)
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const target = e.currentTarget;
+      const start = target.selectionStart;
+      const end = target.selectionEnd;
+      const val = target.value;
+      const updated = val.substring(0, start) + "  " + val.substring(end);
+      setDescription(updated);
+      setTimeout(() => {
+        target.selectionStart = target.selectionEnd = start + 2;
+      }, 0);
+      return;
+    }
+
+    // Suporte a continuação inteligente de listas (- [ ] ou - )
+    if (e.key === "Enter" && !e.shiftKey) {
+      const target = e.currentTarget;
+      const start = target.selectionStart;
+      const lines = target.value.substring(0, start).split("\n");
+      const currentLine = lines[lines.length - 1];
+
+      const taskMatch = currentLine.match(/^(\s*)-\s\[ \]\s(.*)$/);
+      const bulletMatch = currentLine.match(/^(\s*)-\s(.*)$/);
+
+      if (taskMatch) {
+        if (taskMatch[2].trim() === "") {
+          e.preventDefault();
+          const lineStart = start - currentLine.length;
+          const updated = target.value.substring(0, lineStart) + target.value.substring(start);
+          setDescription(updated);
+          setTimeout(() => {
+            target.selectionStart = target.selectionEnd = lineStart;
+          }, 0);
+        } else {
+          e.preventDefault();
+          const indent = taskMatch[1];
+          const insert = `\n${indent}- [ ] `;
+          const updated = target.value.substring(0, start) + insert + target.value.substring(start);
+          setDescription(updated);
+          setTimeout(() => {
+            target.selectionStart = target.selectionEnd = start + insert.length;
+          }, 0);
+        }
+      } else if (bulletMatch) {
+        if (bulletMatch[2].trim() === "") {
+          e.preventDefault();
+          const lineStart = start - currentLine.length;
+          const updated = target.value.substring(0, lineStart) + target.value.substring(start);
+          setDescription(updated);
+          setTimeout(() => {
+            target.selectionStart = target.selectionEnd = lineStart;
+          }, 0);
+        } else {
+          e.preventDefault();
+          const indent = bulletMatch[1];
+          const insert = `\n${indent}- `;
+          const updated = target.value.substring(0, start) + insert + target.value.substring(start);
+          setDescription(updated);
+          setTimeout(() => {
+            target.selectionStart = target.selectionEnd = start + insert.length;
+          }, 0);
+        }
+      }
+    }
+  };
 
   const activeRoute = config?.projectRoutes.find((r) => r.id === selectedRouteId);
-
-  useEffect(() => {
-    if (activeRoute?.defaultTags) {
-      setSelectedTags(activeRoute.defaultTags);
-    }
-  }, [selectedRouteId, activeRoute]);
-
-  const toggleTag = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
-  };
 
   if (showOnboarding) {
     return (
@@ -202,58 +269,41 @@ export const QuickCaptureCard: React.FC = () => {
         {/* Corpo Principal */}
         <div className="p-4 flex flex-col gap-3">
           <div className="flex gap-3">
-            {/* Thumbnail do Recorte */}
-            <div className="w-32 h-28 rounded bg-[#16171f] border border-[#232530] flex items-center justify-center overflow-hidden shrink-0">
+            {/* Thumbnail do Recorte (com clique para ampliar) */}
+            <div
+              onClick={() => imageBase64 && setShowImagePreview(true)}
+              className="group relative w-36 h-32 rounded bg-[#16171f] border border-[#232530] hover:border-[#2dd4bf]/60 flex items-center justify-center overflow-hidden shrink-0 cursor-zoom-in transition"
+              title="Clique para ver preview ampliado"
+            >
               {imageBase64 ? (
-                <img
-                  src={imageBase64}
-                  alt="Recorte"
-                  className="w-full h-full object-cover rounded"
-                />
+                <>
+                  <img
+                    src={imageBase64}
+                    alt="Recorte"
+                    className="w-full h-full object-cover rounded group-hover:scale-105 transition duration-200"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition font-mono text-[10px] text-[#2dd4bf] gap-1">
+                    <span>🔍</span> ver recorte
+                  </div>
+                </>
               ) : (
                 <span className="text-[11px] font-mono text-[#525460]">sem recorte</span>
               )}
             </div>
 
-            {/* Campo de Descrição única */}
+            {/* Campo de Markdown único */}
             <div className="flex-1 flex flex-col font-mono">
               <textarea
                 ref={descInputRef}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-                    e.preventDefault();
-                    handleSave();
-                  }
-                }}
-                placeholder="❯ anotações ou observações (opcional, [ctrl+enter] para salvar)..."
-                rows={4}
-                className="w-full h-full min-h-[105px] bg-[#16171f] border border-[#232530] focus:border-[#2dd4bf] rounded px-3 py-2.5 text-xs text-[#d4d4d8] placeholder-[#525460] outline-none resize-none transition leading-relaxed"
+                onKeyDown={handleMarkdownKeyDown}
+                placeholder="❯ anotações em Markdown (listas, - [ ], [[links]], notas)... [ctrl+enter para salvar]"
+                rows={5}
+                className="w-full h-full min-h-[125px] bg-[#16171f] border border-[#232530] focus:border-[#2dd4bf] rounded px-3 py-2.5 text-xs text-[#d4d4d8] placeholder-[#525460] outline-none resize-none transition leading-relaxed"
                 autoFocus
               />
             </div>
-          </div>
-
-          {/* Tags */}
-          <div className="flex items-center gap-1.5 text-xs font-mono">
-            <span className="text-[#525460] text-[11px]">tags:</span>
-            {["qa", "bug", "ui", "p1", "daily"].map((tag) => {
-              const active = selectedTags.includes(tag);
-              return (
-                <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={`px-2 py-0.5 rounded text-[11px] transition cursor-pointer ${
-                    active
-                      ? "bg-[#172228] text-[#2dd4bf] border border-[#2dd4bf]/40"
-                      : "bg-[#16171f] text-[#71717a] hover:text-[#d4d4d8] border border-[#232530]"
-                  }`}
-                >
-                  #{tag}
-                </button>
-              );
-            })}
           </div>
 
           {errorMsg && (
@@ -306,6 +356,34 @@ export const QuickCaptureCard: React.FC = () => {
           })()}
         </div>
       </div>
+
+      {/* Lightbox / Preview da Imagem Ampliada */}
+      {showImagePreview && imageBase64 && (
+        <div
+          onClick={() => setShowImagePreview(false)}
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex flex-col items-center justify-center p-6 cursor-zoom-out select-none"
+        >
+          <div
+            className="relative max-w-full max-h-full flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-full flex items-center justify-between pb-2 text-xs font-mono text-[#a1a1aa]">
+              <span>preview da captura</span>
+              <button
+                onClick={() => setShowImagePreview(false)}
+                className="px-2 py-0.5 rounded bg-[#1f222d] hover:bg-[#2e3343] text-white cursor-pointer"
+              >
+                fechar [esc]
+              </button>
+            </div>
+            <img
+              src={imageBase64}
+              alt="Preview Completo"
+              className="max-w-[85vw] max-h-[75vh] object-contain rounded border border-[#323645] shadow-2xl bg-[#0c0d10]"
+            />
+          </div>
+        </div>
+      )}
 
       {showSettings && config && (
         <SettingsModal

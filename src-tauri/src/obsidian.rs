@@ -36,7 +36,6 @@ pub fn save_snippet(payload: SaveSnippetPayload) -> Result<(), String> {
 
     let now = Local::now();
     let time_str = now.format("%H:%M").to_string();
-    let date_str = now.format("%d-%m-%Y").to_string();
     let file_timestamp = now.format("%Y%m%d-%H%M%S").to_string();
     let image_filename = format!("clip-{}.png", file_timestamp);
 
@@ -73,7 +72,11 @@ pub fn save_snippet(payload: SaveSnippetPayload) -> Result<(), String> {
         .decode(clean_base64.trim())
         .map_err(|e| format!("Falha ao decodificar imagem base64: {}", e))?;
 
-    fs::write(&image_path, decoded_bytes).map_err(|e| format!("Falha ao gravar imagem: {}", e))?;
+    let mut img_file = fs::File::create(&image_path).map_err(|e| format!("Falha ao criar imagem: {}", e))?;
+    img_file.write_all(&decoded_bytes).map_err(|e| format!("Falha ao gravar imagem: {}", e))?;
+    let _ = img_file.flush();
+    let _ = img_file.sync_all();
+    drop(img_file);
 
     let dd_mm_yyyy = now.format("%d-%m-%Y").to_string();
     let yyyy_mm_dd = now.format("%Y-%m-%d").to_string();
@@ -141,19 +144,23 @@ pub fn save_snippet(payload: SaveSnippetPayload) -> Result<(), String> {
         }
     }
 
-    let mut entry = format!("### {}{}\n![[{}]]\n", time_str, tags_str, image_filename);
+    let mut entry = if !tags_str.is_empty() {
+        format!("### {}{}\n![[{}]]\n", time_str, tags_str, image_filename)
+    } else {
+        format!("### {}\n![[{}]]\n", time_str, image_filename)
+    };
 
     if let Some(msg) = &payload.message {
         let trimmed = msg.trim();
         if !trimmed.is_empty() {
-            entry.push_str(&format!("> {}\n", trimmed));
+            entry.push_str(&format!("\n{}\n", trimmed));
         }
     } else if !payload.title.trim().is_empty()
         && payload.title.trim() != "Captura"
         && payload.title.trim() != "Captura Rápida"
     {
         let trimmed = payload.title.trim();
-        entry.push_str(&format!("> {}\n", trimmed));
+        entry.push_str(&format!("\n{}\n", trimmed));
     }
 
     // 6. Gravar (Append) no arquivo Markdown
@@ -186,6 +193,9 @@ pub fn save_snippet(payload: SaveSnippetPayload) -> Result<(), String> {
 
     file.write_all(full_to_write.as_bytes())
         .map_err(|e| format!("Falha ao escrever nota: {}", e))?;
+    let _ = file.flush();
+    let _ = file.sync_all();
+    drop(file);
 
     Ok(())
 }
