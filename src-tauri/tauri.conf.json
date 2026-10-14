@@ -36,6 +36,21 @@
         "shadow": false,
         "resizable": false,
         "maximizable": false
+      },
+      {
+        "label": "about_window",
+        "title": "Global Quick Capture - Sobre & Atualizações",
+        "width": 580,
+        "height": 560,
+        "transparent": true,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "center": true,
+        "skipTaskbar": false,
+        "visible": false,
+        "shadow": false,
+        "resizable": false,
+        "maximizable": false
       }
     ],
     "security": {

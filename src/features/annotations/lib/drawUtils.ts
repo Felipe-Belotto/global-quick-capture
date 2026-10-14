@@ -100,3 +100,84 @@ export function applyPixelate(
 
   ctx.putImageData(imgData, clampedX, clampedY);
 }
+
+export function drawHighlighter(
+  ctx: CanvasRenderingContext2D,
+  points: { x: number; y: number }[],
+  color: string = "#eab308",
+  lineWidth: number = 22
+) {
+  if (points.length === 0) return;
+
+  ctx.save();
+  ctx.globalCompositeOperation = "multiply";
+  ctx.globalAlpha = 0.5;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = lineWidth;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  if (points.length === 1) {
+    ctx.beginPath();
+    ctx.arc(points[0].x, points[0].y, lineWidth / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    return;
+  }
+
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) {
+    ctx.lineTo(points[i].x, points[i].y);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+export function drawAnnotationText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  color: string = "#ef4444",
+  fontSize: number = 20
+) {
+  const trimmed = text.trim();
+  if (!trimmed) return;
+
+  ctx.save();
+  ctx.font = `bold ${fontSize}px monospace, ui-monospace, sans-serif`;
+  ctx.textBaseline = "top";
+
+  const metrics = ctx.measureText(trimmed);
+  const paddingX = Math.round(fontSize * 0.35);
+  const paddingY = Math.round(fontSize * 0.22);
+  const textWidth = metrics.width;
+  const textHeight = fontSize * 1.25;
+
+  const bgX = Math.round(x - paddingX);
+  const bgY = Math.round(y - paddingY);
+  const bgW = Math.round(textWidth + paddingX * 2);
+  const bgH = Math.round(textHeight + paddingY * 2);
+  const radius = Math.max(3, Math.round(fontSize * 0.2));
+
+  // Fundo estilo terminal minimalista escuro com contorno
+  ctx.fillStyle = "rgba(12, 13, 16, 0.9)";
+  ctx.strokeStyle = color;
+  ctx.lineWidth = Math.max(1.5, Math.round(fontSize * 0.08));
+
+  ctx.beginPath();
+  if (typeof ctx.roundRect === "function") {
+    ctx.roundRect(bgX, bgY, bgW, bgH, radius);
+  } else {
+    ctx.rect(bgX, bgY, bgW, bgH);
+  }
+  ctx.fill();
+  ctx.stroke();
+
+  // Texto
+  ctx.fillStyle = color;
+  ctx.fillText(trimmed, x, y);
+  ctx.restore();
+}

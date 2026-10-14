@@ -32,3 +32,11 @@ export interface VaultNode {
   name: string;
   isFolder: boolean;
 }
+
+export interface SnipRegion {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+

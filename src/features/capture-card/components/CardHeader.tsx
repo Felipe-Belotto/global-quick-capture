@@ -8,6 +8,7 @@ interface CardHeaderProps {
   selectedRouteId: string;
   onSelectRoute: (routeId: string) => void;
   onOpenSettings: () => void;
+  onOpenAbout?: () => void;
   onClose: () => void;
 }
 
@@ -16,6 +17,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
   selectedRouteId,
   onSelectRoute,
   onOpenSettings,
+  onOpenAbout,
   onClose,
 }) => {
   const { onMouseDown: handleDrag } = useDraggableWindow();
@@ -51,6 +53,15 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
 
       {/* Ações da Janela */}
       <div className="flex items-center gap-2 pl-2 shrink-0">
+        {onOpenAbout && (
+          <button
+            onClick={onOpenAbout}
+            className="text-xs font-mono text-[#525460] hover:text-[#2dd4bf] px-1.5 py-0.5 rounded hover:bg-[#1f222d] transition cursor-pointer"
+            title="Sobre, Versão & Atualizações"
+          >
+            [v0.1.3]
+          </button>
+        )}
         <button
           onClick={onOpenSettings}
           className="text-xs font-mono text-[#71717a] hover:text-[#d4d4d8] px-1.5 py-0.5 rounded hover:bg-[#1f222d] transition cursor-pointer"

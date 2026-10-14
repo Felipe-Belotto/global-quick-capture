@@ -5,9 +5,13 @@ import { AppConfig, SaveSnippetPayload } from "../../../shared/types";
 import { getTodayFormatted } from "../../../shared/lib/date";
 import { CardHeader } from "./CardHeader";
 import { ImagePreviewLightbox } from "./ImagePreviewLightbox";
-import { SettingsModal } from "../../settings/components/SettingsModal";
-import { OnboardingModal } from "../../onboarding/components/OnboardingModal";
-import { AnnotationEditorModal } from "../../annotations/components/AnnotationEditorModal";
+import { SettingsModal } from "../../settings";
+import { OnboardingModal } from "../../onboarding";
+import { AnnotationEditorModal } from "../../annotations";
+import { useVaultAutocomplete } from "../hooks/useVaultAutocomplete";
+import { AutocompletePopover } from "./AutocompletePopover";
+import { OcrButton } from "../../ocr";
+import { AppInfoModal } from "../../updater";
 
 export const QuickCaptureCard: React.FC = () => {
   const [config, setConfig] = useState<AppConfig | null>(null);
@@ -20,10 +24,18 @@ export const QuickCaptureCard: React.FC = () => {
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [showAbout, setShowAbout] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
 
   const descInputRef = useRef<HTMLTextAreaElement | null>(null);
   const isSavingRef = useRef<boolean>(false);
+
+  const autocomplete = useVaultAutocomplete({
+    value: description,
+    onChange: setDescription,
+    textareaRef: descInputRef,
+    config,
+  });
 
   // Sincronizar selectedRouteId se as rotas mudarem
   useEffect(() => {
@@ -79,9 +91,14 @@ export const QuickCaptureCard: React.FC = () => {
       isSavingRef.current = false;
     });
 
+    const unlistenSettings = listen("open_settings", () => {
+      setShowSettings(true);
+    });
+
     return () => {
       unlistenLoad.then((f) => f());
       unlistenError.then((f) => f());
+      unlistenSettings.then((f) => f());
     };
   }, []);
 
@@ -126,12 +143,16 @@ export const QuickCaptureCard: React.FC = () => {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        if (showAnnotationEditor) {
+        if (autocomplete.isOpen) {
+          autocomplete.close();
+        } else if (showAnnotationEditor) {
           setShowAnnotationEditor(false);
         } else if (showImagePreview) {
           setShowImagePreview(false);
         } else if (showSettings) {
           setShowSettings(false);
+        } else if (showAbout) {
+          setShowAbout(false);
         } else {
           handleCancel();
         }
@@ -141,7 +162,14 @@ export const QuickCaptureCard: React.FC = () => {
           handleSave();
         }
       } else if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+        const hasOpenModal =
+          showSettings ||
+          showAbout ||
+          showAnnotationEditor ||
+          showImagePreview ||
+          showOnboarding;
         if (
+          !hasOpenModal &&
           document.activeElement?.tagName !== "INPUT" &&
           document.activeElement?.tagName !== "TEXTAREA"
         ) {
@@ -155,10 +183,25 @@ export const QuickCaptureCard: React.FC = () => {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [handleCancel, handleSave, config, showSettings, showImagePreview, showAnnotationEditor]);
+  }, [
+    handleCancel,
+    handleSave,
+    config,
+    showSettings,
+    showAbout,
+    showOnboarding,
+    showImagePreview,
+    showAnnotationEditor,
+    autocomplete,
+  ]);
 
   // Suporte a markdown inteligente no textarea
   const handleMarkdownKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // 1. O autocomplete captura setas Cima/Baixo, Enter, Tab e Esc com prioridade máxima
+    if (autocomplete.handleKeyDown(e)) {
+      return;
+    }
+
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       e.stopPropagation();
@@ -255,6 +298,7 @@ export const QuickCaptureCard: React.FC = () => {
           selectedRouteId={selectedRouteId}
           onSelectRoute={setSelectedRouteId}
           onOpenSettings={() => setShowSettings(true)}
+          onOpenAbout={() => setShowAbout(true)}
           onClose={handleCancel}
         />
 
@@ -295,19 +339,42 @@ export const QuickCaptureCard: React.FC = () => {
                   <span>anotar / blur</span>
                 </button>
               )}
+
+              {/* Botão de Reconhecimento de Texto / OCR */}
+              {imageBase64 && (
+                <OcrButton
+                  imageBase64={imageBase64}
+                  onInsertMarkdown={(codeBlock) => {
+                    setDescription((prev) => (prev.trim() ? `${prev}\n\n${codeBlock}` : codeBlock));
+                    setTimeout(() => {
+                      descInputRef.current?.focus();
+                    }, 50);
+                  }}
+                />
+              )}
             </div>
 
             {/* Campo de Markdown com atalhos de lista e tab */}
-            <div className="flex-1 flex flex-col font-mono">
+            <div className="relative flex-1 flex flex-col font-mono">
               <textarea
                 ref={descInputRef}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 onKeyDown={handleMarkdownKeyDown}
-                placeholder="❯ anotações em Markdown (listas, - [ ], [[links]], notas)... [ctrl+enter para salvar]"
+                placeholder="❯ anotações em Markdown (listas, - [ ], [[links]], #tags)... [ctrl+enter para salvar]"
                 rows={5}
                 className="w-full h-full min-h-[125px] bg-[#16171f] border border-[#232530] focus:border-[#2dd4bf] rounded px-3 py-2.5 text-xs text-[#d4d4d8] placeholder-[#525460] outline-none resize-none transition leading-relaxed"
                 autoFocus
+              />
+
+              <AutocompletePopover
+                isOpen={autocomplete.isOpen}
+                mode={autocomplete.mode}
+                items={autocomplete.items}
+                selectedIndex={autocomplete.selectedIndex}
+                position={autocomplete.position}
+                onSelect={autocomplete.applySuggestion}
+                onHover={autocomplete.setSelectedIndex}
               />
             </div>
           </div>
@@ -382,6 +449,11 @@ export const QuickCaptureCard: React.FC = () => {
             }
           }}
         />
+      )}
+
+      {/* Modal de Sobre, Dispositivo & Atualizações */}
+      {showAbout && (
+        <AppInfoModal onClose={() => setShowAbout(false)} />
       )}
     </div>
   );

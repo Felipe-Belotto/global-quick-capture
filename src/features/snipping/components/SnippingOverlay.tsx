@@ -125,7 +125,13 @@ export const SnippingOverlay: React.FC = () => {
         if (isQuickSave) {
           await invoke("quick_save_and_copy_cmd", { croppedBase64 });
         } else {
-          await invoke("finish_snip", { croppedBase64 });
+          await invoke("finish_snip", {
+            croppedBase64,
+            x,
+            y,
+            width,
+            height,
+          });
         }
       } catch (err) {
         console.error("Erro ao enviar recorte:", err);
@@ -135,7 +141,13 @@ export const SnippingOverlay: React.FC = () => {
         if (isQuickSave) {
           await invoke("quick_save_and_copy_cmd", { croppedBase64: screenImage || "" });
         } else {
-          await invoke("finish_snip", { croppedBase64: screenImage || "" });
+          await invoke("finish_snip", {
+            croppedBase64: screenImage || "",
+            x,
+            y,
+            width,
+            height,
+          });
         }
       } catch (err) {
         console.error("Erro ao finalizar recorte:", err);

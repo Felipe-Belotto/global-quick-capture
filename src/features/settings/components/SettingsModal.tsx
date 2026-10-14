@@ -292,6 +292,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
               </button>
             </div>
           </div>
+
+          {/* Versão e Verificação de Atualizações */}
+          <div className="pt-3 border-t border-[#232530] flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <span className="text-[#8e909a]">versão_instalada:</span>
+              <span className="text-white font-mono bg-[#16171f] px-2 py-0.5 rounded border border-[#232530]">
+                v0.1.3
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await invoke("show_about_window");
+                } catch {
+                  window.open("https://github.com/felipe-belotto/global-quick-capture/releases", "_blank");
+                }
+              }}
+              className="text-[#2dd4bf] hover:underline cursor-pointer flex items-center gap-1.5"
+            >
+              <span>⟳</span>
+              <span>[ verificar atualizações & status ]</span>
+            </button>
+          </div>
         </div>
 
         {/* Rodapé */}
