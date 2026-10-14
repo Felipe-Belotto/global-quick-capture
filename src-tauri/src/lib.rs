@@ -445,6 +445,55 @@ fn start_dragging_window(window: tauri::WebviewWindow) -> Result<(), String> {
     window.start_dragging().map_err(|e| e.to_string())
 }
 
+#[tauri::command]
+fn download_and_install_update(app: tauri::AppHandle, url: String) -> Result<(), String> {
+    let temp_dir = std::env::temp_dir();
+    let installer_path = temp_dir.join("Global-Quick-Capture-Update.exe");
+
+    let app_handle = app.clone();
+    std::thread::spawn(move || {
+        let _ = app_handle.emit("update_progress", 20);
+
+        // Download usando curl nativo do Windows com -L para seguir redirects de releases
+        let status = std::process::Command::new("curl.exe")
+            .args(["-L", "-s", "-o", installer_path.to_str().unwrap(), &url])
+            .status();
+
+        match status {
+            Ok(s) if s.success() => {
+                let _ = app_handle.emit("update_progress", 100);
+                let _ = app_handle.emit("update_ready_to_install", ());
+
+                std::thread::sleep(std::time::Duration::from_millis(600));
+
+                #[cfg(target_os = "windows")]
+                {
+                    use std::os::windows::process::CommandExt;
+                    const DETACHED_PROCESS: u32 = 0x00000008;
+                    let _ = std::process::Command::new(&installer_path)
+                        .creation_flags(DETACHED_PROCESS)
+                        .spawn();
+                }
+                #[cfg(not(target_os = "windows"))]
+                {
+                    let _ = std::process::Command::new(&installer_path).spawn();
+                }
+
+                // Encerra a instância antiga para permitir que o instalador substitua os arquivos
+                app_handle.exit(0);
+            }
+            Ok(s) => {
+                let _ = app_handle.emit("update_error", format!("curl retornou erro: {}", s));
+            }
+            Err(e) => {
+                let _ = app_handle.emit("update_error", format!("Falha ao baixar instalador: {}", e));
+            }
+        }
+    });
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -465,7 +514,8 @@ pub fn run() {
             show_about_window,
             hide_about_window,
             show_settings_window,
-            start_dragging_window
+            start_dragging_window,
+            download_and_install_update
         ])
         .setup(|app| {
             // 1. Registrar Atalho Global dinâmico do config (padrão Win + Alt + S)

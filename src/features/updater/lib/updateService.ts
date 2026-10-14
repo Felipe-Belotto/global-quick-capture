@@ -146,9 +146,15 @@ export async function checkForUpdates(
         }))
       : [];
 
-    const installerAsset = assets.find((a) =>
-      a.name.toLowerCase().endsWith(".exe") || a.name.toLowerCase().endsWith(".msi")
+    // Prioriza o instalador executável (setup.exe) para instalação automática
+    const setupAsset = assets.find(
+      (a) => a.name.toLowerCase().includes("setup") && a.name.toLowerCase().endsWith(".exe")
     );
+    const installerAsset =
+      setupAsset ||
+      assets.find(
+        (a) => a.name.toLowerCase().endsWith(".exe") || a.name.toLowerCase().endsWith(".msi")
+      );
 
     const release: ReleaseInfo = {
       tagName,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { DragHandle } from "../../../shared/components/DragHandle";
 import { useDraggableWindow } from "../../../shared/hooks/useDraggableWindow";
 import { SystemAppInfo, UpdateCheckResult, UpdateStatus } from "../types";
@@ -25,11 +26,42 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
 
   const { onMouseDown: handleDrag } = useDraggableWindow();
 
-  // Carrega informações do aplicativo e sistema
+  // Carrega informações do aplicativo e escuta eventos de atualização nativos
   useEffect(() => {
     fetchSystemAppInfo().then((info) => {
       setAppInfo(info);
     });
+
+    const unlistenProgress = listen<number>("update_progress", (event) => {
+      setDownloadProgress(event.payload);
+      setUpdateStatus("downloading");
+    });
+
+    const unlistenReady = listen("update_ready_to_install", () => {
+      setDownloadProgress(100);
+      setUpdateStatus("downloaded");
+    });
+
+    const unlistenError = listen<string>("update_error", (event) => {
+      setUpdateStatus("error");
+      setUpdateResult((prev) =>
+        prev
+          ? { ...prev, errorMessage: event.payload }
+          : {
+              hasUpdate: false,
+              currentVersion: "0.1.3",
+              latestVersion: "0.1.4",
+              checkedAt: new Date().toLocaleTimeString(),
+              errorMessage: event.payload,
+            }
+      );
+    });
+
+    return () => {
+      unlistenProgress.then((f) => f());
+      unlistenReady.then((f) => f());
+      unlistenError.then((f) => f());
+    };
   }, []);
 
   // Fechar no Esc
@@ -79,29 +111,40 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
     }
   };
 
-  const handleStartDownload = () => {
+  const handleStartDownload = async () => {
     if (!updateResult?.release?.downloadUrl) return;
 
     setUpdateStatus("downloading");
-    setDownloadProgress(5);
+    setDownloadProgress(10);
 
-    // Simulação visual de download fluído
-    const interval = setInterval(() => {
-      setDownloadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setUpdateStatus("downloaded");
-          return 100;
-        }
-        const step = Math.floor(Math.random() * 20) + 10;
-        return Math.min(prev + step, 100);
+    if (updateResult.isSimulated) {
+      // Simulação visual de download para modo de teste
+      const interval = setInterval(() => {
+        setDownloadProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setUpdateStatus("downloaded");
+            return 100;
+          }
+          const step = Math.floor(Math.random() * 20) + 10;
+          return Math.min(prev + step, 100);
+        });
+      }, 300);
+      return;
+    }
+
+    // Download real e instalação nativa automática (sem abrir navegador)
+    try {
+      await invoke("download_and_install_update", {
+        url: updateResult.release.downloadUrl,
       });
-    }, 350);
-  };
-
-  const handleInstall = () => {
-    if (updateResult?.release?.htmlUrl) {
-      openExternalLink(updateResult.release.htmlUrl);
+    } catch (e: any) {
+      setUpdateStatus("error");
+      setUpdateResult((prev) =>
+        prev
+          ? { ...prev, errorMessage: e?.message || "Falha ao iniciar atualização automática." }
+          : null
+      );
     }
   };
 
@@ -308,23 +351,34 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
                       </div>
                     )}
 
-                    {/* Ações de Download / Instalação */}
+                    {/* Ações de Download / Instalação Automática */}
                     <div className="flex items-center gap-2 pt-1">
                       {updateStatus === "update-available" && (
                         <button
                           onClick={handleStartDownload}
-                          className="flex-1 py-2 bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10] font-bold rounded transition cursor-pointer flex items-center justify-center gap-1.5"
+                          className="flex-1 py-2 bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10] font-bold rounded transition cursor-pointer flex items-center justify-center gap-1.5 shadow-md"
                         >
-                          <span>⬇</span> Baixar & Atualizar Agora
+                          <span>⬇</span> Atualizar Automaticamente Agora
+                        </button>
+                      )}
+
+                      {updateStatus === "downloading" && (
+                        <button
+                          disabled
+                          className="flex-1 py-2 bg-[#1c2438] border border-[#38bdf8]/50 text-[#38bdf8] font-bold rounded flex items-center justify-center gap-2"
+                        >
+                          <span className="animate-spin text-sm">⟳</span>
+                          <span>Baixando atualização ({downloadProgress}%)...</span>
                         </button>
                       )}
 
                       {updateStatus === "downloaded" && (
                         <button
-                          onClick={handleInstall}
-                          className="flex-1 py-2 bg-[#10b981] hover:bg-[#059669] text-white font-bold rounded transition cursor-pointer flex items-center justify-center gap-1.5"
+                          disabled
+                          className="flex-1 py-2 bg-[#0e2a22] border border-[#10b981] text-[#10b981] font-bold rounded flex items-center justify-center gap-1.5"
                         >
-                          <span>✓</span> Instalar Atualização
+                          <span>✓</span>
+                          <span>Iniciando instalador e reiniciando...</span>
                         </button>
                       )}
 
