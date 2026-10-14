@@ -49,13 +49,48 @@ Tudo roda nativamente em Rust via Tauri v2, com consumo de memória em torno de 
 
 ## Download e Instalação
 
-| Tipo | Arquivo | Plataforma |
-| :--- | :--- | :--- |
-| **Instalador Oficial (.exe)** | [`Global.Quick.Capture_0.1.0_x64-setup.exe`](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.0/Global.Quick.Capture_0.1.0_x64-setup.exe) | Windows 10 / 11 (x64) |
-| **Pacote MSI** | [`Global.Quick.Capture_0.1.0_x64_en-US.msi`](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.0/Global.Quick.Capture_0.1.0_x64_en-US.msi) | Windows 10 / 11 (x64) |
+### Opção 1: Download Direto (Releases Oficiais)
 
-> [!NOTE]
-> **Aviso do Windows SmartScreen**: Como o projeto é de código aberto e não possui um certificado digital pago da Microsoft, o Windows pode exibir um alerta de segurança na primeira execução. Basta clicar em **Mais informações** e selecionar **Executar assim mesmo**.
+| Tipo | Arquivo | Plataforma | Link |
+| :--- | :--- | :--- | :--- |
+| **Instalador Oficial (.exe)** | `Global.Quick.Capture_0.1.0_x64-setup.exe` | Windows 10 / 11 (x64) | [Baixar .exe](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.0/Global.Quick.Capture_0.1.0_x64-setup.exe) |
+| **Pacote MSI** | `Global.Quick.Capture_0.1.0_x64_en-US.msi` | Windows 10 / 11 (x64) | [Baixar .msi](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.0/Global.Quick.Capture_0.1.0_x64_en-US.msi) |
+| **Artefato da Action (CI)** | `windows-installer.zip` | Windows 10 / 11 (x64) | [Acessar Builds no GitHub Actions](https://github.com/Felipe-Belotto/global-quick-capture/actions) |
+
+---
+
+### Opção 2: Instalação Rápida via PowerShell (Recomendado - Sem bloqueio de navegador)
+
+Se o navegador bloquear o download por reputação, você pode baixar e iniciar a instalação em 1 linha no **PowerShell**:
+
+```powershell
+irm https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.0/Global.Quick.Capture_0.1.0_x64-setup.exe -OutFile "$env:TEMP\setup.exe"; Unblock-File "$env:TEMP\setup.exe"; Start-Process "$env:TEMP\setup.exe"
+```
+
+---
+
+### 🛡️ Como liberar o download e a instalação no Windows
+
+Por ser um projeto open-source independente sem certificado comercial pago da Microsoft (*Code Signing Certificate*), os navegadores e o Windows SmartScreen podem emitir alertas preventivos:
+
+#### 1. Se o navegador (Edge ou Chrome) disser "Arquivo suspeito / bloqueado":
+- **Microsoft Edge**:
+  1. Passe o cursor sobre o item na lista de downloads e clique no ícone **`...`** (Três pontos).
+  2. Selecione **Manter** (*Keep*).
+  3. Na janela seguinte, clique em **Mostrar mais** (*Show more*) e depois em **Manter mesmo assim** (*Keep anyway*).
+- **Google Chrome**:
+  1. Pressione `Ctrl + J` para abrir a página de Downloads.
+  2. Localize o instalador e clique em **Baixar arquivo suspeito** (ou **Manter arquivo perigoso**).
+
+#### 2. Se baixou o arquivo `.zip` da aba GitHub Actions:
+- Arquivos baixados diretamente da aba *Actions* vêm com a flag de zona web do Windows.
+- Clique com o botão direito no arquivo `.zip` (ou no `.exe` extraído) > **Propriedades** > marque a caixa **Desbloquear** (*Unblock*) no canto inferior > **Aplicar** / **OK**.
+- Ou no PowerShell: `Unblock-File .\Global.Quick.Capture_0.1.0_x64-setup.exe`.
+
+#### 3. Na primeira execução (Alerta do Windows SmartScreen):
+- Quando a janela azul *"O Windows protegeu o seu computador"* aparecer:
+  1. Clique no link textual **"Mais informações"** (*More info*).
+  2. Clique no botão **"Executar assim mesmo"** (*Run anyway*).
 
 ---
 
@@ -146,6 +181,8 @@ O projeto conta com um documento interativo standalone de Design System contendo
   - 💡 **Roadmap de UX**: Diagnóstico e sugestões para elevar a experiência visual (micro-feedbacks, animações de fechamento, anotações rápidas).
 
 ---
+
+## Compilação Local
 
 ```powershell
 # 1. Clonar repositório
