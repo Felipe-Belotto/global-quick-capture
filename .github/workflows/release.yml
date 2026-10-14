@@ -39,8 +39,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v__VERSION__
-          releaseName: 'Global Quick Capture v__VERSION__'
+          tagName: ${{ github.ref_name }}
+          releaseName: 'Global Quick Capture ${{ github.ref_name }}'
           releaseBody: |
             ## 🚀 Novidades desta versão:
             - Captura rápida com atalho global (Win + Alt + S).
