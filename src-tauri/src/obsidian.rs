@@ -153,7 +153,7 @@ pub fn save_snippet(payload: SaveSnippetPayload) -> Result<(), String> {
         let _ = fs::create_dir_all(parent);
     }
 
-    // 5. Montar o texto formatado em Markdown
+    // 5. Montar o texto formatado em Markdown (Estilo Log/Timeline: - **HH:mm**)
     let mut tags_str = String::new();
     for tag in &payload.tags {
         let clean_tag = tag.trim_start_matches('#');
@@ -162,23 +162,42 @@ pub fn save_snippet(payload: SaveSnippetPayload) -> Result<(), String> {
         }
     }
 
-    let mut entry = if !tags_str.is_empty() {
-        format!("### {}{}\n![[{}]]\n", time_str, tags_str, image_filename)
+    let header_line = if !tags_str.is_empty() {
+        format!("- **{}**{}", time_str, tags_str)
     } else {
-        format!("### {}\n![[{}]]\n", time_str, image_filename)
+        format!("- **{}**", time_str)
     };
 
-    if let Some(msg) = &payload.message {
+    let mut entry = format!("{}\n  ![[{}]]\n", header_line, image_filename);
+
+    let text_content = if let Some(msg) = &payload.message {
         let trimmed = msg.trim();
         if !trimmed.is_empty() {
-            entry.push_str(&format!("\n{}\n", trimmed));
+            Some(trimmed)
+        } else {
+            None
         }
     } else if !payload.title.trim().is_empty()
         && payload.title.trim() != "Captura"
         && payload.title.trim() != "Captura Rápida"
     {
-        let trimmed = payload.title.trim();
-        entry.push_str(&format!("\n{}\n", trimmed));
+        Some(payload.title.trim())
+    } else {
+        None
+    };
+
+    if let Some(txt) = text_content {
+        let indented: Vec<String> = txt
+            .lines()
+            .map(|line| {
+                if line.trim().is_empty() {
+                    String::new()
+                } else {
+                    format!("  {}", line)
+                }
+            })
+            .collect();
+        entry.push_str(&format!("{}\n", indented.join("\n")));
     }
 
     // 6. Gravar (Append) no arquivo Markdown
@@ -321,4 +340,23 @@ pub fn scan_vault_subfolders(vault_path: &str) -> Vec<String> {
     folders.sort();
     folders
 }
+
+pub fn copy_image_to_clipboard(png_bytes: &[u8]) -> Result<(), String> {
+    let img = image::load_from_memory(png_bytes)
+        .map_err(|e| format!("Erro ao decodificar imagem para área de transferência: {}", e))?;
+    let rgba = img.to_rgba8();
+    let (width, height) = rgba.dimensions();
+    let mut clipboard = arboard::Clipboard::new()
+        .map_err(|e| format!("Erro ao acessar área de transferência: {}", e))?;
+    let img_data = arboard::ImageData {
+        width: width as usize,
+        height: height as usize,
+        bytes: std::borrow::Cow::Borrowed(&rgba),
+    };
+    clipboard
+        .set_image(img_data)
+        .map_err(|e| format!("Erro ao copiar imagem para área de transferência: {}", e))?;
+    Ok(())
+}
+
 

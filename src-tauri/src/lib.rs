@@ -85,6 +85,55 @@ fn cancel_snip(app: tauri::AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn quick_save_and_copy_cmd(app: tauri::AppHandle, cropped_base64: String) -> Result<(), String> {
+    // 1. Ocultar o overlay de recorte imediatamente (0ms de latência percebida)
+    if let Some(overlay) = app.get_webview_window("snipping_overlay") {
+        let _ = overlay.hide();
+    }
+
+    // 2. Executar cópia para clipboard e persistência no cofre em segundo plano
+    std::thread::spawn(move || {
+        // A. Copiar imagem para a Área de Transferência (Clipboard)
+        let clean_base64 = if let Some(pos) = cropped_base64.find("base64,") {
+            &cropped_base64[pos + 7..]
+        } else {
+            &cropped_base64
+        };
+        use base64::Engine;
+        if let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(clean_base64.trim()) {
+            if let Err(e) = obsidian::copy_image_to_clipboard(&bytes) {
+                eprintln!("Erro ao copiar imagem para clipboard: {}", e);
+            }
+        }
+
+        // B. Salvar no Obsidian na rota primária configurada
+        let cfg = config::load_config();
+        let target_route_id = if !cfg.default_route_id.is_empty() {
+            cfg.default_route_id
+        } else if let Some(first_route) = cfg.project_routes.first() {
+            first_route.id.clone()
+        } else {
+            "daily".to_string()
+        };
+
+        let payload = obsidian::SaveSnippetPayload {
+            image_buffer_base64: cropped_base64,
+            title: "Captura Rápida".to_string(),
+            message: None,
+            route_id: target_route_id,
+            custom_target_file: None,
+            tags: vec![],
+        };
+
+        if let Err(e) = obsidian::save_snippet(payload) {
+            eprintln!("Erro no salvamento rápido do Obsidian: {}", e);
+        }
+    });
+
+    Ok(())
+}
+
+#[tauri::command]
 fn select_vault_folder() -> Option<String> {
     let folder = rfd::FileDialog::new()
         .set_title("Selecione a pasta raiz do seu Cofre do Obsidian")
@@ -115,7 +164,8 @@ pub fn run() {
             scan_vault_folders_cmd,
             trigger_capture,
             finish_snip,
-            cancel_snip
+            cancel_snip,
+            quick_save_and_copy_cmd
         ])
         .setup(|app| {
             // 1. Registrar Atalho Global dinâmico do config (padrão Win + Alt + S)
