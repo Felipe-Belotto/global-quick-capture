@@ -18,6 +18,17 @@ export const QuickCaptureCard: React.FC = () => {
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
 
   const descInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const isSavingRef = useRef<boolean>(false);
+
+  // Sincronizar selectedRouteId se as rotas mudarem (ex: troca de cofre)
+  useEffect(() => {
+    if (config?.projectRoutes && config.projectRoutes.length > 0) {
+      const exists = config.projectRoutes.some((r) => r.id === selectedRouteId);
+      if (!exists) {
+        setSelectedRouteId(config.defaultRouteId || config.projectRoutes[0].id || "daily");
+      }
+    }
+  }, [config, selectedRouteId]);
 
   // Carregar configurações e verificar se precisa de Onboarding
   useEffect(() => {
@@ -49,6 +60,8 @@ export const QuickCaptureCard: React.FC = () => {
       setShowImagePreview(false);
       setSaveSuccess(false);
       setErrorMsg(null);
+      isSavingRef.current = false;
+      setIsSaving(false);
       setTimeout(() => {
         descInputRef.current?.focus();
       }, 100);
@@ -60,6 +73,9 @@ export const QuickCaptureCard: React.FC = () => {
   }, []);
 
   const handleSave = useCallback(async () => {
+    // Trava de duplicação: impede disparo duplo de Ctrl+Enter
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
     setIsSaving(true);
     setErrorMsg(null);
 
@@ -82,6 +98,7 @@ export const QuickCaptureCard: React.FC = () => {
     } catch (err: unknown) {
       setErrorMsg(String(err));
       setIsSaving(false);
+      isSavingRef.current = false;
     }
   }, [description, imageBase64, selectedRouteId]);
 
@@ -105,8 +122,11 @@ export const QuickCaptureCard: React.FC = () => {
           handleCancel();
         }
       } else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        handleSave();
+        // Apenas processa aqui se o foco NÃO estiver no textarea (evita duplicar evento)
+        if (document.activeElement?.tagName !== "TEXTAREA") {
+          e.preventDefault();
+          handleSave();
+        }
       } else if (!e.ctrlKey && !e.metaKey && !e.altKey) {
         if (
           document.activeElement?.tagName !== "INPUT" &&
@@ -128,6 +148,7 @@ export const QuickCaptureCard: React.FC = () => {
   const handleMarkdownKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
+      e.stopPropagation();
       handleSave();
       return;
     }
@@ -389,7 +410,12 @@ export const QuickCaptureCard: React.FC = () => {
         <SettingsModal
           config={config}
           onClose={() => setShowSettings(false)}
-          onSave={(updated) => setConfig(updated)}
+          onSave={(updated) => {
+            setConfig(updated);
+            if (!updated.projectRoutes.some((r) => r.id === selectedRouteId)) {
+              setSelectedRouteId(updated.defaultRouteId || updated.projectRoutes[0]?.id || "daily");
+            }
+          }}
         />
       )}
     </div>

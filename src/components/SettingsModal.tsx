@@ -18,11 +18,82 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
   const [isScanning, setIsScanning] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  const rescanFolders = async (targetPath?: string, replaceAll = false) => {
+    const path = targetPath || vaultPath;
+    if (!path.trim()) return;
+    setIsScanning(true);
+    try {
+      const detected = await invoke<string[]>("scan_vault_folders_cmd", {
+        vaultPath: path.trim(),
+      });
+
+      const baseRoutes: ProjectRoute[] = [
+        {
+          id: "daily",
+          keyShortcut: "1",
+          label: "Daily Note",
+          targetType: "daily_note",
+          folderPath: "Daily",
+        },
+        {
+          id: "inbox",
+          keyShortcut: "2",
+          label: "Inbox",
+          targetType: "file",
+          filePath: "Inbox.md",
+        },
+      ];
+
+      const currentRoutes = replaceAll ? baseRoutes : [...projectRoutes];
+      const existingIds = new Set(currentRoutes.map((r) => r.id));
+      const existingFolderPaths = new Set(
+        currentRoutes
+          .filter((r) => r.targetType === "folder" && r.folderPath)
+          .map((r) => r.folderPath!.toLowerCase())
+      );
+
+      let shortcutCounter = currentRoutes.length + 1;
+
+      detected.forEach((folder) => {
+        const lower = folder.toLowerCase();
+        if (
+          !lower.includes("daily") &&
+          !lower.includes("inbox") &&
+          !existingFolderPaths.has(lower)
+        ) {
+          const id = `route_${folder.replace(/[^a-zA-Z0-9]/g, "_")}`;
+          if (!existingIds.has(id)) {
+            const name = folder.split("/").pop() || folder;
+            const isQA = lower.includes("qa") || lower.includes("bug");
+            currentRoutes.push({
+              id,
+              keyShortcut: shortcutCounter <= 9 ? shortcutCounter.toString() : undefined,
+              label: isQA ? `QA / ${name}` : name,
+              targetType: "folder",
+              folderPath: folder,
+              customAttachmentsFolder: isQA ? `${folder}/assets` : undefined,
+            });
+            existingIds.add(id);
+            shortcutCounter++;
+          }
+        }
+      });
+
+      setProjectRoutes(currentRoutes);
+    } catch (e) {
+      console.error("Erro ao escanear pastas:", e);
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
   const handlePickFolder = async () => {
     try {
       const path = await invoke<string | null>("select_vault_folder");
-      if (path) {
+      if (path && path !== vaultPath) {
         setVaultPath(path);
+        // Ao trocar o cofre, limpa as rotas do cofre anterior e detecta as novas
+        await rescanFolders(path, true);
       }
     } catch (e) {
       console.error("Erro ao selecionar pasta:", e);
@@ -30,37 +101,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
   };
 
   const handleScanFolders = async () => {
-    if (!vaultPath.trim()) return;
-    setIsScanning(true);
-    try {
-      const detected = await invoke<string[]>("scan_vault_folders_cmd", { vaultPath: vaultPath.trim() });
-      const currentIds = new Set(projectRoutes.map((r) => r.id));
-      const newRoutes: ProjectRoute[] = [...projectRoutes];
-      let shortcutCounter = projectRoutes.length + 1;
-
-      detected.forEach((folder) => {
-        const id = `route_${folder.replace(/[^a-zA-Z0-9]/g, "_")}`;
-        if (!currentIds.has(id)) {
-          const name = folder.split("/").pop() || folder;
-          const isQA = folder.toLowerCase().includes("qa") || folder.toLowerCase().includes("bug");
-          newRoutes.push({
-            id,
-            keyShortcut: shortcutCounter <= 9 ? shortcutCounter.toString() : undefined,
-            label: isQA ? `QA / ${name}` : name,
-            targetType: "folder",
-            folderPath: folder,
-            customAttachmentsFolder: isQA ? `${folder}/assets` : undefined,
-            defaultTags: isQA ? ["qa", "bug"] : ["projeto"],
-          });
-          shortcutCounter++;
-        }
-      });
-      setProjectRoutes(newRoutes);
-    } catch (e) {
-      console.error("Erro ao escanear pastas:", e);
-    } finally {
-      setIsScanning(false);
-    }
+    await rescanFolders(vaultPath, false);
   };
 
   const handleSave = async () => {
@@ -177,13 +218,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
           <div className="flex flex-col gap-2 pt-1 border-t border-[#232530]">
             <div className="flex items-center justify-between text-[#8e909a]">
               <span>project_routes:</span>
-              <button
-                onClick={handleScanFolders}
-                disabled={isScanning}
-                className="text-[#2dd4bf] hover:underline cursor-pointer"
-              >
-                {isScanning ? "escaneando..." : "[ escanear cofre ]"}
-              </button>
+              <div className="flex items-center gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={handleScanFolders}
+                  disabled={isScanning}
+                  className="text-[#2dd4bf] hover:underline cursor-pointer"
+                  title="Detecta novas pastas sem apagar as existentes"
+                >
+                  {isScanning ? "escaneando..." : "[ + detectar ]"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => rescanFolders(vaultPath, true)}
+                  disabled={isScanning}
+                  className="text-[#f59e0b] hover:underline cursor-pointer"
+                  title="Limpa as rotas antigas e recria a partir deste cofre"
+                >
+                  [ ↺ redefinir ]
+                </button>
+              </div>
             </div>
 
             <div className="max-h-32 overflow-y-auto flex flex-col gap-1.5 pr-1 no-scrollbar">
