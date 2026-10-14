@@ -8,8 +8,7 @@ import { OnboardingModal } from "./OnboardingModal";
 export const QuickCaptureCard: React.FC = () => {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [selectedRouteId, setSelectedRouteId] = useState<string>("daily");
-  const [title, setTitle] = useState<string>("");
-  const [message, setMessage] = useState<string>("");
+  const [description, setDescription] = useState<string>("" );
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [imageBase64, setImageBase64] = useState<string>("");
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -18,7 +17,7 @@ export const QuickCaptureCard: React.FC = () => {
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
 
-  const titleInputRef = useRef<HTMLInputElement | null>(null);
+  const descInputRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Carregar configurações e verificar se precisa de Onboarding
   useEffect(() => {
@@ -46,12 +45,11 @@ export const QuickCaptureCard: React.FC = () => {
 
     const unlisten = listen<string>("load_snip_image", (event) => {
       setImageBase64(event.payload);
-      setTitle("");
-      setMessage("");
+      setDescription("");
       setSaveSuccess(false);
       setErrorMsg(null);
       setTimeout(() => {
-        titleInputRef.current?.focus();
+        descInputRef.current?.focus();
       }, 100);
     });
 
@@ -61,11 +59,6 @@ export const QuickCaptureCard: React.FC = () => {
   }, []);
 
   const handleSave = useCallback(async () => {
-    if (!title.trim() && !message.trim()) {
-      setErrorMsg("Digite um título ou observação.");
-      return;
-    }
-
     setIsSaving(true);
     setErrorMsg(null);
 
@@ -73,8 +66,8 @@ export const QuickCaptureCard: React.FC = () => {
       imageBufferBase64:
         imageBase64 ||
         "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
-      title: title.trim() || "Captura Rápida",
-      message: message.trim() || undefined,
+      title: description.trim() ? description.trim().split("\n")[0].slice(0, 40) : "Captura",
+      message: description.trim() || undefined,
       routeId: selectedRouteId,
       tags: selectedTags,
     };
@@ -84,12 +77,12 @@ export const QuickCaptureCard: React.FC = () => {
       setSaveSuccess(true);
       setTimeout(() => {
         setSaveSuccess(false);
-      }, 1200);
+      }, 1000);
     } catch (err: unknown) {
       setErrorMsg(String(err));
       setIsSaving(false);
     }
-  }, [title, message, imageBase64, selectedRouteId, selectedTags]);
+  }, [description, imageBase64, selectedRouteId, selectedTags]);
 
   const handleCancel = useCallback(async () => {
     try {
@@ -159,7 +152,11 @@ export const QuickCaptureCard: React.FC = () => {
         {/* Header estilo terminal Warp (arrastável) */}
         <div
           data-tauri-drag-region
-          className="h-10 px-3 bg-[#0c0d10] border-b border-[#232530] flex items-center justify-between cursor-move rounded-t-lg"
+          onDoubleClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          className="h-10 px-3 bg-[#0c0d10] border-b border-[#232530] flex items-center justify-between cursor-move rounded-t-lg select-none"
         >
           {/* Rotas de projetos estilo abas de terminal */}
           <div data-tauri-drag-region className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
@@ -218,30 +215,22 @@ export const QuickCaptureCard: React.FC = () => {
               )}
             </div>
 
-            {/* Campos de Entrada */}
-            <div className="flex-1 flex flex-col gap-2 font-mono">
-              <input
-                ref={titleInputRef}
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+            {/* Campo de Descrição única */}
+            <div className="flex-1 flex flex-col font-mono">
+              <textarea
+                ref={descInputRef}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
+                  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
                     e.preventDefault();
                     handleSave();
                   }
                 }}
-                placeholder="❯ resumo rápido / título do bug..."
-                className="w-full bg-[#16171f] border border-[#232530] focus:border-[#2dd4bf] rounded px-3 py-2 text-xs text-white placeholder-[#525460] outline-none transition"
+                placeholder="❯ anotações ou observações (opcional, [ctrl+enter] para salvar)..."
+                rows={4}
+                className="w-full h-full min-h-[105px] bg-[#16171f] border border-[#232530] focus:border-[#2dd4bf] rounded px-3 py-2.5 text-xs text-[#d4d4d8] placeholder-[#525460] outline-none resize-none transition leading-relaxed"
                 autoFocus
-              />
-
-              <textarea
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="❯ notas de qa, passos de reprodução, logs adicionais..."
-                rows={2}
-                className="w-full bg-[#16171f] border border-[#232530] focus:border-[#2dd4bf] rounded px-3 py-2 text-xs text-[#d4d4d8] placeholder-[#525460] outline-none resize-none transition"
               />
             </div>
           </div>
@@ -274,39 +263,48 @@ export const QuickCaptureCard: React.FC = () => {
           )}
 
           {/* Rodapé: Destino & Ações */}
-          <div className="flex items-center justify-between pt-2 border-t border-[#232530] text-xs font-mono text-[#71717a]">
-            <div className="truncate max-w-[360px]">
-              <span className="opacity-60">destino: </span>
-              <span className="text-[#d4d4d8]">
-                {activeRoute?.targetType === "daily_note" && "Daily/YYYY-MM-DD.md"}
-                {activeRoute?.targetType === "file" && (activeRoute.filePath || "Inbox.md")}
-                {activeRoute?.targetType === "folder" && `${activeRoute.folderPath}/YYYY-MM-DD_nota.md`}
-              </span>
-            </div>
+          {(() => {
+            const d = new Date();
+            const dd = String(d.getDate()).padStart(2, "0");
+            const mm = String(d.getMonth() + 1).padStart(2, "0");
+            const yyyy = d.getFullYear();
+            const todayFormatted = `${dd}-${mm}-${yyyy}`;
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleCancel}
-                className="px-3 py-1 text-[#71717a] hover:text-[#d4d4d8] transition cursor-pointer"
-              >
-                cancelar [esc]
-              </button>
+            return (
+              <div className="flex items-center justify-between pt-2 border-t border-[#232530] text-xs font-mono text-[#71717a]">
+                <div className="truncate max-w-[360px]">
+                  <span className="opacity-60">destino: </span>
+                  <span className="text-[#d4d4d8]">
+                    {activeRoute?.targetType === "daily_note" && `Daily/${todayFormatted}.md`}
+                    {activeRoute?.targetType === "file" && (activeRoute.filePath || "Inbox.md")}
+                    {activeRoute?.targetType === "folder" && `${activeRoute.folderPath}/${todayFormatted}.md`}
+                  </span>
+                </div>
 
-              <button
-                onClick={handleSave}
-                disabled={isSaving}
-                className={`px-3.5 py-1.5 rounded font-medium transition cursor-pointer ${
-                  saveSuccess
-                    ? "bg-[#10b981] text-[#0c0d10]"
-                    : "bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10]"
-                }`}
-              >
-                {saveSuccess ? "salvo!" : "salvar [ctrl+enter] ↵"}
-              </button>
-            </div>
-          </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleCancel}
+                    className="px-3 py-1 text-[#71717a] hover:text-[#d4d4d8] transition cursor-pointer"
+                  >
+                    cancelar [esc]
+                  </button>
+
+                  <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className={`px-3.5 py-1.5 rounded font-medium transition cursor-pointer ${
+                      saveSuccess
+                        ? "bg-[#10b981] text-[#0c0d10]"
+                        : "bg-[#2dd4bf] hover:bg-[#25b5a3] text-[#0c0d10]"
+                    }`}
+                  >
+                    {saveSuccess ? "salvo!" : "salvar [ctrl+enter] ↵"}
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
         </div>
-
       </div>
 
       {showSettings && config && (

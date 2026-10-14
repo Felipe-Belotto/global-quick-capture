@@ -26,14 +26,16 @@
         "label": "capture_card",
         "title": "Quick Capture",
         "width": 720,
-        "height": 520,
+        "height": 480,
         "transparent": true,
         "decorations": false,
         "alwaysOnTop": true,
         "center": true,
         "skipTaskbar": true,
         "visible": false,
-        "shadow": false
+        "shadow": false,
+        "resizable": false,
+        "maximizable": false
       }
     ],
     "security": {

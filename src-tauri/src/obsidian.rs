@@ -36,7 +36,7 @@ pub fn save_snippet(payload: SaveSnippetPayload) -> Result<(), String> {
 
     let now = Local::now();
     let time_str = now.format("%H:%M").to_string();
-    let date_str = now.format("%Y-%m-%d").to_string();
+    let date_str = now.format("%d-%m-%Y").to_string();
     let file_timestamp = now.format("%Y%m%d-%H%M%S").to_string();
     let image_filename = format!("clip-{}.png", file_timestamp);
 
@@ -75,6 +75,9 @@ pub fn save_snippet(payload: SaveSnippetPayload) -> Result<(), String> {
 
     fs::write(&image_path, decoded_bytes).map_err(|e| format!("Falha ao gravar imagem: {}", e))?;
 
+    let dd_mm_yyyy = now.format("%d-%m-%Y").to_string();
+    let yyyy_mm_dd = now.format("%Y-%m-%d").to_string();
+
     // 4. Determinar o arquivo Markdown de destino
     let target_md_path = if let Some(custom_file) = payload.custom_target_file {
         vault_root.join(custom_file)
@@ -84,7 +87,18 @@ pub fn save_snippet(payload: SaveSnippetPayload) -> Result<(), String> {
                 let folder = route.folder_path.as_deref().unwrap_or("Daily");
                 let daily_dir = vault_root.join(folder);
                 fs::create_dir_all(&daily_dir).map_err(|e| e.to_string())?;
-                daily_dir.join(format!("{}.md", date_str))
+
+                let candidate_dd = daily_dir.join(format!("{}.md", dd_mm_yyyy));
+                let candidate_iso = daily_dir.join(format!("{}.md", yyyy_mm_dd));
+
+                // Se já existir qualquer nota desse dia (DD-MM-YYYY ou YYYY-MM-DD), anexa a ela
+                if candidate_dd.exists() {
+                    candidate_dd
+                } else if candidate_iso.exists() {
+                    candidate_iso
+                } else {
+                    candidate_dd
+                }
             }
             "file" => {
                 let file = route.file_path.as_deref().unwrap_or("Inbox.md");
@@ -94,18 +108,18 @@ pub fn save_snippet(payload: SaveSnippetPayload) -> Result<(), String> {
                 let folder = route.folder_path.as_deref().unwrap_or("Projects");
                 let project_dir = vault_root.join(folder);
                 fs::create_dir_all(&project_dir).map_err(|e| e.to_string())?;
-                // Salva como nota do dia no projeto ou nome formatado
-                let sanitized_title: String = payload
-                    .title
-                    .chars()
-                    .filter(|c| c.is_alphanumeric() || *c == '-' || *c == '_')
-                    .collect();
-                let title_slug = if sanitized_title.is_empty() {
-                    "nota".to_string()
+
+                let candidate_dd = project_dir.join(format!("{}.md", dd_mm_yyyy));
+                let candidate_iso = project_dir.join(format!("{}.md", yyyy_mm_dd));
+
+                // Se já existir nota diária nesta pasta de projeto, anexa a ela
+                if candidate_dd.exists() {
+                    candidate_dd
+                } else if candidate_iso.exists() {
+                    candidate_iso
                 } else {
-                    sanitized_title
-                };
-                project_dir.join(format!("{}_{}.md", date_str, title_slug))
+                    candidate_dd
+                }
             }
             _ => vault_root.join("Inbox.md"),
         }
@@ -127,26 +141,50 @@ pub fn save_snippet(payload: SaveSnippetPayload) -> Result<(), String> {
         }
     }
 
-    let mut entry = format!(
-        "\n### {} - {}{}\n![[{}]]\n",
-        time_str, payload.title, tags_str, image_filename
-    );
+    let mut entry = format!("### {}{}\n![[{}]]\n", time_str, tags_str, image_filename);
 
     if let Some(msg) = &payload.message {
         let trimmed = msg.trim();
         if !trimmed.is_empty() {
-            entry.push_str(&format!("> **QA / Observação**: {}\n", trimmed));
+            entry.push_str(&format!("> {}\n", trimmed));
         }
+    } else if !payload.title.trim().is_empty()
+        && payload.title.trim() != "Captura"
+        && payload.title.trim() != "Captura Rápida"
+    {
+        let trimmed = payload.title.trim();
+        entry.push_str(&format!("> {}\n", trimmed));
     }
 
     // 6. Gravar (Append) no arquivo Markdown
+    let existing_content = if target_md_path.exists() {
+        fs::read_to_string(&target_md_path).unwrap_or_default()
+    } else {
+        String::new()
+    };
+
+    let prefix = if existing_content.trim().is_empty() {
+        // Se a nota é nova, cria com o título do dia
+        format!("# {}\n\n", dd_mm_yyyy)
+    } else if !existing_content.ends_with("\n\n") {
+        if existing_content.ends_with('\n') {
+            "\n".to_string()
+        } else {
+            "\n\n".to_string()
+        }
+    } else {
+        String::new()
+    };
+
+    let full_to_write = format!("{}{}\n", prefix, entry);
+
     let mut file = OpenOptions::new()
         .create(true)
         .append(true)
         .open(&target_md_path)
         .map_err(|e| format!("Falha ao abrir nota de destino {}: {}", target_md_path.display(), e))?;
 
-    file.write_all(entry.as_bytes())
+    file.write_all(full_to_write.as_bytes())
         .map_err(|e| format!("Falha ao escrever nota: {}", e))?;
 
     Ok(())
