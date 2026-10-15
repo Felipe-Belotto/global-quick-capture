@@ -448,7 +448,7 @@ fn start_dragging_window(window: tauri::WebviewWindow) -> Result<(), String> {
 #[tauri::command]
 fn download_and_install_update(app: tauri::AppHandle, url: String) -> Result<(), String> {
     let temp_dir = std::env::temp_dir();
-    let installer_path = temp_dir.join("Global-Quick-Capture-Update.exe");
+    let installer_path = temp_dir.join("QCap-Update.exe");
 
     let app_handle = app.clone();
     std::thread::spawn(move || {
@@ -541,7 +541,7 @@ pub fn run() {
 
             let _tray = TrayIconBuilder::new()
                 .menu(&menu)
-                .tooltip("Global Quick Capture (Win+Alt+S)")
+                .tooltip("QCap (Win+Alt+S)")
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "quit" => {

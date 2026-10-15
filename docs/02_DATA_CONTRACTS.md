@@ -1,7 +1,7 @@
 # Contratos de Dados & Integração com Obsidian
 
 ## 1. Arquivo de Configuração do App (`config.json`)
-Armazenado em `%APPDATA%\global-quick-capture\config.json`.
+Armazenado em `%APPDATA%\qcap\config.json`.
 
 ```json
 {

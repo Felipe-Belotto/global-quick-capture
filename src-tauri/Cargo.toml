@@ -1,12 +1,12 @@
 [package]
-name = "global-quick-capture"
+name = "qcap"
 version = "0.1.4"
-description = "Global Quick Capture for Windows & Obsidian"
+description = "QCap - Quick Capture for Windows & Obsidian"
 authors = ["Felipe"]
 edition = "2021"
 
 [lib]
-name = "global_quick_capture_lib"
+name = "qcap_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

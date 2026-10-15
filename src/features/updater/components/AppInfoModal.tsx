@@ -235,7 +235,7 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-sm text-[#f5f5f7] tracking-tight">
-                  Global Quick Capture
+                  QCap
                 </span>
                 <span className="px-1.5 py-0.5 text-[10px] rounded-md bg-[#ff4d4d]/10 text-[#ff4d4d] border border-[#ff4d4d]/30 font-mono font-medium">
                   v{appInfo?.version || "0.1.4"}

@@ -1,5 +1,5 @@
 {
-  "name": "global-quick-capture",
+  "name": "qcap",
   "private": true,
   "version": "0.1.4",
   "type": "module",

@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Global Quick Capture",
+  "productName": "QCap",
   "version": "0.1.4",
-  "identifier": "com.quickcapture.app",
+  "identifier": "com.qcap.app",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -24,7 +24,7 @@
       },
       {
         "label": "capture_card",
-        "title": "Quick Capture",
+        "title": "QCap",
         "width": 720,
         "height": 480,
         "transparent": true,
@@ -39,7 +39,7 @@
       },
       {
         "label": "about_window",
-        "title": "Global Quick Capture - Sobre & Atualizações",
+        "title": "QCap - Sobre & Atualizações",
         "width": 580,
         "height": 560,
         "transparent": true,

@@ -1,6 +1,8 @@
 <div align="center">
 
-# Global Quick Capture
+<img src="./docs/qcap-banner.jpg" alt="QCap Banner" width="100%" style="border-radius: 8px; margin-bottom: 16px;" />
+
+# QCap
 
 **Snipping tool e captura rápida para Obsidian no Windows.**  
 Inspirado na velocidade do Raycast e na estética refinada do Warp Terminal.
@@ -37,7 +39,7 @@ Inspirado na velocidade do Raycast e na estética refinada do Warp Terminal.
 
 Gravar notas visuais no Obsidian normalmente exige abrir o app, criar uma nova nota, colar o print e organizá-lo manualmente. 
 
-O **Global Quick Capture** elimina esse atrito:
+O **QCap** elimina esse atrito:
 1. Pressione **`Win + Alt + S`** em qualquer lugar do Windows.
 2. Arraste o mouse sobre a área que deseja recortar.
 3. Digite o título, adicione notas detalhadas de QA e selecione a pasta de destino pelo teclado (`1`, `2`, `3`).
@@ -151,7 +153,7 @@ Acessível pelo ícone de engrenagem no card ou pelo menu de contexto na bandeja
 
 As configurações são persistidas em:
 ```
-%APPDATA%\global-quick-capture\config.json
+%APPDATA%\qcap\config.json
 ```
 
 ---

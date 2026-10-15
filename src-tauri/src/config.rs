@@ -94,10 +94,17 @@ impl Default for AppConfig {
 }
 
 pub fn get_config_path() -> PathBuf {
-    let mut config_dir = dirs::config_dir().unwrap_or_else(|| PathBuf::from("."));
-    config_dir.push("global-quick-capture");
-    let _ = fs::create_dir_all(&config_dir);
-    config_dir.join("config.json")
+    let base = dirs::config_dir().unwrap_or_else(|| PathBuf::from("."));
+    let new_dir = base.join("qcap");
+    let old_dir = base.join("global-quick-capture");
+
+    if !new_dir.exists() && old_dir.join("config.json").exists() {
+        let _ = fs::create_dir_all(&new_dir);
+        let _ = fs::copy(old_dir.join("config.json"), new_dir.join("config.json"));
+    } else {
+        let _ = fs::create_dir_all(&new_dir);
+    }
+    new_dir.join("config.json")
 }
 
 pub fn load_config() -> AppConfig {

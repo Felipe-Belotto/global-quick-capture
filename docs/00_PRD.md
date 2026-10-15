@@ -1,4 +1,4 @@
-# PRD - Global Quick Capture (Obsidian Windows)
+# PRD - QCap (Obsidian Windows)
 
 ## 1. Visão Geral
 Utilitário de bandeja para Windows no estilo Raycast/Spotlight de ultra-baixo consumo de memória (~30-50 MB) focado em captura rápida de recortes de tela anotados diretamente para um cofre Obsidian, sem abrir o Obsidian.

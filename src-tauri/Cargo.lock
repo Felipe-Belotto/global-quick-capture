@@ -1651,25 +1651,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "global-quick-capture"
-version = "0.1.4"
-dependencies = [
- "arboard",
- "base64 0.22.1",
- "chrono",
- "dirs 6.0.0",
- "image",
- "rfd",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-global-shortcut",
- "tauri-plugin-opener",
- "xcap",
-]
-
-[[package]]
 name = "gobject-sys"
 version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3333,6 +3314,25 @@ name = "pxfm"
 version = "0.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d55d956fa96f5ec02be2e13af0e20391a5aa83d6a074e3ad368959d0fab299ea"
+
+[[package]]
+name = "qcap"
+version = "0.1.4"
+dependencies = [
+ "arboard",
+ "base64 0.22.1",
+ "chrono",
+ "dirs 6.0.0",
+ "image",
+ "rfd",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-global-shortcut",
+ "tauri-plugin-opener",
+ "xcap",
+]
 
 [[package]]
 name = "quick-error"

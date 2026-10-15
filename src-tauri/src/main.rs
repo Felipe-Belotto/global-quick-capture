@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    global_quick_capture_lib::run()
+    qcap_lib::run()
 }

@@ -40,7 +40,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: ${{ github.ref_name }}
-          releaseName: 'Global Quick Capture ${{ github.ref_name }}'
+          releaseName: 'QCap ${{ github.ref_name }}'
           releaseBody: |
             ## 🚀 Novidades desta versão:
             - Captura rápida com atalho global (Win + Alt + S).
