@@ -220,16 +220,110 @@ fn list_vault_nodes_cmd(vault_path: Option<String>) -> Vec<VaultNode> {
     list_vault_nodes(&path)
 }
 
+#[derive(serde::Serialize, Clone, Debug)]
+pub struct StartSnipData {
+    pub screen_image: String,
+    pub windows: Vec<capture::WindowRect>,
+}
+
 #[tauri::command]
 fn trigger_capture(app: tauri::AppHandle) -> Result<(), String> {
     // 1. Tira o print da tela antes de abrir a janela para congelar o estado real
     let screen_b64 = capture::capture_primary_screen().unwrap_or_default();
+    let windows = capture::get_visible_windows();
 
     if let Some(overlay) = app.get_webview_window("snipping_overlay") {
         let _ = overlay.show();
         let _ = overlay.set_focus();
-        let _ = overlay.emit("start_snip", screen_b64);
+        let _ = overlay.emit("start_snip", &screen_b64);
+        let _ = overlay.emit(
+            "start_snip_data",
+            StartSnipData {
+                screen_image: screen_b64,
+                windows,
+            },
+        );
     }
+    Ok(())
+}
+
+#[tauri::command]
+fn start_scrolling_capture_cmd(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(overlay) = app.get_webview_window("snipping_overlay") {
+        let _ = overlay.hide();
+    }
+
+    let app_handle = app.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_millis(150));
+
+        let monitors = match xcap::Monitor::all() {
+            Ok(m) => m,
+            Err(_) => return,
+        };
+        let monitor = match monitors.into_iter().find(|m| m.is_primary().unwrap_or(false)) {
+            Some(m) => m,
+            None => return,
+        };
+
+        let mut frames: Vec<image::RgbaImage> = Vec::new();
+
+        if let Ok(img) = monitor.capture_image() {
+            frames.push(img);
+        }
+
+        for _ in 0..3 {
+            #[cfg(target_os = "windows")]
+            unsafe {
+                extern "system" {
+                    fn mouse_event(dwFlags: u32, dx: u32, dy: u32, dwData: u32, dwExtraInfo: usize);
+                }
+                mouse_event(0x0800, 0, 0, (-120 * 5) as u32, 0);
+            }
+            std::thread::sleep(std::time::Duration::from_millis(300));
+            if let Ok(img) = monitor.capture_image() {
+                frames.push(img);
+            }
+        }
+
+        if frames.is_empty() {
+            return;
+        }
+
+        let width = frames[0].width();
+        let frame_h = frames[0].height();
+        let slice_h = frame_h / 2;
+        let total_h = frame_h + ((frames.len() - 1) as u32 * slice_h);
+
+        let mut stitched = image::RgbaImage::new(width, total_h);
+        image::imageops::overlay(&mut stitched, &frames[0], 0, 0);
+
+        let mut curr_y = frame_h;
+        for frame in frames.iter().skip(1) {
+            let sub = image::imageops::crop_imm(frame, 0, frame_h - slice_h, width, slice_h);
+            if curr_y + slice_h <= total_h {
+                image::imageops::overlay(&mut stitched, &sub.to_image(), 0, curr_y as i64);
+                curr_y += slice_h;
+            }
+        }
+
+        let mut buffer = Vec::new();
+        let mut cursor = std::io::Cursor::new(&mut buffer);
+        use image::codecs::png::{CompressionType, FilterType, PngEncoder};
+        let encoder = PngEncoder::new_with_quality(&mut cursor, CompressionType::Fast, FilterType::NoFilter);
+        if stitched.write_with_encoder(encoder).is_ok() {
+            use base64::Engine;
+            let b64 = base64::engine::general_purpose::STANDARD.encode(&buffer);
+            let final_b64 = format!("data:image/png;base64,{}", b64);
+
+            let _ = app_handle.emit("load_snip_image", &final_b64);
+            if let Some(card_win) = app_handle.get_webview_window("capture_card") {
+                let _ = card_win.show();
+                let _ = card_win.set_focus();
+            }
+        }
+    });
+
     Ok(())
 }
 
@@ -590,6 +684,7 @@ pub fn run() {
             quick_save_and_copy_cmd,
             copy_image_to_clipboard_cmd,
             save_image_to_disk_cmd,
+            start_scrolling_capture_cmd,
             get_system_app_info,
             show_about_window,
             hide_about_window,

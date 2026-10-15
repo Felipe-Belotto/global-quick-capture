@@ -29,3 +29,44 @@ pub fn capture_primary_screen() -> Result<String, String> {
     let b64 = base64::engine::general_purpose::STANDARD.encode(&buffer);
     Ok(format!("data:image/png;base64,{}", b64))
 }
+
+#[derive(serde::Serialize, Clone, Debug)]
+pub struct WindowRect {
+    pub title: String,
+    pub app_name: String,
+    pub x: i32,
+    pub y: i32,
+    pub width: u32,
+    pub height: u32,
+}
+
+pub fn get_visible_windows() -> Vec<WindowRect> {
+    let mut rects = Vec::new();
+    if let Ok(windows) = xcap::Window::all() {
+        for w in windows {
+            if let Ok(is_min) = w.is_minimized() {
+                if is_min {
+                    continue;
+                }
+            }
+            let title = w.title().unwrap_or_default();
+            let app_name = w.app_name().unwrap_or_default();
+            let x = w.x().unwrap_or(0);
+            let y = w.y().unwrap_or(0);
+            let width = w.width().unwrap_or(0);
+            let height = w.height().unwrap_or(0);
+            if width > 60 && height > 60 {
+                rects.push(WindowRect {
+                    title,
+                    app_name,
+                    x,
+                    y,
+                    width,
+                    height,
+                });
+            }
+        }
+    }
+    rects
+}
+

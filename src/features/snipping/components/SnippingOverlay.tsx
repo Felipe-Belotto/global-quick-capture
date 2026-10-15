@@ -3,6 +3,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import {
   Crop,
+  AppWindow,
+  ScrollText,
   Monitor,
   ScanText,
   Copy,
@@ -14,6 +16,22 @@ import {
 } from "lucide-react";
 import { extractTextFromImage } from "../../ocr/lib/ocrEngine";
 
+interface WindowRect {
+  title: string;
+  app_name: string;
+  x: i32;
+  y: i32;
+  width: number;
+  height: number;
+}
+
+type i32 = number;
+
+interface StartSnipData {
+  screen_image: string;
+  windows: WindowRect[];
+}
+
 interface CropResult {
   base64: string;
   x: number;
@@ -24,56 +42,33 @@ interface CropResult {
 
 export const SnippingOverlay: React.FC = () => {
   const [screenImage, setScreenImage] = useState<string>("");
+  const [windows, setWindows] = useState<WindowRect[]>([]);
   const [isSelecting, setIsSelecting] = useState(false);
   const [isCtrlHeld, setIsCtrlHeld] = useState<boolean>(false);
   const [startPos, setStartPos] = useState<{ x: number; y: number } | null>(null);
   const [currentPos, setCurrentPos] = useState<{ x: number; y: number } | null>(null);
   const [completedCrop, setCompletedCrop] = useState<CropResult | null>(null);
+  const [hoveredWindow, setHoveredWindow] = useState<WindowRect | null>(null);
   const [isOcrLoading, setIsOcrLoading] = useState<boolean>(false);
   const [ocrSuccess, setOcrSuccess] = useState<boolean>(false);
+  const [isScrollingCapture, setIsScrollingCapture] = useState<boolean>(false);
 
   const imgRef = useRef<HTMLImageElement | null>(null);
+  const completedCropRef = useRef<CropResult | null>(null);
+  const hoveredWindowRef = useRef<WindowRect | null>(null);
+  const isCtrlHeldRef = useRef<boolean>(false);
 
-  // Inicializar overlay quando acionado
   useEffect(() => {
-    const unlisten = listen<string>("start_snip", (event) => {
-      if (event.payload) {
-        setScreenImage(event.payload);
-      }
-      setIsSelecting(false);
-      setIsCtrlHeld(false);
-      setStartPos(null);
-      setCurrentPos(null);
-      setCompletedCrop(null);
-      setIsOcrLoading(false);
-      setOcrSuccess(false);
-    });
-
-    return () => {
-      unlisten.then((f) => f());
-    };
-  }, []);
-
-  const handleCancel = useCallback(async () => {
-    if (completedCrop) {
-      // Se há um recorte concluído, primeiro cancela a seleção
-      setCompletedCrop(null);
-      setStartPos(null);
-      setCurrentPos(null);
-      return;
-    }
-
-    setIsSelecting(false);
-    setIsCtrlHeld(false);
-    setStartPos(null);
-    setCurrentPos(null);
-    setCompletedCrop(null);
-    try {
-      await invoke("cancel_snip");
-    } catch (e) {
-      console.error("Erro ao cancelar recorte:", e);
-    }
+    completedCropRef.current = completedCrop;
   }, [completedCrop]);
+
+  useEffect(() => {
+    hoveredWindowRef.current = hoveredWindow;
+  }, [hoveredWindow]);
+
+  useEffect(() => {
+    isCtrlHeldRef.current = isCtrlHeld;
+  }, [isCtrlHeld]);
 
   // Função auxiliar para gerar recorte em canvas
   const generateCroppedImage = useCallback(
@@ -113,44 +108,35 @@ export const SnippingOverlay: React.FC = () => {
   );
 
   // Ações de Saída
-  const handleSendToObsidian = useCallback(
-    async (crop: CropResult) => {
-      try {
-        await invoke("finish_snip", {
-          croppedBase64: crop.base64,
-          x: crop.x,
-          y: crop.y,
-          width: crop.width,
-          height: crop.height,
-        });
-      } catch (err) {
-        console.error("Erro ao enviar para Obsidian:", err);
-      }
-    },
-    []
-  );
+  const handleSendToObsidian = useCallback(async (crop: CropResult) => {
+    try {
+      await invoke("finish_snip", {
+        croppedBase64: crop.base64,
+        x: crop.x,
+        y: crop.y,
+        width: crop.width,
+        height: crop.height,
+      });
+    } catch (err) {
+      console.error("Erro ao enviar para Obsidian:", err);
+    }
+  }, []);
 
-  const handleCopyToClipboard = useCallback(
-    async (crop: CropResult) => {
-      try {
-        await invoke("copy_image_to_clipboard_cmd", { croppedBase64: crop.base64 });
-      } catch (err) {
-        console.error("Erro ao copiar imagem:", err);
-      }
-    },
-    []
-  );
+  const handleCopyToClipboard = useCallback(async (crop: CropResult) => {
+    try {
+      await invoke("copy_image_to_clipboard_cmd", { croppedBase64: crop.base64 });
+    } catch (err) {
+      console.error("Erro ao copiar imagem:", err);
+    }
+  }, []);
 
-  const handleSaveToDisk = useCallback(
-    async (crop: CropResult) => {
-      try {
-        await invoke("save_image_to_disk_cmd", { croppedBase64: crop.base64 });
-      } catch (err) {
-        console.error("Erro ao salvar imagem em disco:", err);
-      }
-    },
-    []
-  );
+  const handleSaveToDisk = useCallback(async (crop: CropResult) => {
+    try {
+      await invoke("save_image_to_disk_cmd", { croppedBase64: crop.base64 });
+    } catch (err) {
+      console.error("Erro ao salvar imagem em disco:", err);
+    }
+  }, []);
 
   const handleRunOcr = useCallback(
     async (crop: CropResult) => {
@@ -163,7 +149,7 @@ export const SnippingOverlay: React.FC = () => {
           setOcrSuccess(true);
           setTimeout(async () => {
             await invoke("cancel_snip");
-          }, 400);
+          }, 300);
         } else {
           setIsOcrLoading(false);
         }
@@ -175,45 +161,168 @@ export const SnippingOverlay: React.FC = () => {
     [isOcrLoading]
   );
 
-  // Selecionar tela inteira imediatamente
   const handleSelectFullscreen = useCallback(async () => {
     const w = window.innerWidth;
     const h = window.innerHeight;
     const base64 = await generateCroppedImage(0, 0, w, h);
-    setCompletedCrop({
+    const cropData: CropResult = {
       base64,
       x: 0,
       y: 0,
       width: w,
       height: h,
-    });
+    };
+    setCompletedCrop(cropData);
     setStartPos({ x: 0, y: 0 });
     setCurrentPos({ x: w, y: h });
   }, [generateCroppedImage]);
 
-  // Teclado
+  const handleStartScrollingCapture = useCallback(async () => {
+    setIsScrollingCapture(true);
+    try {
+      await invoke("start_scrolling_capture_cmd");
+    } catch (err) {
+      console.error("Erro ao iniciar captura de página inteira:", err);
+      setIsScrollingCapture(false);
+    }
+  }, []);
+
+  const handleCancel = useCallback(async () => {
+    if (completedCropRef.current) {
+      setCompletedCrop(null);
+      setStartPos(null);
+      setCurrentPos(null);
+      setHoveredWindow(null);
+      return;
+    }
+
+    setIsSelecting(false);
+    setIsCtrlHeld(false);
+    setStartPos(null);
+    setCurrentPos(null);
+    setCompletedCrop(null);
+    setHoveredWindow(null);
+    try {
+      await invoke("cancel_snip");
+    } catch (e) {
+      console.error("Erro ao cancelar recorte:", e);
+    }
+  }, []);
+
+  // Inicializar overlay quando acionado pelo backend
+  useEffect(() => {
+    const unlistenData = listen<StartSnipData>("start_snip_data", (event) => {
+      if (event.payload) {
+        setScreenImage(event.payload.screen_image);
+        setWindows(event.payload.windows || []);
+      }
+      setIsSelecting(false);
+      setIsCtrlHeld(false);
+      setStartPos(null);
+      setCurrentPos(null);
+      setCompletedCrop(null);
+      setHoveredWindow(null);
+      setIsOcrLoading(false);
+      setOcrSuccess(false);
+      setIsScrollingCapture(false);
+    });
+
+    const unlistenLegacy = listen<string>("start_snip", (event) => {
+      if (event.payload) {
+        setScreenImage(event.payload);
+      }
+      setIsSelecting(false);
+      setIsCtrlHeld(false);
+      setStartPos(null);
+      setCurrentPos(null);
+      setCompletedCrop(null);
+      setHoveredWindow(null);
+      setIsOcrLoading(false);
+      setOcrSuccess(false);
+      setIsScrollingCapture(false);
+    });
+
+    return () => {
+      unlistenData.then((f) => f());
+      unlistenLegacy.then((f) => f());
+    };
+  }, []);
+
+  // Teclado com ref para evitar stale closure
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      const activeCrop = completedCropRef.current;
+      const activeWin = hoveredWindowRef.current;
+
       if (e.key === "Escape") {
+        e.preventDefault();
         handleCancel();
       } else if (e.key === "Control" || e.ctrlKey) {
         setIsCtrlHeld(true);
       } else if (e.key === "1") {
-        // Modo recorte / limpa tela cheia
+        // Modo recorte / limpa tela
         setCompletedCrop(null);
         setStartPos(null);
         setCurrentPos(null);
+        setHoveredWindow(null);
       } else if (e.key === "2") {
-        // Modo tela inteira
+        // Snapping de janela
+        if (activeWin) {
+          const x = Math.max(0, activeWin.x);
+          const y = Math.max(0, activeWin.y);
+          const w = Math.min(window.innerWidth - x, activeWin.width);
+          const h = Math.min(window.innerHeight - y, activeWin.height);
+          generateCroppedImage(x, y, w, h).then((b64) => {
+            const res: CropResult = { base64: b64, x, y, width: w, height: h };
+            setCompletedCrop(res);
+            setStartPos({ x, y });
+            setCurrentPos({ x: x + w, y: y + h });
+          });
+        }
+      } else if (e.key === "3") {
+        // Página Inteira (Auto-Scroll)
+        handleStartScrollingCapture();
+      } else if (e.key === "4") {
+        // Tela inteira
         handleSelectFullscreen();
-      } else if (e.key === "Enter" && completedCrop) {
-        handleSendToObsidian(completedCrop);
-      } else if (e.ctrlKey && (e.key === "c" || e.key === "C") && completedCrop) {
+      } else if (e.ctrlKey && (e.key === "c" || e.key === "C")) {
         e.preventDefault();
-        handleCopyToClipboard(completedCrop);
-      } else if (e.ctrlKey && (e.key === "s" || e.key === "S") && completedCrop) {
+        if (activeCrop) {
+          handleCopyToClipboard(activeCrop);
+        } else if (activeWin) {
+          const x = Math.max(0, activeWin.x);
+          const y = Math.max(0, activeWin.y);
+          const w = Math.min(window.innerWidth - x, activeWin.width);
+          const h = Math.min(window.innerHeight - y, activeWin.height);
+          generateCroppedImage(x, y, w, h).then((b64) => {
+            handleCopyToClipboard({ base64: b64, x, y, width: w, height: h });
+          });
+        }
+      } else if (e.ctrlKey && (e.key === "s" || e.key === "S")) {
         e.preventDefault();
-        handleSaveToDisk(completedCrop);
+        if (activeCrop) {
+          handleSaveToDisk(activeCrop);
+        } else if (activeWin) {
+          const x = Math.max(0, activeWin.x);
+          const y = Math.max(0, activeWin.y);
+          const w = Math.min(window.innerWidth - x, activeWin.width);
+          const h = Math.min(window.innerHeight - y, activeWin.height);
+          generateCroppedImage(x, y, w, h).then((b64) => {
+            handleSaveToDisk({ base64: b64, x, y, width: w, height: h });
+          });
+        }
+      } else if (e.key === "Enter") {
+        if (activeCrop) {
+          handleSendToObsidian(activeCrop);
+        } else if (activeWin) {
+          const x = Math.max(0, activeWin.x);
+          const y = Math.max(0, activeWin.y);
+          const w = Math.min(window.innerWidth - x, activeWin.width);
+          const h = Math.min(window.innerHeight - y, activeWin.height);
+          generateCroppedImage(x, y, w, h).then((b64) => {
+            handleSendToObsidian({ base64: b64, x, y, width: w, height: h });
+          });
+        }
       }
     };
 
@@ -223,38 +332,81 @@ export const SnippingOverlay: React.FC = () => {
       }
     };
 
-    window.addEventListener("keydown", onKeyDown);
-    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("keydown", onKeyDown, true);
+    window.addEventListener("keyup", onKeyUp, true);
     return () => {
-      window.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("keydown", onKeyDown, true);
+      window.removeEventListener("keyup", onKeyUp, true);
     };
   }, [
     handleCancel,
-    completedCrop,
+    generateCroppedImage,
+    handleStartScrollingCapture,
     handleSelectFullscreen,
-    handleSendToObsidian,
     handleCopyToClipboard,
     handleSaveToDisk,
+    handleSendToObsidian,
   ]);
+
+  // Detecção de janela/modal sob o cursor quando não estiver selecionando
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (e.ctrlKey !== isCtrlHeld) {
+      setIsCtrlHeld(e.ctrlKey);
+    }
+
+    if (isSelecting && startPos) {
+      setCurrentPos({ x: e.clientX, y: e.clientY });
+      return;
+    }
+
+    // Se já tiver recorte ativo, não atualizar hover de janela
+    if (completedCrop) return;
+
+    // Detectar janela sob o cursor
+    const mx = e.clientX;
+    const my = e.clientY;
+
+    const matched = windows.filter(
+      (w) =>
+        mx >= w.x &&
+        mx <= w.x + w.width &&
+        my >= w.y &&
+        my <= w.y + w.height
+    );
+
+    if (matched.length > 0) {
+      // Pega a menor janela (prioriza modais, caixas de diálogo sobre janelas de fundo)
+      matched.sort((a, b) => a.width * a.height - b.width * b.height);
+      setHoveredWindow(matched[0]);
+    } else {
+      setHoveredWindow(null);
+    }
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
-    // Se clicar em botões, não iniciar seleção
     if ((e.target as HTMLElement).closest("button")) return;
+
+    // Se clicar em cima de uma janela detectada sem arrastar
+    if (hoveredWindow && !completedCrop) {
+      const hw = hoveredWindow;
+      const x = Math.max(0, hw.x);
+      const y = Math.max(0, hw.y);
+      const width = Math.min(window.innerWidth - x, hw.width);
+      const height = Math.min(window.innerHeight - y, hw.height);
+
+      if (e.ctrlKey || isCtrlHeldRef.current) {
+        generateCroppedImage(x, y, width, height).then((b64) => {
+          invoke("quick_save_and_copy_cmd", { croppedBase64: b64 });
+        });
+        return;
+      }
+    }
 
     setCompletedCrop(null);
     setIsSelecting(true);
     if (e.ctrlKey) setIsCtrlHeld(true);
     setStartPos({ x: e.clientX, y: e.clientY });
-    setCurrentPos({ x: e.clientX, y: e.clientY });
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (e.ctrlKey !== isCtrlHeld) {
-      setIsCtrlHeld(e.ctrlKey);
-    }
-    if (!isSelecting || !startPos) return;
     setCurrentPos({ x: e.clientX, y: e.clientY });
   };
 
@@ -265,12 +417,19 @@ export const SnippingOverlay: React.FC = () => {
     const isQuickSave = e.ctrlKey || isCtrlHeld;
     setIsCtrlHeld(false);
 
-    const x = Math.min(startPos.x, currentPos.x);
-    const y = Math.min(startPos.y, currentPos.y);
-    const width = Math.abs(currentPos.x - startPos.x);
-    const height = Math.abs(currentPos.y - startPos.y);
+    let x = Math.min(startPos.x, currentPos.x);
+    let y = Math.min(startPos.y, currentPos.y);
+    let width = Math.abs(currentPos.x - startPos.x);
+    let height = Math.abs(currentPos.y - startPos.y);
 
-    if (width < 12 || height < 12) {
+    // Se foi apenas um clique (sem arrastar) sobre uma janela/modal destacada
+    if (width < 8 && height < 8 && hoveredWindow) {
+      const hw = hoveredWindow;
+      x = Math.max(0, hw.x);
+      y = Math.max(0, hw.y);
+      width = Math.min(window.innerWidth - x, hw.width);
+      height = Math.min(window.innerHeight - y, hw.height);
+    } else if (width < 12 || height < 12) {
       setStartPos(null);
       setCurrentPos(null);
       setCompletedCrop(null);
@@ -287,10 +446,10 @@ export const SnippingOverlay: React.FC = () => {
       }
       setStartPos(null);
       setCurrentPos(null);
+      setCompletedCrop(null);
       return;
     }
 
-    // Mantém o recorte ativo para a Toolbar de Ações
     setCompletedCrop({
       base64: croppedBase64,
       x,
@@ -298,6 +457,9 @@ export const SnippingOverlay: React.FC = () => {
       width,
       height,
     });
+    setStartPos({ x, y });
+    setCurrentPos({ x: x + width, y: y + height });
+    setHoveredWindow(null);
   };
 
   const rect =
@@ -347,13 +509,36 @@ export const SnippingOverlay: React.FC = () => {
         />
       )}
 
-      {/* Máscara de escurecimento */}
+      {/* Máscara de escurecimento suave */}
       <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+
+      {/* Destaque Inteligente de Janela / Modal sob o cursor (Smart Snapping) */}
+      {!completedCrop && !isSelecting && hoveredWindow && (
+        <div
+          className="absolute border-2 border-[#ff4d4d] bg-[#ff4d4d]/10 pointer-events-none transition-all duration-75 shadow-[0_0_24px_rgba(255,77,77,0.25)] rounded-[4px]"
+          style={{
+            left: `${Math.max(0, hoveredWindow.x)}px`,
+            top: `${Math.max(0, hoveredWindow.y)}px`,
+            width: `${Math.min(window.innerWidth - hoveredWindow.x, hoveredWindow.width)}px`,
+            height: `${Math.min(window.innerHeight - hoveredWindow.y, hoveredWindow.height)}px`,
+          }}
+        >
+          <div className="absolute -top-7 left-0 px-2 py-1 rounded-[4px] bg-[#111317] border border-[#ff4d4d] text-[12px] leading-[16px] font-mono text-[#ff4d4d] whitespace-nowrap flex items-center gap-1.5 shadow-xl">
+            <AppWindow size={12} />
+            <span className="font-semibold truncate max-w-[280px]">
+              {hoveredWindow.app_name || hoveredWindow.title || "Janela"}
+            </span>
+            <span className="text-zinc-400 font-normal">
+              • {hoveredWindow.width}×{hoveredWindow.height}px [Clique p/ capturar]
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* 1. Top Mode Dock (Barra Superior de Modos de Captura) */}
       {!completedCrop && !isSelecting && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-1 p-1 rounded-[8px] bg-[#111317]/95 border border-[#282d37] shadow-2xl backdrop-blur-md">
-          {/* Botão Recorte */}
+          {/* Botão Recorte Livre */}
           <button
             type="button"
             className="group relative flex items-center justify-center w-8 h-8 rounded-[8px] text-[#ff4d4d] bg-[#1c2028] transition hover:bg-[#252a35] cursor-pointer"
@@ -361,6 +546,38 @@ export const SnippingOverlay: React.FC = () => {
             <Crop size={16} />
             <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-[4px] bg-[#181a1f] border border-[#2b303c] text-[12px] leading-[16px] font-mono text-[#f5f5f7] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-50">
               Recortar Área [1]
+            </span>
+          </button>
+
+          {/* Botão Janela / Modal Snapping */}
+          <button
+            type="button"
+            className={`group relative flex items-center justify-center w-8 h-8 rounded-[8px] transition cursor-pointer ${
+              hoveredWindow
+                ? "text-[#ff4d4d] bg-[#1c2028]"
+                : "text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#252a35]"
+            }`}
+          >
+            <AppWindow size={16} />
+            <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-[4px] bg-[#181a1f] border border-[#2b303c] text-[12px] leading-[16px] font-mono text-[#f5f5f7] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-50">
+              Smart Snapping (Janela/Modal) [2]
+            </span>
+          </button>
+
+          {/* Botão Página Inteira (Auto-Scroll) */}
+          <button
+            type="button"
+            onClick={handleStartScrollingCapture}
+            disabled={isScrollingCapture}
+            className="group relative flex items-center justify-center w-8 h-8 rounded-[8px] text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#252a35] transition cursor-pointer"
+          >
+            {isScrollingCapture ? (
+              <Loader2 size={16} className="animate-spin text-[#ff4d4d]" />
+            ) : (
+              <ScrollText size={16} />
+            )}
+            <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-[4px] bg-[#181a1f] border border-[#2b303c] text-[12px] leading-[16px] font-mono text-[#f5f5f7] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-50">
+              {isScrollingCapture ? "Rolando página..." : "Página Inteira (Auto-Scroll) [3]"}
             </span>
           </button>
 
@@ -372,7 +589,7 @@ export const SnippingOverlay: React.FC = () => {
           >
             <Monitor size={16} />
             <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-[4px] bg-[#181a1f] border border-[#2b303c] text-[12px] leading-[16px] font-mono text-[#f5f5f7] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-50">
-              Tela Inteira [2]
+              Tela Inteira [4]
             </span>
           </button>
 
@@ -419,12 +636,12 @@ export const SnippingOverlay: React.FC = () => {
             <span>
               {rect.width} × {rect.height} px
             </span>
-            {isCtrlHeld && <span className="text-[#ff4d4d]">salvar rápido</span>}
+            {isCtrlHeld && <span className="text-[#ff4d4d]">salvar rápido [Ctrl]</span>}
           </div>
         </div>
       )}
 
-      {/* 2. Floating Action Dock (Aparece quando a seleção é concluída) */}
+      {/* 2. Floating Action Dock (Aparece quando a seleção/modal é concluída) */}
       {completedCrop && (
         <div
           style={{
@@ -500,6 +717,7 @@ export const SnippingOverlay: React.FC = () => {
               setCompletedCrop(null);
               setStartPos(null);
               setCurrentPos(null);
+              setHoveredWindow(null);
             }}
             className="group relative flex items-center justify-center w-8 h-8 rounded-[8px] text-[#86868b] hover:text-[#ff4d4d] hover:bg-[#252a35] transition cursor-pointer"
           >

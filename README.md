@@ -41,13 +41,17 @@ Gravar notas visuais no Obsidian normalmente exige abrir o app, criar uma nova n
 
 O **QCap** elimina esse atrito e se integra como uma suíte completa de produtividade visual para o Windows:
 1. Pressione **`Win + Alt + S`** em qualquer lugar do Windows.
-2. Use a nova **Dock Flutuante de Ícones** (Lucide Icons com tooltips) para alternar entre recorte de área (`Crop`) ou captura instantânea de tela inteira (`Monitor`).
-3. Ao finalizar a seleção, escolha sua ação instantânea sem poluição visual:
-   - **Copiar Imagem (`Ctrl+C`)**: Copia o PNG puro para a área de transferência.
-   - **Salvar PNG (`Ctrl+S`)**: Grava a imagem diretamente na pasta `Screenshots`.
-   - **OCR Instantâneo**: Extrai o texto da imagem e copia direto para o Clipboard.
-   - **Nota no Obsidian (`Enter`)**: Abre o card com notas, tags e rotas rápidas do cofre (`1` a `9`).
-4. Tudo construído estritamente sob uma **grade de múltiplos de 4** (4px/8px design grid), com consumo levíssimo de **30 a 40 MB** de RAM em segundo plano.
+2. Use a nova **Dock Flutuante de Ícones** (Lucide Icons com tooltips) para alternar entre os modos:
+   - **`Crop [1]`**: Recorte livre por clique e arraste com contorno de alta precisão.
+   - **`Smart Snapping [2]`**: Reconhece modais, caixas de diálogo e janelas ativas automaticamente sob o mouse. Um simples clique captura o modal perfeito!
+   - **`Página Inteira [3]`**: Auto-scroll automático que desce a página de navegadores (YouTube Music, documentação, Notion) e costura o print longo vertical.
+   - **`Tela Inteira [4]`**: Captura rápida do monitor todo em 1 clique.
+3. Ao finalizar a seleção (ou passar o mouse sobre a janela), use os **atalhos diretos sem precisar clicar no botão**:
+   - **`Ctrl + C`**: Copia a imagem instantaneamente para a área de transferência e fecha o overlay.
+   - **`Ctrl + S`**: Grava o PNG direto na pasta `Screenshots` e fecha o overlay.
+   - **`Enter`**: Envia para o Card do Obsidian com rotas e notas rápidas.
+   - **OCR Instantâneo**: Extrai o texto da imagem diretamente para o Clipboard.
+4. Construído sob uma **grade estrita de múltiplos de 4** (4px/8px design grid), com consumo levíssimo de **30 a 40 MB** de RAM em segundo plano.
 
 ---
 
@@ -139,10 +143,12 @@ Ao salvar uma captura, o arquivo de destino recebe o bloco formatado com data, h
 | `Win + Alt + S` | Global no Windows | Abre o overlay de recorte sobre qualquer janela |
 | `Esc` | Overlay / Card | Cancela a seleção ou fecha o card sem salvar |
 | `1` | Overlay de Recorte | Ativa o modo de seleção de área livre (`Crop`) |
-| `2` | Overlay de Recorte | Captura instantaneamente a tela inteira (`Monitor`) |
-| `Ctrl + C` | Overlay com Seleção | Copia a imagem recortada diretamente para a área de transferência |
-| `Ctrl + S` | Overlay com Seleção | Salva a imagem PNG diretamente na pasta de Screenshots/Downloads |
-| `Enter` | Overlay com Seleção | Envia a área selecionada para o Card do Obsidian |
+| `2` | Overlay de Recorte | Captura a janela ou modal sob o cursor (`Smart Snapping`) |
+| `3` | Overlay de Recorte | Inicia a captura de página inteira com rolagem (`Auto-Scroll`) |
+| `4` | Overlay de Recorte | Captura instantaneamente a tela inteira (`Monitor`) |
+| `Ctrl + C` | Overlay com Seleção/Janela | Copia a imagem recortada diretamente para o Clipboard e fecha |
+| `Ctrl + S` | Overlay com Seleção/Janela | Salva a imagem PNG diretamente na pasta de Screenshots e fecha |
+| `Enter` | Overlay com Seleção/Janela | Envia a área selecionada para o Card do Obsidian |
 | `1` a `9` | Card de Captura | Seleciona o projeto ou nota de destino no cofre |
 | `Tab` | Card de Captura | Alterna entre o campo de título e o campo de notas de QA |
 | `Ctrl + Enter` | Card de Captura | Grava a nota no cofre e fecha a janela |
