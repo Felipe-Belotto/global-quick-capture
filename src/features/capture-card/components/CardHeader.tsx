@@ -1,5 +1,5 @@
 import React from "react";
-import { Settings, X } from "lucide-react";
+import { Settings, X, Minus, Square } from "lucide-react";
 import { AppConfig } from "../../../shared/types";
 import { DragHandle } from "../../../shared/components/DragHandle";
 import { useDraggableWindow } from "../../../shared/hooks/useDraggableWindow";
@@ -11,6 +11,9 @@ interface CardHeaderProps {
   onOpenSettings: () => void;
   onOpenAbout?: () => void;
   onClose: () => void;
+  isMaximized?: boolean;
+  onToggleMaximize?: () => void;
+  onMinimize?: () => void;
 }
 
 export const CardHeader: React.FC<CardHeaderProps> = ({
@@ -20,6 +23,9 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
   onOpenSettings,
   onOpenAbout,
   onClose,
+  isMaximized = false,
+  onToggleMaximize,
+  onMinimize,
 }) => {
   const { onMouseDown: handleDrag } = useDraggableWindow();
 
@@ -27,12 +33,18 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
     <div
       data-tauri-drag-region
       onMouseDown={handleDrag}
-      className="h-10 px-3 bg-[#111317] border-b border-[#282d37] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-md select-none"
+      onDoubleClick={onToggleMaximize}
+      className={`h-10 pl-3 pr-0 bg-[#111317] border-b border-[#282d37] flex items-center justify-between cursor-grab active:cursor-grabbing select-none ${
+        isMaximized ? "rounded-none" : "rounded-t-md"
+      }`}
     >
       {/* Alça de Arraste + Logo Seta Vermelha do QCap + Rotas de projetos */}
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
         <DragHandle />
-        <span className="font-mono text-sm text-[#ff4d4d] select-none font-black tracking-tight flex items-center gap-1" title="QCap">
+        <span
+          className="font-mono text-sm text-[#ff4d4d] select-none font-black tracking-tight flex items-center gap-1"
+          title="QCap"
+        >
           ❯
         </span>
 
@@ -55,31 +67,71 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
         })}
       </div>
 
-      {/* Ações da Janela */}
-      <div className="flex items-center gap-1.5 pl-2 shrink-0">
-        {onOpenAbout && (
+      {/* Ações da Janela e Controles Nativos do Windows (Minimizar, Maximizar, Fechar) */}
+      <div className="flex items-center h-full shrink-0" data-no-drag>
+        {/* Links / Botões utilitários */}
+        <div className="flex items-center gap-1 mr-2">
+          {onOpenAbout && (
+            <button
+              type="button"
+              onClick={onOpenAbout}
+              className="text-[11px] font-mono text-[#86868b] hover:text-[#ff4d4d] px-2 py-0.5 rounded-md hover:bg-[#1e222a] transition cursor-pointer"
+              title="Sobre, Versão & Atualizações"
+            >
+              v0.1.4
+            </button>
+          )}
           <button
-            onClick={onOpenAbout}
-            className="text-[11px] font-mono text-[#86868b] hover:text-[#ff4d4d] px-2 py-0.5 rounded-md hover:bg-[#1e222a] transition cursor-pointer"
-            title="Sobre, Versão & Atualizações"
+            type="button"
+            onClick={onOpenSettings}
+            className="text-[#86868b] hover:text-[#f5f5f7] p-1.5 rounded-md hover:bg-[#1e222a] transition cursor-pointer flex items-center justify-center"
+            title="Configurações (Vault e Atalhos)"
           >
-            v0.1.4
+            <Settings className="w-3.5 h-3.5" strokeWidth={1.75} />
           </button>
-        )}
-        <button
-          onClick={onOpenSettings}
-          className="text-[#86868b] hover:text-[#f5f5f7] p-1 rounded-md hover:bg-[#1e222a] transition cursor-pointer flex items-center justify-center"
-          title="Configurações (Vault e Atalhos)"
-        >
-          <Settings className="w-3.5 h-3.5" strokeWidth={1.75} />
-        </button>
-        <button
-          onClick={onClose}
-          className="text-[#86868b] hover:text-[#ff4d4d] p-1 rounded-md hover:bg-[#1e222a] transition cursor-pointer flex items-center justify-center"
-          title="Fechar"
-        >
-          <X className="w-3.5 h-3.5" strokeWidth={1.75} />
-        </button>
+        </div>
+
+        {/* Botões Nativos Windows 11 */}
+        <div className="flex items-center h-full border-l border-[#282d37]">
+          {/* Minimizar */}
+          <button
+            type="button"
+            onClick={onMinimize}
+            className="w-11 h-full flex items-center justify-center text-[#86868b] hover:text-[#f5f5f7] hover:bg-white/10 active:bg-white/15 transition cursor-pointer"
+            title="Minimizar"
+          >
+            <Minus size={13} strokeWidth={1.5} />
+          </button>
+
+          {/* Maximizar / Restaurar */}
+          <button
+            type="button"
+            onClick={onToggleMaximize}
+            className="w-11 h-full flex items-center justify-center text-[#86868b] hover:text-[#f5f5f7] hover:bg-white/10 active:bg-white/15 transition cursor-pointer"
+            title={isMaximized ? "Restaurar" : "Maximizar"}
+          >
+            {isMaximized ? (
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.2">
+                <rect x="2.5" y="0.5" width="7" height="7" rx="0.5" />
+                <path d="M0.5 2.5 V9.5 H7.5" />
+              </svg>
+            ) : (
+              <Square size={11} strokeWidth={1.5} />
+            )}
+          </button>
+
+          {/* Fechar */}
+          <button
+            type="button"
+            onClick={onClose}
+            className={`w-11 h-full flex items-center justify-center text-[#86868b] hover:text-white hover:bg-[#c42b1c] active:bg-[#a52316] transition cursor-pointer ${
+              !isMaximized ? "rounded-tr-md" : ""
+            }`}
+            title="Fechar (Esc)"
+          >
+            <X size={14} strokeWidth={1.5} />
+          </button>
+        </div>
       </div>
     </div>
   );

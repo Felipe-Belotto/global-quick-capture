@@ -258,32 +258,19 @@ fn finish_snip(
     }
 
     if let Some(ref card) = card_win {
-        let snip_coords = match region {
-            Some(r) => Some(r),
-            None => match (x, y, width, height) {
-                (Some(x), Some(y), Some(w), Some(h)) => Some(SnipRegion {
-                    x,
-                    y,
-                    width: w,
-                    height: h,
-                }),
-                _ => None,
-            },
-        };
+        let _ = (region, x, y, width, height);
 
-        let last_pos = LAST_CARD_POS.lock().ok().and_then(|guard| *guard);
+        // Se estiver maximizada de uma sessão anterior, restaura ao tamanho padrão
+        let _ = card.unmaximize();
 
+        // Centraliza sempre no monitor da captura
         if let Some(ref mon) = monitor {
-            let card_size = card.outer_size().ok();
-            let smart_pos = calculate_smart_position(
-                *mon.position(),
-                *mon.size(),
-                mon.scale_factor(),
-                card_size,
-                snip_coords,
-                last_pos,
-            );
-            let _ = card.set_position(Position::Physical(smart_pos));
+            let mon_pos = mon.position();
+            let mon_size = mon.size();
+            let card_size = card.outer_size().unwrap_or(PhysicalSize::new(720, 480));
+            let center_x = mon_pos.x + (mon_size.width as i32 - card_size.width as i32) / 2;
+            let center_y = mon_pos.y + (mon_size.height as i32 - card_size.height as i32) / 2;
+            let _ = card.set_position(Position::Physical(PhysicalPosition::new(center_x, center_y)));
         } else {
             let _ = card.center();
         }
@@ -433,11 +420,51 @@ fn hide_about_window(app: tauri::AppHandle) -> Result<(), String> {
 #[tauri::command]
 fn show_settings_window(app: tauri::AppHandle) -> Result<(), String> {
     if let Some(card_win) = app.get_webview_window("capture_card") {
+        let _ = card_win.unmaximize();
+        let _ = card_win.center();
         let _ = card_win.show();
         let _ = card_win.set_focus();
         let _ = card_win.emit("open_settings", ());
     }
     Ok(())
+}
+
+#[tauri::command]
+fn minimize_window_cmd(app: tauri::AppHandle, label: Option<String>) -> Result<(), String> {
+    let win_label = label.unwrap_or_else(|| "capture_card".to_string());
+    if let Some(win) = app.get_webview_window(&win_label) {
+        let _ = win.minimize();
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn toggle_maximize_window_cmd(app: tauri::AppHandle, label: Option<String>) -> Result<bool, String> {
+    let win_label = label.unwrap_or_else(|| "capture_card".to_string());
+    if let Some(win) = app.get_webview_window(&win_label) {
+        if let Ok(is_max) = win.is_maximized() {
+            if is_max {
+                let _ = win.unmaximize();
+                return Ok(false);
+            } else {
+                let _ = win.maximize();
+                return Ok(true);
+            }
+        } else {
+            let _ = win.maximize();
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+#[tauri::command]
+fn is_window_maximized_cmd(app: tauri::AppHandle, label: Option<String>) -> Result<bool, String> {
+    let win_label = label.unwrap_or_else(|| "capture_card".to_string());
+    if let Some(win) = app.get_webview_window(&win_label) {
+        return Ok(win.is_maximized().unwrap_or(false));
+    }
+    Ok(false)
 }
 
 #[tauri::command]
@@ -515,6 +542,9 @@ pub fn run() {
             hide_about_window,
             show_settings_window,
             start_dragging_window,
+            minimize_window_cmd,
+            toggle_maximize_window_cmd,
+            is_window_maximized_cmd,
             download_and_install_update
         ])
         .setup(|app| {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { AppConfig, SaveSnippetPayload } from "../../../shared/types";
 import { getTodayFormatted } from "../../../shared/lib/date";
 import { CardHeader } from "./CardHeader";
@@ -27,6 +28,7 @@ export const QuickCaptureCard: React.FC = () => {
   const [showAbout, setShowAbout] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
   const [isDraggingFile, setIsDraggingFile] = useState<boolean>(false);
+  const [isMaximized, setIsMaximized] = useState<boolean>(false);
   const [contextMenu, setContextMenu] = useState<{
     isOpen: boolean;
     x: number;
@@ -36,6 +38,55 @@ export const QuickCaptureCard: React.FC = () => {
 
   const descInputRef = useRef<HTMLTextAreaElement | null>(null);
   const isSavingRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    const initWindowListeners = async () => {
+      try {
+        const appWin = getCurrentWindow();
+        const max = await appWin.isMaximized();
+        setIsMaximized(max);
+        unlisten = await appWin.onResized(async () => {
+          const m = await appWin.isMaximized();
+          setIsMaximized(m);
+        });
+      } catch {
+        try {
+          const max = await invoke<boolean>("is_window_maximized_cmd");
+          setIsMaximized(max);
+        } catch {}
+      }
+    };
+    initWindowListeners();
+    return () => {
+      if (unlisten) unlisten();
+    };
+  }, []);
+
+  const handleMinimize = async () => {
+    try {
+      const appWin = getCurrentWindow();
+      await appWin.minimize();
+    } catch {
+      await invoke("minimize_window_cmd");
+    }
+  };
+
+  const handleToggleMaximize = async () => {
+    try {
+      const appWin = getCurrentWindow();
+      await appWin.toggleMaximize();
+      const max = await appWin.isMaximized();
+      setIsMaximized(max);
+    } catch {
+      try {
+        const max = await invoke<boolean>("toggle_maximize_window_cmd");
+        setIsMaximized(max);
+      } catch (err) {
+        console.warn("Falha ao maximizar janela:", err);
+      }
+    }
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -406,14 +457,14 @@ export const QuickCaptureCard: React.FC = () => {
   }
 
   return (
-    <div className="w-full h-full flex flex-col p-2 select-none overflow-hidden">
+    <div className={`w-full h-full flex flex-col select-none overflow-hidden ${isMaximized ? "p-0" : "p-2"}`}>
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDropFile}
-        className={`w-full h-full bg-[#111317] border rounded-md shadow-2xl text-[#f5f5f7] flex flex-col font-sans relative transition-all duration-150 ${
-          isDraggingFile ? "border-[#ff4d4d] ring-2 ring-[#ff4d4d]/40" : "border-[#282d37]"
-        }`}
+        className={`w-full h-full bg-[#111317] border shadow-2xl text-[#f5f5f7] flex flex-col font-sans relative transition-all duration-150 ${
+          isMaximized ? "rounded-none border-transparent" : "rounded-md border-[#282d37]"
+        } ${isDraggingFile ? "border-[#ff4d4d] ring-2 ring-[#ff4d4d]/40" : ""}`}
       >
         {/* Overlay visual ao arrastar arquivo de imagem para dentro do card */}
         {isDraggingFile && (
@@ -424,7 +475,7 @@ export const QuickCaptureCard: React.FC = () => {
           </div>
         )}
 
-        {/* Cabeçalho Modular com Drag Handle e Tabs */}
+        {/* Cabeçalho Modular com Controles Nativos do Windows (Minimizar, Maximizar, Fechar) */}
         <CardHeader
           config={config}
           selectedRouteId={selectedRouteId}
@@ -432,6 +483,9 @@ export const QuickCaptureCard: React.FC = () => {
           onOpenSettings={() => setShowSettings(true)}
           onOpenAbout={() => setShowAbout(true)}
           onClose={handleCancel}
+          isMaximized={isMaximized}
+          onToggleMaximize={handleToggleMaximize}
+          onMinimize={handleMinimize}
         />
 
         {/* Corpo Principal Flexível */}
