@@ -7,8 +7,8 @@
 **Snipping tool e captura rápida para Obsidian no Windows.**  
 Inspirado na velocidade do Raycast e na estética refinada do Warp Terminal.
 
-[![Release v0.1.3](https://img.shields.io/badge/Release-v0.1.3-6366f1?style=flat-square&logo=github&logoColor=white)](https://github.com/Felipe-Belotto/global-quick-capture/releases/tag/v0.1.3)
-[![Download .exe](https://img.shields.io/badge/Download-.exe%20(Windows%20x64)-0ea5e9?style=flat-square&logo=windows&logoColor=white)](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.3/Global.Quick.Capture_0.1.3_x64-setup.exe)
+[![Release v0.1.4](https://img.shields.io/badge/Release-v0.1.4-6366f1?style=flat-square&logo=github&logoColor=white)](https://github.com/Felipe-Belotto/global-quick-capture/releases/tag/v0.1.4)
+[![Download .exe](https://img.shields.io/badge/Download-.exe%20(Windows%20x64)-0ea5e9?style=flat-square&logo=windows&logoColor=white)](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.4/Global.Quick.Capture_0.1.4_x64-setup.exe)
 [![Tauri v2](https://img.shields.io/badge/Tauri-v2-14b8a6?style=flat-square&logo=tauri&logoColor=white)](https://tauri.app/)
 [![React 19](https://img.shields.io/badge/React-19-38bdf8?style=flat-square&logo=react&logoColor=white)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-a855f7?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
@@ -18,7 +18,7 @@ Inspirado na velocidade do Raycast e na estética refinada do Warp Terminal.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│  [1] Daily Note   [2] Inbox   [3] QA / Bugs   [4] Frontend         ⚙  ✕ │
+│  [1] Daily Note   [2] Inbox   [3] QA / Bugs   [4] Frontend    ─  □  ✕ │
 ├────────────────────────────────────────────────────────────────────────┤
 │  ┌──────────────┐  Resumo do recorte / Título do bug...                │
 │  │              │  ─────────────────────────────────────────────────── │
@@ -39,13 +39,15 @@ Inspirado na velocidade do Raycast e na estética refinada do Warp Terminal.
 
 Gravar notas visuais no Obsidian normalmente exige abrir o app, criar uma nova nota, colar o print e organizá-lo manualmente. 
 
-O **QCap** elimina esse atrito:
+O **QCap** elimina esse atrito e se integra como uma suíte completa de produtividade visual para o Windows:
 1. Pressione **`Win + Alt + S`** em qualquer lugar do Windows.
-2. Arraste o mouse sobre a área que deseja recortar.
-3. Digite o título, adicione notas detalhadas de QA e selecione a pasta de destino pelo teclado (`1`, `2`, `3`).
-4. Pressione **`Ctrl + Enter`**: a imagem `.png` é gravada na pasta de anexos e a entrada formatada em Markdown é inserida no seu cofre instantaneamente.
-
-Tudo roda nativamente em Rust via Tauri v2, com consumo de memória em torno de **30 a 40 MB** em segundo plano.
+2. Use a nova **Dock Flutuante de Ícones** (Lucide Icons com tooltips) para alternar entre recorte de área (`Crop`) ou captura instantânea de tela inteira (`Monitor`).
+3. Ao finalizar a seleção, escolha sua ação instantânea sem poluição visual:
+   - **Copiar Imagem (`Ctrl+C`)**: Copia o PNG puro para a área de transferência.
+   - **Salvar PNG (`Ctrl+S`)**: Grava a imagem diretamente na pasta `Screenshots`.
+   - **OCR Instantâneo**: Extrai o texto da imagem e copia direto para o Clipboard.
+   - **Nota no Obsidian (`Enter`)**: Abre o card com notas, tags e rotas rápidas do cofre (`1` a `9`).
+4. Tudo construído estritamente sob uma **grade de múltiplos de 4** (4px/8px design grid), com consumo levíssimo de **30 a 40 MB** de RAM em segundo plano.
 
 ---
 
@@ -55,8 +57,8 @@ Tudo roda nativamente em Rust via Tauri v2, com consumo de memória em torno de 
 
 | Tipo | Arquivo | Plataforma | Link |
 | :--- | :--- | :--- | :--- |
-| **Instalador Oficial (.exe)** | `Global.Quick.Capture_0.1.3_x64-setup.exe` | Windows 10 / 11 (x64) | [Baixar .exe](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.3/Global.Quick.Capture_0.1.3_x64-setup.exe) |
-| **Pacote MSI** | `Global.Quick.Capture_0.1.3_x64_en-US.msi` | Windows 10 / 11 (x64) | [Baixar .msi](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.3/Global.Quick.Capture_0.1.3_x64_en-US.msi) |
+| **Instalador Oficial (.exe)** | `Global.Quick.Capture_0.1.4_x64-setup.exe` | Windows 10 / 11 (x64) | [Baixar .exe](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.4/Global.Quick.Capture_0.1.4_x64-setup.exe) |
+| **Pacote MSI** | `Global.Quick.Capture_0.1.4_x64_en-US.msi` | Windows 10 / 11 (x64) | [Baixar .msi](https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.4/Global.Quick.Capture_0.1.4_x64_en-US.msi) |
 | **Artefato da Action (CI)** | `windows-installer.zip` | Windows 10 / 11 (x64) | [Acessar Builds no GitHub Actions](https://github.com/Felipe-Belotto/global-quick-capture/actions) |
 
 ---
@@ -66,7 +68,7 @@ Tudo roda nativamente em Rust via Tauri v2, com consumo de memória em torno de 
 Se o navegador bloquear o download por reputação, você pode baixar e iniciar a instalação em 1 linha no **PowerShell**:
 
 ```powershell
-irm https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.3/Global.Quick.Capture_0.1.3_x64-setup.exe -OutFile "$env:TEMP\setup.exe"; Unblock-File "$env:TEMP\setup.exe"; Start-Process "$env:TEMP\setup.exe"
+irm https://github.com/Felipe-Belotto/global-quick-capture/releases/download/v0.1.4/Global.Quick.Capture_0.1.4_x64-setup.exe -OutFile "$env:TEMP\setup.exe"; Unblock-File "$env:TEMP\setup.exe"; Start-Process "$env:TEMP\setup.exe"
 ```
 
 ---
@@ -87,7 +89,7 @@ Por ser um projeto open-source independente sem certificado comercial pago da Mi
 #### 2. Se baixou o arquivo `.zip` da aba GitHub Actions:
 - Arquivos baixados diretamente da aba *Actions* vêm com a flag de zona web do Windows.
 - Clique com o botão direito no arquivo `.zip` (ou no `.exe` extraído) > **Propriedades** > marque a caixa **Desbloquear** (*Unblock*) no canto inferior > **Aplicar** / **OK**.
-- Ou no PowerShell: `Unblock-File .\Global.Quick.Capture_0.1.0_x64-setup.exe`.
+- Ou no PowerShell: `Unblock-File .\Global.Quick.Capture_0.1.4_x64-setup.exe`.
 
 #### 3. Na primeira execução (Alerta do Windows SmartScreen):
 - Quando a janela azul *"O Windows protegeu o seu computador"* aparecer:
@@ -136,7 +138,12 @@ Ao salvar uma captura, o arquivo de destino recebe o bloco formatado com data, h
 | :--- | :--- | :--- |
 | `Win + Alt + S` | Global no Windows | Abre o overlay de recorte sobre qualquer janela |
 | `Esc` | Overlay / Card | Cancela a seleção ou fecha o card sem salvar |
-| `1` a `9` | Card de Captura | Seleciona o projeto ou nota de destino |
+| `1` | Overlay de Recorte | Ativa o modo de seleção de área livre (`Crop`) |
+| `2` | Overlay de Recorte | Captura instantaneamente a tela inteira (`Monitor`) |
+| `Ctrl + C` | Overlay com Seleção | Copia a imagem recortada diretamente para a área de transferência |
+| `Ctrl + S` | Overlay com Seleção | Salva a imagem PNG diretamente na pasta de Screenshots/Downloads |
+| `Enter` | Overlay com Seleção | Envia a área selecionada para o Card do Obsidian |
+| `1` a `9` | Card de Captura | Seleciona o projeto ou nota de destino no cofre |
 | `Tab` | Card de Captura | Alterna entre o campo de título e o campo de notas de QA |
 | `Ctrl + Enter` | Card de Captura | Grava a nota no cofre e fecha a janela |
 
