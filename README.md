@@ -46,12 +46,15 @@ O **QCap** elimina esse atrito e se integra como uma suíte completa de produtiv
    - **`Smart Snapping [2]`**: Reconhece modais, caixas de diálogo e janelas ativas automaticamente sob o mouse. Um simples clique captura o modal perfeito!
    - **`Página Inteira [3]`**: Auto-scroll automático que desce a página de navegadores (YouTube Music, documentação, Notion) e costura o print longo vertical.
    - **`Tela Inteira [4]`**: Captura rápida do monitor todo em 1 clique.
-3. Ao finalizar a seleção (ou passar o mouse sobre a janela), use os **atalhos diretos sem precisar clicar no botão**:
+3. **Ajuste Fino de Resolução e Redimensionamento**:
+   - **8 Alças de Redimensionamento**: Arraste os cantos ou laterais para ajustar o enquadramento com precisão milimétrica, ou arraste o miolo para reposicionar o recorte.
+   - **Ajuste Numérico em Pixels**: Clique no badge `L × A px` para digitar a resolução exata desejada (ex: `1280 × 720`, `800 × 600`) ou aplicar presets rápidos (`16:9`, `1:1`).
+4. Ao finalizar a seleção (ou passar o mouse sobre a janela), use os **atalhos diretos sem precisar clicar no botão**:
    - **`Ctrl + C`**: Copia a imagem instantaneamente para a área de transferência e fecha o overlay.
    - **`Ctrl + S`**: Grava o PNG direto na pasta `Screenshots` e fecha o overlay.
    - **`Enter`**: Envia para o Card do Obsidian com rotas e notas rápidas.
    - **OCR Instantâneo**: Extrai o texto da imagem diretamente para o Clipboard.
-4. Construído sob uma **grade estrita de múltiplos de 4** (4px/8px design grid), com consumo levíssimo de **30 a 40 MB** de RAM em segundo plano.
+5. Construído sob uma **grade estrita de múltiplos de 4** (4px/8px design grid), com consumo levíssimo de **30 a 40 MB** de RAM em segundo plano.
 
 ---
 

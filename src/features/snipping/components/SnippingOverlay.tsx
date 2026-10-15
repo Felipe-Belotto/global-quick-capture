@@ -19,13 +19,11 @@ import { extractTextFromImage } from "../../ocr/lib/ocrEngine";
 interface WindowRect {
   title: string;
   app_name: string;
-  x: i32;
-  y: i32;
+  x: number;
+  y: number;
   width: number;
   height: number;
 }
-
-type i32 = number;
 
 interface StartSnipData {
   screen_image: string;
@@ -38,6 +36,15 @@ interface CropResult {
   y: number;
   width: number;
   height: number;
+}
+
+interface DragStartInfo {
+  mouseX: number;
+  mouseY: number;
+  rectLeft: number;
+  rectTop: number;
+  rectWidth: number;
+  rectHeight: number;
 }
 
 export const SnippingOverlay: React.FC = () => {
@@ -53,10 +60,19 @@ export const SnippingOverlay: React.FC = () => {
   const [ocrSuccess, setOcrSuccess] = useState<boolean>(false);
   const [isScrollingCapture, setIsScrollingCapture] = useState<boolean>(false);
 
+  // Redimensionamento e Ajuste de Pixels
+  const [resizeHandle, setResizeHandle] = useState<string | null>(null);
+  const [dragStartPoint, setDragStartPoint] = useState<DragStartInfo | null>(null);
+  const [isEditingDimensions, setIsEditingDimensions] = useState<boolean>(false);
+  const [customWidthInput, setCustomWidthInput] = useState<string>("");
+  const [customHeightInput, setCustomHeightInput] = useState<string>("");
+
   const imgRef = useRef<HTMLImageElement | null>(null);
   const completedCropRef = useRef<CropResult | null>(null);
   const hoveredWindowRef = useRef<WindowRect | null>(null);
   const isCtrlHeldRef = useRef<boolean>(false);
+  const resizeHandleRef = useRef<string | null>(null);
+  const dragStartPointRef = useRef<DragStartInfo | null>(null);
 
   useEffect(() => {
     completedCropRef.current = completedCrop;
@@ -69,6 +85,14 @@ export const SnippingOverlay: React.FC = () => {
   useEffect(() => {
     isCtrlHeldRef.current = isCtrlHeld;
   }, [isCtrlHeld]);
+
+  useEffect(() => {
+    resizeHandleRef.current = resizeHandle;
+  }, [resizeHandle]);
+
+  useEffect(() => {
+    dragStartPointRef.current = dragStartPoint;
+  }, [dragStartPoint]);
 
   // Função auxiliar para gerar recorte em canvas
   const generateCroppedImage = useCallback(
@@ -188,11 +212,17 @@ export const SnippingOverlay: React.FC = () => {
   }, []);
 
   const handleCancel = useCallback(async () => {
+    if (isEditingDimensions) {
+      setIsEditingDimensions(false);
+      return;
+    }
+
     if (completedCropRef.current) {
       setCompletedCrop(null);
       setStartPos(null);
       setCurrentPos(null);
       setHoveredWindow(null);
+      setIsEditingDimensions(false);
       return;
     }
 
@@ -202,12 +232,13 @@ export const SnippingOverlay: React.FC = () => {
     setCurrentPos(null);
     setCompletedCrop(null);
     setHoveredWindow(null);
+    setIsEditingDimensions(false);
     try {
       await invoke("cancel_snip");
     } catch (e) {
       console.error("Erro ao cancelar recorte:", e);
     }
-  }, []);
+  }, [isEditingDimensions]);
 
   // Inicializar overlay quando acionado pelo backend
   useEffect(() => {
@@ -225,6 +256,9 @@ export const SnippingOverlay: React.FC = () => {
       setIsOcrLoading(false);
       setOcrSuccess(false);
       setIsScrollingCapture(false);
+      setIsEditingDimensions(false);
+      setResizeHandle(null);
+      setDragStartPoint(null);
     });
 
     const unlistenLegacy = listen<string>("start_snip", (event) => {
@@ -240,6 +274,9 @@ export const SnippingOverlay: React.FC = () => {
       setIsOcrLoading(false);
       setOcrSuccess(false);
       setIsScrollingCapture(false);
+      setIsEditingDimensions(false);
+      setResizeHandle(null);
+      setDragStartPoint(null);
     });
 
     return () => {
@@ -248,7 +285,7 @@ export const SnippingOverlay: React.FC = () => {
     };
   }, []);
 
-  // Teclado com ref para evitar stale closure
+  // Teclado
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       const activeCrop = completedCropRef.current;
@@ -259,14 +296,12 @@ export const SnippingOverlay: React.FC = () => {
         handleCancel();
       } else if (e.key === "Control" || e.ctrlKey) {
         setIsCtrlHeld(true);
-      } else if (e.key === "1") {
-        // Modo recorte / limpa tela
+      } else if (e.key === "1" && !isEditingDimensions) {
         setCompletedCrop(null);
         setStartPos(null);
         setCurrentPos(null);
         setHoveredWindow(null);
-      } else if (e.key === "2") {
-        // Snapping de janela
+      } else if (e.key === "2" && !isEditingDimensions) {
         if (activeWin) {
           const x = Math.max(0, activeWin.x);
           const y = Math.max(0, activeWin.y);
@@ -279,11 +314,9 @@ export const SnippingOverlay: React.FC = () => {
             setCurrentPos({ x: x + w, y: y + h });
           });
         }
-      } else if (e.key === "3") {
-        // Página Inteira (Auto-Scroll)
+      } else if (e.key === "3" && !isEditingDimensions) {
         handleStartScrollingCapture();
-      } else if (e.key === "4") {
-        // Tela inteira
+      } else if (e.key === "4" && !isEditingDimensions) {
         handleSelectFullscreen();
       } else if (e.ctrlKey && (e.key === "c" || e.key === "C")) {
         e.preventDefault();
@@ -311,7 +344,7 @@ export const SnippingOverlay: React.FC = () => {
             handleSaveToDisk({ base64: b64, x, y, width: w, height: h });
           });
         }
-      } else if (e.key === "Enter") {
+      } else if (e.key === "Enter" && !isEditingDimensions) {
         if (activeCrop) {
           handleSendToObsidian(activeCrop);
         } else if (activeWin) {
@@ -346,12 +379,91 @@ export const SnippingOverlay: React.FC = () => {
     handleCopyToClipboard,
     handleSaveToDisk,
     handleSendToObsidian,
+    isEditingDimensions,
   ]);
 
-  // Detecção de janela/modal sob o cursor quando não estiver selecionando
+  const rect =
+    startPos && currentPos
+      ? {
+          left: Math.min(startPos.x, currentPos.x),
+          top: Math.min(startPos.y, currentPos.y),
+          width: Math.abs(currentPos.x - startPos.x),
+          height: Math.abs(currentPos.y - startPos.y),
+        }
+      : null;
+
+  // Lógica de Redimensionamento e Mover por Arraste
+  const handleResizeStart = (e: React.MouseEvent, handle: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!rect) return;
+
+    setResizeHandle(handle);
+    setDragStartPoint({
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      rectLeft: rect.left,
+      rectTop: rect.top,
+      rectWidth: rect.width,
+      rectHeight: rect.height,
+    });
+  };
+
   const handleMouseMove = (e: React.MouseEvent) => {
     if (e.ctrlKey !== isCtrlHeld) {
       setIsCtrlHeld(e.ctrlKey);
+    }
+
+    // Se estiver redimensionando ou movendo a seleção existente
+    if (resizeHandleRef.current && dragStartPointRef.current) {
+      const handle = resizeHandleRef.current;
+      const initial = dragStartPointRef.current;
+      const dx = e.clientX - initial.mouseX;
+      const dy = e.clientY - initial.mouseY;
+
+      if (handle === "move") {
+        const nextLeft = Math.max(0, Math.min(window.innerWidth - initial.rectWidth, initial.rectLeft + dx));
+        const nextTop = Math.max(0, Math.min(window.innerHeight - initial.rectHeight, initial.rectTop + dy));
+        setStartPos({ x: nextLeft, y: nextTop });
+        setCurrentPos({ x: nextLeft + initial.rectWidth, y: nextTop + initial.rectHeight });
+      } else if (handle === "se") {
+        const nextW = Math.max(16, Math.min(window.innerWidth - initial.rectLeft, initial.rectWidth + dx));
+        const nextH = Math.max(16, Math.min(window.innerHeight - initial.rectTop, initial.rectHeight + dy));
+        setStartPos({ x: initial.rectLeft, y: initial.rectTop });
+        setCurrentPos({ x: initial.rectLeft + nextW, y: initial.rectTop + nextH });
+      } else if (handle === "sw") {
+        const nextLeft = Math.max(0, Math.min(initial.rectLeft + initial.rectWidth - 16, initial.rectLeft + dx));
+        const nextW = initial.rectLeft + initial.rectWidth - nextLeft;
+        const nextH = Math.max(16, Math.min(window.innerHeight - initial.rectTop, initial.rectHeight + dy));
+        setStartPos({ x: nextLeft, y: initial.rectTop });
+        setCurrentPos({ x: nextLeft + nextW, y: initial.rectTop + nextH });
+      } else if (handle === "ne") {
+        const nextTop = Math.max(0, Math.min(initial.rectTop + initial.rectHeight - 16, initial.rectTop + dy));
+        const nextH = initial.rectTop + initial.rectHeight - nextTop;
+        const nextW = Math.max(16, Math.min(window.innerWidth - initial.rectLeft, initial.rectWidth + dx));
+        setStartPos({ x: initial.rectLeft, y: nextTop });
+        setCurrentPos({ x: initial.rectLeft + nextW, y: nextTop + nextH });
+      } else if (handle === "nw") {
+        const nextLeft = Math.max(0, Math.min(initial.rectLeft + initial.rectWidth - 16, initial.rectLeft + dx));
+        const nextTop = Math.max(0, Math.min(initial.rectTop + initial.rectHeight - 16, initial.rectTop + dy));
+        const nextW = initial.rectLeft + initial.rectWidth - nextLeft;
+        const nextH = initial.rectTop + initial.rectHeight - nextTop;
+        setStartPos({ x: nextLeft, y: nextTop });
+        setCurrentPos({ x: nextLeft + nextW, y: nextTop + nextH });
+      } else if (handle === "e") {
+        const nextW = Math.max(16, Math.min(window.innerWidth - initial.rectLeft, initial.rectWidth + dx));
+        setCurrentPos({ x: initial.rectLeft + nextW, y: currentPos ? currentPos.y : initial.rectTop + initial.rectHeight });
+      } else if (handle === "w") {
+        const nextLeft = Math.max(0, Math.min(initial.rectLeft + initial.rectWidth - 16, initial.rectLeft + dx));
+        setStartPos({ x: nextLeft, y: startPos ? startPos.y : initial.rectTop });
+      } else if (handle === "s") {
+        const nextH = Math.max(16, Math.min(window.innerHeight - initial.rectTop, initial.rectHeight + dy));
+        setCurrentPos({ x: currentPos ? currentPos.x : initial.rectLeft + initial.rectWidth, y: initial.rectTop + nextH });
+      } else if (handle === "n") {
+        const nextTop = Math.max(0, Math.min(initial.rectTop + initial.rectHeight - 16, initial.rectTop + dy));
+        setStartPos({ x: startPos ? startPos.x : initial.rectLeft, y: nextTop });
+      }
+      return;
     }
 
     if (isSelecting && startPos) {
@@ -359,7 +471,6 @@ export const SnippingOverlay: React.FC = () => {
       return;
     }
 
-    // Se já tiver recorte ativo, não atualizar hover de janela
     if (completedCrop) return;
 
     // Detectar janela sob o cursor
@@ -367,15 +478,10 @@ export const SnippingOverlay: React.FC = () => {
     const my = e.clientY;
 
     const matched = windows.filter(
-      (w) =>
-        mx >= w.x &&
-        mx <= w.x + w.width &&
-        my >= w.y &&
-        my <= w.y + w.height
+      (w) => mx >= w.x && mx <= w.x + w.width && my >= w.y && my <= w.y + w.height
     );
 
     if (matched.length > 0) {
-      // Pega a menor janela (prioriza modais, caixas de diálogo sobre janelas de fundo)
       matched.sort((a, b) => a.width * a.height - b.width * b.height);
       setHoveredWindow(matched[0]);
     } else {
@@ -385,10 +491,14 @@ export const SnippingOverlay: React.FC = () => {
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return;
-    if ((e.target as HTMLElement).closest("button")) return;
+    if ((e.target as HTMLElement).closest("button") || (e.target as HTMLElement).closest("input")) return;
 
-    // Se clicar em cima de uma janela detectada sem arrastar
-    if (hoveredWindow && !completedCrop) {
+    if (completedCrop) {
+      setIsEditingDimensions(false);
+      return;
+    }
+
+    if (hoveredWindow) {
       const hw = hoveredWindow;
       const x = Math.max(0, hw.x);
       const y = Math.max(0, hw.y);
@@ -411,6 +521,23 @@ export const SnippingOverlay: React.FC = () => {
   };
 
   const handleMouseUp = async (e: React.MouseEvent) => {
+    // Se estava redimensionando ou movendo
+    if (resizeHandleRef.current) {
+      setResizeHandle(null);
+      setDragStartPoint(null);
+      if (rect && rect.width >= 16 && rect.height >= 16) {
+        const b64 = await generateCroppedImage(rect.left, rect.top, rect.width, rect.height);
+        setCompletedCrop({
+          base64: b64,
+          x: rect.left,
+          y: rect.top,
+          width: rect.width,
+          height: rect.height,
+        });
+      }
+      return;
+    }
+
     if (!isSelecting || !startPos || !currentPos) return;
     setIsSelecting(false);
 
@@ -422,7 +549,6 @@ export const SnippingOverlay: React.FC = () => {
     let width = Math.abs(currentPos.x - startPos.x);
     let height = Math.abs(currentPos.y - startPos.y);
 
-    // Se foi apenas um clique (sem arrastar) sobre uma janela/modal destacada
     if (width < 8 && height < 8 && hoveredWindow) {
       const hw = hoveredWindow;
       x = Math.max(0, hw.x);
@@ -462,17 +588,27 @@ export const SnippingOverlay: React.FC = () => {
     setHoveredWindow(null);
   };
 
-  const rect =
-    startPos && currentPos
-      ? {
-          left: Math.min(startPos.x, currentPos.x),
-          top: Math.min(startPos.y, currentPos.y),
-          width: Math.abs(currentPos.x - startPos.x),
-          height: Math.abs(currentPos.y - startPos.y),
-        }
-      : null;
+  // Aplicação manual de dimensões em px
+  const handleApplyDimensions = async (wVal: number, hVal: number) => {
+    if (!rect) return;
+    const newWidth = Math.max(16, Math.min(window.innerWidth - rect.left, wVal));
+    const newHeight = Math.max(16, Math.min(window.innerHeight - rect.top, hVal));
 
-  // Posição inteligente da Action Toolbar (abaixo da seleção ou acima se perto do rodapé)
+    const nextCurrent = { x: rect.left + newWidth, y: rect.top + newHeight };
+    setCurrentPos(nextCurrent);
+
+    const b64 = await generateCroppedImage(rect.left, rect.top, newWidth, newHeight);
+    setCompletedCrop({
+      base64: b64,
+      x: rect.left,
+      y: rect.top,
+      width: newWidth,
+      height: newHeight,
+    });
+    setIsEditingDimensions(false);
+  };
+
+  // Posição inteligente da Action Toolbar
   const getActionToolbarPos = () => {
     if (!rect) return { top: 16, left: window.innerWidth / 2 };
     const dockHeight = 40;
@@ -610,10 +746,10 @@ export const SnippingOverlay: React.FC = () => {
         </div>
       )}
 
-      {/* Retângulo de Seleção */}
+      {/* Retângulo de Seleção com Handles de Redimensionamento */}
       {rect && (
         <div
-          className={`absolute border pointer-events-none transition-[border-color] ${
+          className={`absolute border transition-[border-color] ${
             isCtrlHeld
               ? "border-[#ff4d4d] shadow-[0_0_0_9999px_rgba(0,0,0,0.65),0_0_16px_rgba(255,77,77,0.3)]"
               : "border-[#ff4d4d] shadow-[0_0_0_9999px_rgba(0,0,0,0.65)]"
@@ -625,19 +761,151 @@ export const SnippingOverlay: React.FC = () => {
             height: `${rect.height}px`,
           }}
         >
-          {/* Badge de Dimensões (sempre múltiplos de 4 nos paddings) */}
-          <div
-            className={`absolute -top-6 left-0 px-2 py-1 rounded-[4px] border text-[12px] leading-[16px] font-mono whitespace-nowrap flex items-center gap-2 ${
-              isCtrlHeld
-                ? "bg-[#1c2028] border-[#ff4d4d] text-[#ff4d4d]"
-                : "bg-[#111317] border-[#282d37] text-[#f5f5f7]"
-            }`}
-          >
-            <span>
-              {rect.width} × {rect.height} px
-            </span>
-            {isCtrlHeld && <span className="text-[#ff4d4d]">salvar rápido [Ctrl]</span>}
+          {/* Área central com cursor de mover */}
+          {completedCrop && (
+            <div
+              onMouseDown={(e) => handleResizeStart(e, "move")}
+              className="absolute inset-0 cursor-move bg-transparent"
+              title="Arrastar área de recorte"
+            />
+          )}
+
+          {/* Badge de Dimensões Interativo (Clicável para editar px) */}
+          <div className="absolute -top-7 left-0 flex items-center gap-1 z-50">
+            {!isEditingDimensions ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCustomWidthInput(String(rect.width));
+                  setCustomHeightInput(String(rect.height));
+                  setIsEditingDimensions(true);
+                }}
+                className={`px-2 py-1 rounded-[4px] border text-[12px] leading-[16px] font-mono whitespace-nowrap flex items-center gap-2 cursor-pointer shadow-xl transition hover:border-[#ff4d4d] ${
+                  isCtrlHeld
+                    ? "bg-[#1c2028] border-[#ff4d4d] text-[#ff4d4d]"
+                    : "bg-[#111317] border-[#282d37] text-[#f5f5f7] hover:bg-[#181a1f]"
+                }`}
+                title="Clique para definir dimensões exatas em pixels"
+              >
+                <span>
+                  {rect.width} × {rect.height} px
+                </span>
+                {isCtrlHeld && <span className="text-[#ff4d4d]">salvar rápido [Ctrl]</span>}
+              </button>
+            ) : (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 p-1 rounded-[4px] bg-[#111317] border border-[#ff4d4d] shadow-2xl backdrop-blur-md z-50 animate-in fade-in"
+              >
+                <input
+                  type="number"
+                  value={customWidthInput}
+                  onChange={(e) => setCustomWidthInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleApplyDimensions(Number(customWidthInput) || rect.width, Number(customHeightInput) || rect.height);
+                    }
+                  }}
+                  className="w-16 h-6 px-1 rounded-[4px] bg-[#1c2028] border border-[#282d37] text-[12px] font-mono text-[#f5f5f7] focus:outline-none focus:border-[#ff4d4d] text-center"
+                  placeholder="Largura"
+                  autoFocus
+                />
+                <span className="text-[12px] font-mono text-zinc-400">×</span>
+                <input
+                  type="number"
+                  value={customHeightInput}
+                  onChange={(e) => setCustomHeightInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleApplyDimensions(Number(customWidthInput) || rect.width, Number(customHeightInput) || rect.height);
+                    }
+                  }}
+                  className="w-16 h-6 px-1 rounded-[4px] bg-[#1c2028] border border-[#282d37] text-[12px] font-mono text-[#f5f5f7] focus:outline-none focus:border-[#ff4d4d] text-center"
+                  placeholder="Altura"
+                />
+                <span className="text-[12px] font-mono text-zinc-400">px</span>
+
+                {/* Presets rápidos */}
+                <div className="flex items-center gap-1 border-l border-[#282d37] pl-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const w = 800;
+                      const h = 450;
+                      setCustomWidthInput(String(w));
+                      setCustomHeightInput(String(h));
+                      handleApplyDimensions(w, h);
+                    }}
+                    className="px-1.5 py-0.5 rounded-[4px] bg-[#1c2028] hover:bg-[#252a35] text-[10px] font-mono text-zinc-300 cursor-pointer"
+                  >
+                    16:9
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const s = Math.min(rect.width, rect.height) || 400;
+                      setCustomWidthInput(String(s));
+                      setCustomHeightInput(String(s));
+                      handleApplyDimensions(s, s);
+                    }}
+                    className="px-1.5 py-0.5 rounded-[4px] bg-[#1c2028] hover:bg-[#252a35] text-[10px] font-mono text-zinc-300 cursor-pointer"
+                  >
+                    1:1
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleApplyDimensions(Number(customWidthInput) || rect.width, Number(customHeightInput) || rect.height)}
+                  className="flex items-center justify-center w-6 h-6 rounded-[4px] bg-[#ff4d4d] text-white hover:bg-[#e04343] transition cursor-pointer"
+                >
+                  <Check size={12} />
+                </button>
+              </div>
+            )}
           </div>
+
+          {/* 8 Alças de Redimensionamento (Múltiplos de 4 estritos: w-2 h-2 = 8x8px) */}
+          {completedCrop && (
+            <>
+              {/* Cantos */}
+              <div
+                onMouseDown={(e) => handleResizeStart(e, "nw")}
+                className="absolute -top-1 -left-1 w-2 h-2 bg-white border border-[#ff4d4d] rounded-[2px] cursor-nwse-resize z-40"
+              />
+              <div
+                onMouseDown={(e) => handleResizeStart(e, "ne")}
+                className="absolute -top-1 -right-1 w-2 h-2 bg-white border border-[#ff4d4d] rounded-[2px] cursor-nesw-resize z-40"
+              />
+              <div
+                onMouseDown={(e) => handleResizeStart(e, "sw")}
+                className="absolute -bottom-1 -left-1 w-2 h-2 bg-white border border-[#ff4d4d] rounded-[2px] cursor-nesw-resize z-40"
+              />
+              <div
+                onMouseDown={(e) => handleResizeStart(e, "se")}
+                className="absolute -bottom-1 -right-1 w-2 h-2 bg-white border border-[#ff4d4d] rounded-[2px] cursor-nwse-resize z-40"
+              />
+
+              {/* Lados */}
+              <div
+                onMouseDown={(e) => handleResizeStart(e, "n")}
+                className="absolute -top-1 left-1/2 -translate-x-1/2 w-4 h-2 bg-white border border-[#ff4d4d] rounded-[2px] cursor-ns-resize z-40"
+              />
+              <div
+                onMouseDown={(e) => handleResizeStart(e, "s")}
+                className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-2 bg-white border border-[#ff4d4d] rounded-[2px] cursor-ns-resize z-40"
+              />
+              <div
+                onMouseDown={(e) => handleResizeStart(e, "w")}
+                className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-4 bg-white border border-[#ff4d4d] rounded-[2px] cursor-ew-resize z-40"
+              />
+              <div
+                onMouseDown={(e) => handleResizeStart(e, "e")}
+                className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-4 bg-white border border-[#ff4d4d] rounded-[2px] cursor-ew-resize z-40"
+              />
+            </>
+          )}
         </div>
       )}
 
@@ -718,6 +986,7 @@ export const SnippingOverlay: React.FC = () => {
               setStartPos(null);
               setCurrentPos(null);
               setHoveredWindow(null);
+              setIsEditingDimensions(false);
             }}
             className="group relative flex items-center justify-center w-8 h-8 rounded-[8px] text-[#86868b] hover:text-[#ff4d4d] hover:bg-[#252a35] transition cursor-pointer"
           >
