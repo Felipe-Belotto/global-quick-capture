@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import {
+  Hand,
   ArrowRight,
   Square,
   EyeOff,
@@ -23,7 +24,7 @@ interface AnnotationEditorModalProps {
   onClose: () => void;
 }
 
-type ToolType = "arrow" | "rect" | "blur" | "pen" | "highlighter" | "text";
+type ToolType = "hand" | "arrow" | "rect" | "blur" | "pen" | "highlighter" | "text";
 
 interface TextInputState {
   canvasX: number;
@@ -44,10 +45,17 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [startPos, setStartPos] = useState<{ x: number; y: number } | null>(null);
 
+  // Estados de Zoom & Pan com suporte à mãozinha do Figma
+  const [zoom, setZoom] = useState<number>(1);
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState<boolean>(false);
+  const [isSpacePressed, setIsSpacePressed] = useState<boolean>(false);
+  const panStartRef = useRef<{ startX: number; startY: number; initialPanX: number; initialPanY: number } | null>(null);
+
   // Estado para ferramenta de texto interativa
   const [textInput, setTextInput] = useState<TextInputState | null>(null);
-  const [zoom, setZoom] = useState<number>(1);
 
+  const viewportRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const tempCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const canvasContainerRef = useRef<HTMLDivElement | null>(null);
@@ -55,16 +63,30 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
   const imgRef = useRef<HTMLImageElement | null>(null);
   const highlighterPointsRef = useRef<{ x: number; y: number }[]>([]);
 
-  // Wheel listener com Ctrl para zoom suave no documento/área
+  // Wheel listener com Ctrl (Zoom) e Shift (Pan Horizontal lado a lado estilo Figma)
   useEffect(() => {
-    const container = canvasContainerRef.current;
+    const container = viewportRef.current;
     if (!container) return;
 
     const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
       if (e.ctrlKey) {
-        e.preventDefault();
+        // Zoom in / Zoom out suave
         const delta = e.deltaY < 0 ? 0.15 : -0.15;
-        setZoom((prev) => Math.min(Math.max(Number((prev + delta).toFixed(2)), 0.5), 3.5));
+        setZoom((prev) => Math.min(Math.max(Number((prev + delta).toFixed(2)), 0.5), 4.0));
+      } else if (e.shiftKey) {
+        // Shift + Wheel arrasta horizontalmente para os lados
+        const shiftDelta = e.deltaY || e.deltaX;
+        setPan((prev) => ({
+          ...prev,
+          x: Math.round(prev.x - shiftDelta),
+        }));
+      } else {
+        // Wheel normal ou touchpad: pan vertical e horizontal suave
+        setPan((prev) => ({
+          x: Math.round(prev.x - e.deltaX),
+          y: Math.round(prev.y - e.deltaY),
+        }));
       }
     };
 
@@ -161,7 +183,7 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
     [textInput, handleCommitText, color]
   );
 
-  // Atalhos de Teclado: A, R, B, H, T e Ctrl+Z
+  // Atalhos de Teclado: Espaço (Mãozinha), A, R, B, D, T, P, H e Ctrl+Z
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
@@ -170,6 +192,13 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
         (target.tagName === "INPUT" ||
           target.tagName === "TEXTAREA" ||
           target.isContentEditable);
+
+      // Segurar Espaço ativa temporariamente a mãozinha (estilo Figma)
+      if (e.code === "Space" && !isInputActive && !e.repeat) {
+        e.preventDefault();
+        setIsSpacePressed(true);
+        return;
+      }
 
       // Ctrl+Z para Desfazer (não captura se estiver digitando em campo de texto)
       if ((e.ctrlKey || e.metaKey) && (e.key === "z" || e.key === "Z")) {
@@ -192,6 +221,10 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
 
       const key = e.key.toLowerCase();
       switch (key) {
+        case "h":
+          e.preventDefault();
+          selectTool("hand");
+          break;
         case "a":
           e.preventDefault();
           selectTool("arrow");
@@ -204,9 +237,13 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
           e.preventDefault();
           selectTool("blur");
           break;
-        case "h":
+        case "d":
           e.preventDefault();
           selectTool("highlighter");
+          break;
+        case "p":
+          e.preventDefault();
+          selectTool("pen");
           break;
         case "t":
           e.preventDefault();
@@ -225,9 +262,19 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
       }
     };
 
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === "Space") {
+        setIsSpacePressed(false);
+        setIsPanning(false);
+        panStartRef.current = null;
+      }
+    };
+
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
     };
   }, [handleUndo, selectTool, textInput, onClose]);
 
@@ -237,6 +284,71 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
       textInputRef.current.focus();
     }
   }, [textInput]);
+
+  const handleResetView = () => {
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  };
+
+  // Funções de Pan / Arraste (Mãozinha do Figma)
+  const handleContainerMouseDown = (e: React.MouseEvent) => {
+    if (activeTool === "hand" || isSpacePressed || e.button === 1) {
+      e.preventDefault();
+      panStartRef.current = {
+        startX: e.clientX,
+        startY: e.clientY,
+        initialPanX: pan.x,
+        initialPanY: pan.y,
+      };
+      setIsPanning(true);
+    }
+  };
+
+  useEffect(() => {
+    if (!isPanning) return;
+
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      if (!panStartRef.current) return;
+      e.preventDefault();
+      const dx = e.clientX - panStartRef.current.startX;
+      const dy = e.clientY - panStartRef.current.startY;
+      setPan({
+        x: panStartRef.current.initialPanX + dx,
+        y: panStartRef.current.initialPanY + dy,
+      });
+    };
+
+    const handleWindowMouseUp = () => {
+      setIsPanning(false);
+      panStartRef.current = null;
+    };
+
+    window.addEventListener("mousemove", handleWindowMouseMove);
+    window.addEventListener("mouseup", handleWindowMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", handleWindowMouseMove);
+      window.removeEventListener("mouseup", handleWindowMouseUp);
+    };
+  }, [isPanning]);
+
+  const handleContainerMouseMove = (e: React.MouseEvent) => {
+    if (isPanning && panStartRef.current) {
+      e.preventDefault();
+      const dx = e.clientX - panStartRef.current.startX;
+      const dy = e.clientY - panStartRef.current.startY;
+      setPan({
+        x: panStartRef.current.initialPanX + dx,
+        y: panStartRef.current.initialPanY + dy,
+      });
+    }
+  };
+
+  const handleContainerMouseUp = () => {
+    if (isPanning) {
+      setIsPanning(false);
+      panStartRef.current = null;
+    }
+  };
 
   const getCanvasCoords = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -251,6 +363,11 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    // Se a mãozinha estiver ativa, segurando espaço ou botão do meio: delega para Pan
+    if (activeTool === "hand" || isSpacePressed || e.button === 1) {
+      handleContainerMouseDown(e);
+      return;
+    }
     if (e.button !== 0) return;
 
     // Ferramenta de Texto: ao clicar, posiciona e abre a caixa para digitar legenda
@@ -303,6 +420,10 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (isPanning) {
+      handleContainerMouseMove(e);
+      return;
+    }
     if (!isDrawing || !startPos) return;
     const canvas = canvasRef.current;
     const tempCanvas = tempCanvasRef.current;
@@ -363,6 +484,10 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
   };
 
   const handleMouseUp = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (isPanning) {
+      handleContainerMouseUp();
+      return;
+    }
     if (!isDrawing || !startPos) return;
     setIsDrawing(false);
 
@@ -443,6 +568,18 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
         {/* Barra de Ferramentas Estilo Editorial: apenas botões de ícone */}
         <div className="h-11 px-3 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between overflow-x-auto no-scrollbar gap-2">
           <div className="flex items-center gap-1 shrink-0">
+            {/* Mãozinha / Pan */}
+            <button
+              onClick={() => selectTool("hand")}
+              className={`p-2 rounded-md transition cursor-pointer flex items-center justify-center border ${
+                activeTool === "hand" || isSpacePressed
+                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#ff4d4d]"
+                  : "border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
+              }`}
+              title="Mãozinha para arrastar tela [H ou segurar Espaço]"
+            >
+              <Hand size={14} />
+            </button>
             <button
               onClick={() => selectTool("arrow")}
               className={`p-2 rounded-md transition cursor-pointer flex items-center justify-center border ${
@@ -483,7 +620,7 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
                   ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#ff4d4d]"
                   : "border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
               }`}
-              title="Marca-texto [H]"
+              title="Marca-texto [D]"
             >
               <Highlighter size={14} />
             </button>
@@ -526,7 +663,7 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
               ))}
             </div>
 
-            {/* Controles de Zoom rápido (Ctrl+Scroll suportado) */}
+            {/* Controles de Zoom rápido (Ctrl+Scroll / Shift+Scroll) */}
             <div className="flex items-center bg-[#111317] border border-[#282d37] rounded-md px-1.5 py-0.5 text-[11px] gap-1 text-[#86868b]">
               <button
                 type="button"
@@ -538,15 +675,15 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
               </button>
               <button
                 type="button"
-                onClick={() => setZoom(1)}
+                onClick={handleResetView}
                 className="hover:text-white px-1 font-mono text-[10px] cursor-pointer"
-                title="Ctrl+Scroll para zoom / Clique para 100%"
+                title="Ctrl+Scroll para zoom / Shift+Scroll para arrastar / Clique para 100%"
               >
                 {Math.round(zoom * 100)}%
               </button>
               <button
                 type="button"
-                onClick={() => setZoom((prev) => Math.min(3.5, Number((prev + 0.2).toFixed(1))))}
+                onClick={() => setZoom((prev) => Math.min(4.0, Number((prev + 0.2).toFixed(1))))}
                 className="hover:text-white px-1 cursor-pointer"
                 title="Aumentar zoom"
               >
@@ -556,15 +693,30 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
           </div>
         </div>
 
-        {/* Área de Visualização do Canvas com suporte a Zoom e Aspect Ratio preservado */}
-        <div className="p-3 bg-[#0a0c0e] flex items-center justify-center max-h-[300px] overflow-hidden select-none">
+        {/* Área de Visualização do Canvas com Pan (Mãozinha), Zoom e Shift+Scroll */}
+        <div
+          ref={viewportRef}
+          onMouseDown={handleContainerMouseDown}
+          onMouseMove={handleContainerMouseMove}
+          onMouseUp={handleContainerMouseUp}
+          onMouseLeave={handleContainerMouseUp}
+          className={`relative p-3 bg-[#0a0c0e] flex items-center justify-center h-[340px] overflow-hidden select-none ${
+            isSpacePressed || activeTool === "hand"
+              ? isPanning
+                ? "cursor-grabbing"
+                : "cursor-grab"
+              : activeTool === "text"
+              ? "cursor-text"
+              : "cursor-crosshair"
+          }`}
+        >
           <div
             ref={canvasContainerRef}
-            className="relative inline-flex items-center justify-center"
+            className="relative inline-flex items-center justify-center will-change-transform"
             style={{
-              transform: `scale(${zoom})`,
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
               transformOrigin: "center center",
-              transition: "transform 0.08s ease-out",
+              transition: isPanning ? "none" : "transform 0.08s ease-out",
             }}
           >
             <canvas
@@ -572,9 +724,7 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
               onMouseDown={handleMouseDown}
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
-              className={`max-w-full max-h-[280px] object-contain rounded-md border border-[#282d37] shadow-md ${
-                activeTool === "text" ? "cursor-text" : "cursor-crosshair"
-              }`}
+              className={`max-w-full max-h-[300px] object-contain rounded-md border border-[#282d37] shadow-md`}
             />
             {/* Canvas invisível para double buffering suave */}
             <canvas ref={tempCanvasRef} className="hidden" />
@@ -629,11 +779,11 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
               <Undo2 size={13} />
               <span>Desfazer</span>
             </button>
-            {zoom !== 1 && (
+            {(zoom !== 1 || pan.x !== 0 || pan.y !== 0) && (
               <button
-                onClick={() => setZoom(1)}
+                onClick={handleResetView}
                 className="text-[10px] text-[#ff4d4d] hover:underline cursor-pointer"
-                title="Clique para voltar para o tamanho original"
+                title="Clique para voltar para o tamanho e posição original (100%)"
               >
                 Resetar ({Math.round(zoom * 100)}%)
               </button>
