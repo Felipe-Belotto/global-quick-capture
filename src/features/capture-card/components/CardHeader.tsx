@@ -27,12 +27,14 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
     <div
       data-tauri-drag-region
       onMouseDown={handleDrag}
-      className="h-10 px-3 bg-[#111317] border-b border-[#282d37] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-xl select-none"
+      className="h-10 px-3 bg-[#111317] border-b border-[#282d37] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-md select-none"
     >
-      {/* Alça de Arraste + Rotas de projetos estilo abas de terminal editorial */}
-      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+      {/* Alça de Arraste + Logo Seta Vermelha do QCap + Rotas de projetos */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
         <DragHandle />
-        <span className="font-mono text-xs text-[#ff4d4d] mr-1 select-none font-bold">❯</span>
+        <span className="font-mono text-sm text-[#ff4d4d] select-none font-black tracking-tight flex items-center gap-1" title="QCap">
+          ❯
+        </span>
 
         {config?.projectRoutes.map((route, idx) => {
           const isSelected = route.id === selectedRouteId;

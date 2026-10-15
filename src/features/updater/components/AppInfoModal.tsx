@@ -203,19 +203,19 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
           : "fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-3"
       }`}
     >
-      <div className="w-full max-w-[560px] h-full max-h-[540px] bg-[#111317] border border-[#282d37] rounded-xl shadow-2xl text-[#f5f5f7] flex flex-col overflow-hidden mx-auto font-sans">
+      <div className="w-full max-w-[560px] h-full max-h-[540px] bg-[#111317] border border-[#282d37] rounded-md shadow-2xl text-[#f5f5f7] flex flex-col overflow-hidden mx-auto font-sans">
         {/* Terminal Header */}
         <div
           data-tauri-drag-region
           onMouseDown={handleDrag}
-          className="h-10 px-3 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-xl shrink-0 font-mono text-xs"
+          className="h-10 px-3 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-md shrink-0 font-mono text-xs"
         >
           <div className="flex items-center gap-1.5 text-[#86868b]">
             <DragHandle />
-            <span className="text-[#ff4d4d] font-bold">❯</span>
-            <span>quick-capture</span>
+            <span className="text-[#ff4d4d] font-black text-sm select-none">❯</span>
+            <span className="text-[#f5f5f7] font-semibold">qcap</span>
             <span className="text-[#363d4a]">/</span>
-            <span className="text-[#f5f5f7]">device-info & updater</span>
+            <span className="text-[#86868b]">device-info & updater</span>
           </div>
           <button
             onClick={handleClose}

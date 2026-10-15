@@ -46,6 +46,7 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
 
   // Estado para ferramenta de texto interativa
   const [textInput, setTextInput] = useState<TextInputState | null>(null);
+  const [zoom, setZoom] = useState<number>(1);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const tempCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -53,6 +54,23 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
   const textInputRef = useRef<HTMLInputElement | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const highlighterPointsRef = useRef<{ x: number; y: number }[]>([]);
+
+  // Wheel listener com Ctrl para zoom suave no documento/área
+  useEffect(() => {
+    const container = canvasContainerRef.current;
+    if (!container) return;
+
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.15 : -0.15;
+        setZoom((prev) => Math.min(Math.max(Number((prev + delta).toFixed(2)), 0.5), 3.5));
+      }
+    };
+
+    container.addEventListener("wheel", onWheel, { passive: false });
+    return () => container.removeEventListener("wheel", onWheel);
+  }, []);
 
   // Inicializar Canvas com a imagem original
   useEffect(() => {
@@ -419,87 +437,81 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[740px] bg-[#111317] border border-[#282d37] rounded-xl shadow-2xl flex flex-col overflow-hidden font-mono text-xs"
+        className="w-full max-w-[740px] bg-[#111317] border border-[#282d37] rounded-md shadow-2xl flex flex-col overflow-hidden font-mono text-xs"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Barra de Ferramentas Estilo Editorial */}
+        {/* Barra de Ferramentas Estilo Editorial: apenas botões de ícone */}
         <div className="h-11 px-3 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between overflow-x-auto no-scrollbar gap-2">
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={() => selectTool("arrow")}
-              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap border ${
+              className={`p-2 rounded-md transition cursor-pointer flex items-center justify-center border ${
                 activeTool === "arrow"
-                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#f5f5f7]"
+                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#ff4d4d]"
                   : "border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
               }`}
               title="Seta indicativa [A]"
             >
-              <ArrowRight size={13} className={activeTool === "arrow" ? "text-[#ff4d4d]" : ""} />
-              <span>Seta</span>
+              <ArrowRight size={14} />
             </button>
             <button
               onClick={() => selectTool("rect")}
-              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap border ${
+              className={`p-2 rounded-md transition cursor-pointer flex items-center justify-center border ${
                 activeTool === "rect"
-                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#f5f5f7]"
+                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#ff4d4d]"
                   : "border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
               }`}
               title="Retângulo de destaque [R]"
             >
-              <Square size={13} className={activeTool === "rect" ? "text-[#ff4d4d]" : ""} />
-              <span>Retângulo</span>
+              <Square size={14} />
             </button>
             <button
               onClick={() => selectTool("blur")}
-              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap border ${
+              className={`p-2 rounded-md transition cursor-pointer flex items-center justify-center border ${
                 activeTool === "blur"
-                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#f5f5f7]"
+                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#ff4d4d]"
                   : "border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
               }`}
-              title="Censurar ou pixelar dados sensíveis [B]"
+              title="Censurar ou pixelar [B]"
             >
-              <EyeOff size={13} className={activeTool === "blur" ? "text-[#ff4d4d]" : ""} />
-              <span>Blur</span>
+              <EyeOff size={14} />
             </button>
             <button
               onClick={() => selectTool("highlighter")}
-              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap border ${
+              className={`p-2 rounded-md transition cursor-pointer flex items-center justify-center border ${
                 activeTool === "highlighter"
-                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#f5f5f7]"
+                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#ff4d4d]"
                   : "border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
               }`}
               title="Marca-texto [H]"
             >
-              <Highlighter size={13} className={activeTool === "highlighter" ? "text-[#ff4d4d]" : ""} />
-              <span>Destaque</span>
+              <Highlighter size={14} />
             </button>
             <button
               onClick={() => selectTool("text")}
-              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap border ${
+              className={`p-2 rounded-md transition cursor-pointer flex items-center justify-center border ${
                 activeTool === "text"
-                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#f5f5f7]"
+                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#ff4d4d]"
                   : "border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
               }`}
               title="Texto / Legenda [T]"
             >
-              <Type size={13} className={activeTool === "text" ? "text-[#ff4d4d]" : ""} />
-              <span>Texto</span>
+              <Type size={14} />
             </button>
             <button
               onClick={() => selectTool("pen")}
-              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap border ${
+              className={`p-2 rounded-md transition cursor-pointer flex items-center justify-center border ${
                 activeTool === "pen"
-                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#f5f5f7]"
+                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#ff4d4d]"
                   : "border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
               }`}
-              title="Desenho livre com caneta"
+              title="Caneta livre [P]"
             >
-              <Pencil size={13} className={activeTool === "pen" ? "text-[#ff4d4d]" : ""} />
-              <span>Caneta</span>
+              <Pencil size={14} />
             </button>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2.5 shrink-0">
             {/* Seletor de cores */}
             <div className="flex items-center gap-1.5 bg-[#111317] px-2 py-1 rounded-md border border-[#282d37]">
               {["#ff4d4d", "#38bdf8", "#10b981", "#f59e0b"].map((c) => (
@@ -514,21 +526,47 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
               ))}
             </div>
 
-            <button
-              onClick={handleUndo}
-              disabled={history.length <= 1}
-              className="px-2 py-1 rounded-md text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a] disabled:opacity-30 transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
-              title="Desfazer (Ctrl+Z)"
-            >
-              <Undo2 size={12} />
-              <span>Desfazer</span>
-            </button>
+            {/* Controles de Zoom rápido (Ctrl+Scroll suportado) */}
+            <div className="flex items-center bg-[#111317] border border-[#282d37] rounded-md px-1.5 py-0.5 text-[11px] gap-1 text-[#86868b]">
+              <button
+                type="button"
+                onClick={() => setZoom((prev) => Math.max(0.5, Number((prev - 0.2).toFixed(1))))}
+                className="hover:text-white px-1 cursor-pointer"
+                title="Reduzir zoom"
+              >
+                -
+              </button>
+              <button
+                type="button"
+                onClick={() => setZoom(1)}
+                className="hover:text-white px-1 font-mono text-[10px] cursor-pointer"
+                title="Ctrl+Scroll para zoom / Clique para 100%"
+              >
+                {Math.round(zoom * 100)}%
+              </button>
+              <button
+                type="button"
+                onClick={() => setZoom((prev) => Math.min(3.5, Number((prev + 0.2).toFixed(1))))}
+                className="hover:text-white px-1 cursor-pointer"
+                title="Aumentar zoom"
+              >
+                +
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Área de Visualização do Canvas com Aspect Ratio preservado */}
-        <div className="p-3 bg-[#0a0c0e] flex items-center justify-center max-h-[300px] overflow-hidden">
-          <div ref={canvasContainerRef} className="relative inline-flex items-center justify-center">
+        {/* Área de Visualização do Canvas com suporte a Zoom e Aspect Ratio preservado */}
+        <div className="p-3 bg-[#0a0c0e] flex items-center justify-center max-h-[300px] overflow-hidden select-none">
+          <div
+            ref={canvasContainerRef}
+            className="relative inline-flex items-center justify-center"
+            style={{
+              transform: `scale(${zoom})`,
+              transformOrigin: "center center",
+              transition: "transform 0.08s ease-out",
+            }}
+          >
             <canvas
               ref={canvasRef}
               onMouseDown={handleMouseDown}
@@ -579,16 +617,28 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
           </div>
         </div>
 
-        {/* Rodapé de Ações */}
-        <div className="h-10 px-4 bg-[#16181d] border-t border-[#282d37] flex items-center justify-between">
-          <span className="text-[#86868b] text-[11px] truncate mr-2">
-            {activeTool === "blur" && "arraste sobre senhas ou dados sensíveis para pixelar"}
-            {activeTool === "highlighter" && "arraste sobre o texto para destacar com marca-texto"}
-            {activeTool === "text" && "clique na imagem para digitar uma legenda rápida"}
-            {activeTool === "arrow" && "arraste para desenhar uma seta indicativa"}
-            {activeTool === "rect" && "arraste para destacar uma área com retângulo"}
-            {activeTool === "pen" && "desenhe livremente sobre a imagem"}
-          </span>
+        {/* Rodapé Limpo: Botão Desfazer no canto esquerdo + Ações no canto direito */}
+        <div className="h-10 px-3 bg-[#16181d] border-t border-[#282d37] flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleUndo}
+              disabled={history.length <= 1}
+              className="px-2.5 py-1 rounded-md text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a] disabled:opacity-30 transition cursor-pointer flex items-center gap-1.5"
+              title="Desfazer (Ctrl+Z)"
+            >
+              <Undo2 size={13} />
+              <span>Desfazer</span>
+            </button>
+            {zoom !== 1 && (
+              <button
+                onClick={() => setZoom(1)}
+                className="text-[10px] text-[#ff4d4d] hover:underline cursor-pointer"
+                title="Clique para voltar para o tamanho original"
+              >
+                Resetar ({Math.round(zoom * 100)}%)
+              </button>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}

@@ -9,6 +9,7 @@ import { OnboardingModal } from "../../onboarding";
 import { AnnotationEditorModal } from "../../annotations";
 import { useVaultAutocomplete } from "../hooks/useVaultAutocomplete";
 import { AutocompletePopover } from "./AutocompletePopover";
+import { MarkdownContextMenu } from "./MarkdownContextMenu";
 import { OcrButton } from "../../ocr";
 import { AppInfoModal } from "../../updater";
 import { ArrowDownToLine, PenTool, Check } from "lucide-react";
@@ -26,6 +27,12 @@ export const QuickCaptureCard: React.FC = () => {
   const [showAbout, setShowAbout] = useState<boolean>(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(false);
   const [isDraggingFile, setIsDraggingFile] = useState<boolean>(false);
+  const [contextMenu, setContextMenu] = useState<{
+    isOpen: boolean;
+    x: number;
+    y: number;
+    hasSelection: boolean;
+  }>({ isOpen: false, x: 0, y: 0, hasSelection: false });
 
   const descInputRef = useRef<HTMLTextAreaElement | null>(null);
   const isSavingRef = useRef<boolean>(false);
@@ -134,6 +141,87 @@ export const QuickCaptureCard: React.FC = () => {
       unlistenSettings.then((f) => f());
     };
   }, []);
+
+  const handleContextMenu = (e: React.MouseEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    const textarea = descInputRef.current;
+    const hasSel = !!(textarea && textarea.selectionStart !== textarea.selectionEnd);
+    setContextMenu({
+      isOpen: true,
+      x: e.clientX,
+      y: e.clientY,
+      hasSelection: hasSel,
+    });
+  };
+
+  const applyFormat = (prefix: string, suffix = prefix) => {
+    const textarea = descInputRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const val = description;
+    const selected = val.substring(start, end);
+    const replacement = `${prefix}${selected || "texto"}${suffix}`;
+    const nextVal = val.substring(0, start) + replacement + val.substring(end);
+    setDescription(nextVal);
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(
+        start + prefix.length,
+        start + prefix.length + (selected ? selected.length : "texto".length)
+      );
+    }, 10);
+  };
+
+  const insertTemplate = (template: string) => {
+    const textarea = descInputRef.current;
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const val = description;
+    const nextVal = val.substring(0, start) + template + val.substring(end);
+    setDescription(nextVal);
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + template.length, start + template.length);
+    }, 10);
+  };
+
+  const handleClipboard = async (action: "cut" | "copy" | "paste" | "select_all") => {
+    const textarea = descInputRef.current;
+    if (!textarea) return;
+    if (action === "select_all") {
+      textarea.select();
+      return;
+    }
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = description.substring(start, end);
+
+    if (action === "copy") {
+      if (selected) await navigator.clipboard.writeText(selected);
+    } else if (action === "cut") {
+      if (selected) {
+        await navigator.clipboard.writeText(selected);
+        const nextVal = description.substring(0, start) + description.substring(end);
+        setDescription(nextVal);
+        setTimeout(() => {
+          textarea.setSelectionRange(start, start);
+        }, 10);
+      }
+    } else if (action === "paste") {
+      try {
+        const text = await navigator.clipboard.readText();
+        const nextVal = description.substring(0, start) + text + description.substring(end);
+        setDescription(nextVal);
+        setTimeout(() => {
+          textarea.setSelectionRange(start + text.length, start + text.length);
+        }, 10);
+      } catch (err) {
+        console.warn("Falha ao colar da área de transferência:", err);
+      }
+    }
+  };
 
   const handleSave = useCallback(async () => {
     if (isSavingRef.current) return;
@@ -318,18 +406,18 @@ export const QuickCaptureCard: React.FC = () => {
   }
 
   return (
-    <div className="w-full h-full flex items-center justify-center p-3 select-none">
+    <div className="w-full h-full flex flex-col p-2 select-none overflow-hidden">
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDropFile}
-        className={`w-full max-w-[680px] bg-[#111317] border rounded-xl shadow-2xl text-[#f5f5f7] flex flex-col font-sans relative transition-all duration-150 ${
+        className={`w-full h-full bg-[#111317] border rounded-md shadow-2xl text-[#f5f5f7] flex flex-col font-sans relative transition-all duration-150 ${
           isDraggingFile ? "border-[#ff4d4d] ring-2 ring-[#ff4d4d]/40" : "border-[#282d37]"
         }`}
       >
         {/* Overlay visual ao arrastar arquivo de imagem para dentro do card */}
         {isDraggingFile && (
-          <div className="absolute inset-0 bg-[#111317]/95 z-40 rounded-xl flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#ff4d4d] pointer-events-none">
+          <div className="absolute inset-0 bg-[#111317]/95 z-40 rounded-md flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#ff4d4d] pointer-events-none">
             <ArrowDownToLine className="w-7 h-7 text-[#ff4d4d] animate-bounce" strokeWidth={1.75} />
             <span className="font-mono text-xs text-[#ff4d4d] font-medium tracking-tight">Solte a imagem para carregar</span>
             <span className="font-mono text-[10px] text-[#86868b]">Suporta PNG, JPG, WEBP</span>
@@ -346,15 +434,15 @@ export const QuickCaptureCard: React.FC = () => {
           onClose={handleCancel}
         />
 
-        {/* Corpo Principal */}
-        <div className="p-4 flex flex-col gap-3">
-          <div className="flex gap-3">
-            {/* Thumbnail do Recorte com Ações Rápidas */}
+        {/* Corpo Principal Flexível */}
+        <div className="p-3.5 flex-1 flex flex-col gap-3 overflow-hidden">
+          <div className="flex-1 flex gap-3 min-h-[140px]">
+            {/* Thumbnail do Recorte: clique direto abre anotação */}
             <div className="flex flex-col gap-1.5 shrink-0">
               <div
                 onClick={() => imageBase64 && setShowAnnotationEditor(true)}
                 className="group relative w-36 h-28 rounded-md bg-[#16181d] border border-[#282d37] hover:border-[#ff4d4d]/60 flex items-center justify-center overflow-hidden cursor-pointer transition"
-                title="Clique para editar e anotar recorte"
+                title="Clique na imagem para desenhar setas, caixas ou censurar"
               >
                 {imageBase64 ? (
                   <>
@@ -373,20 +461,12 @@ export const QuickCaptureCard: React.FC = () => {
                 )}
               </div>
 
-              {/* Botões de Ação da Imagem: Anotar & OCR em grade compacta */}
+              {/* Botão de OCR limpo embaixo da imagem */}
               {imageBase64 && (
-                <div className="grid grid-cols-2 gap-1.5 w-36">
-                  <button
-                    onClick={() => setShowAnnotationEditor(true)}
-                    className="py-1 px-2 rounded-md bg-[#16181d] hover:bg-[#1e222a] border border-[#282d37] hover:border-[#ff4d4d]/50 text-[#f5f5f7] text-[11px] font-mono flex items-center justify-center gap-1.5 transition cursor-pointer"
-                    title="Desenhar setas, caixas ou censurar"
-                  >
-                    <PenTool className="w-3 h-3 text-[#ff4d4d]" strokeWidth={2} />
-                    <span>Anotar</span>
-                  </button>
-
+                <div className="w-36">
                   <OcrButton
                     imageBase64={imageBase64}
+                    className="w-full"
                     onInsertMarkdown={(codeBlock) => {
                       setDescription((prev) => (prev.trim() ? `${prev}\n\n${codeBlock}` : codeBlock));
                       setTimeout(() => {
@@ -398,16 +478,17 @@ export const QuickCaptureCard: React.FC = () => {
               )}
             </div>
 
-            {/* Campo de Markdown com atalhos de lista e tab */}
-            <div className="relative flex-1 flex flex-col font-mono">
+            {/* Campo de Markdown com botão direito do Obsidian e atalhos */}
+            <div className="relative flex-1 flex flex-col font-mono h-full">
               <textarea
                 ref={descInputRef}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 onKeyDown={handleMarkdownKeyDown}
-                placeholder="Anotações em Markdown (listas, tarefas, [[links]], #tags)..."
+                onContextMenu={handleContextMenu}
+                placeholder="Anotações em Markdown..."
                 rows={5}
-                className="w-full h-full min-h-[125px] bg-[#16181d] border border-[#282d37] focus:border-[#ff4d4d]/70 focus:ring-1 focus:ring-[#ff4d4d]/20 rounded-md px-3 py-2.5 text-xs text-[#f5f5f7] placeholder-[#585e6a] outline-none resize-none transition leading-relaxed font-mono"
+                className="w-full h-full min-h-[125px] flex-1 bg-[#16181d] border border-[#282d37] focus:border-[#ff4d4d]/70 focus:ring-1 focus:ring-[#ff4d4d]/20 rounded-md px-3 py-2.5 text-xs text-[#f5f5f7] placeholder-[#585e6a] outline-none resize-y transition leading-relaxed font-mono"
                 autoFocus
               />
 
@@ -419,6 +500,16 @@ export const QuickCaptureCard: React.FC = () => {
                 position={autocomplete.position}
                 onSelect={autocomplete.applySuggestion}
                 onHover={autocomplete.setSelectedIndex}
+              />
+
+              <MarkdownContextMenu
+                isOpen={contextMenu.isOpen}
+                position={{ x: contextMenu.x, y: contextMenu.y }}
+                onClose={() => setContextMenu((prev) => ({ ...prev, isOpen: false }))}
+                onApplyFormat={applyFormat}
+                onInsertTemplate={insertTemplate}
+                onClipboardAction={handleClipboard}
+                hasSelection={contextMenu.hasSelection}
               />
             </div>
           </div>

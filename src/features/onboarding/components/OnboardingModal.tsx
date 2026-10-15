@@ -119,19 +119,19 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
 
   return (
     <div className="w-full h-full flex items-center justify-center p-4 select-none">
-      <div className="w-full max-w-[640px] bg-[#111317] border border-[#282d37] rounded-xl shadow-2xl text-[#f5f5f7] flex flex-col font-sans">
+      <div className="w-full max-w-[640px] bg-[#111317] border border-[#282d37] rounded-md shadow-2xl text-[#f5f5f7] flex flex-col font-sans">
         {/* Header estilo terminal editorial */}
         <div
           data-tauri-drag-region
           onMouseDown={handleDrag}
-          className="h-10 px-3 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-xl select-none"
+          className="h-10 px-3 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-md select-none"
         >
           <div className="flex items-center gap-2 font-mono text-xs text-[#86868b]">
             <DragHandle />
-            <span className="text-[#ff4d4d] font-bold">❯</span>
-            <span>quick-capture</span>
+            <span className="text-[#ff4d4d] font-black text-sm select-none">❯</span>
+            <span className="text-[#f5f5f7] font-semibold">qcap</span>
             <span className="text-[#363d4a]">/</span>
-            <span className="text-[#f5f5f7] font-medium">setup</span>
+            <span className="text-[#86868b]">setup</span>
           </div>
 
           <div className="flex items-center gap-1.5 opacity-60">

@@ -150,7 +150,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 select-none">
-      <div className="w-full max-w-[620px] max-h-[92vh] bg-[#111317] border border-[#282d37] rounded-xl shadow-2xl text-[#f5f5f7] flex flex-col font-mono text-xs overflow-hidden">
+      <div className="w-full max-w-[620px] max-h-[92vh] bg-[#111317] border border-[#282d37] rounded-md shadow-2xl text-[#f5f5f7] flex flex-col font-mono text-xs overflow-hidden">
         {/* Header estilo terminal editorial */}
         <div
           data-tauri-drag-region
@@ -159,10 +159,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
         >
           <div className="flex items-center gap-2 text-[#86868b]">
             <DragHandle />
-            <span className="text-[#ff4d4d] font-bold">❯</span>
-            <span>quick-capture</span>
+            <span className="text-[#ff4d4d] font-black text-sm select-none">❯</span>
+            <span className="text-[#f5f5f7] font-semibold">qcap</span>
             <span className="text-[#363d4a]">/</span>
-            <span className="text-[#f5f5f7] font-medium">settings</span>
+            <span className="text-[#86868b]">settings</span>
           </div>
           <button
             onClick={onClose}

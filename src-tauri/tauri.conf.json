@@ -27,6 +27,8 @@
         "title": "QCap",
         "width": 720,
         "height": 480,
+        "minWidth": 580,
+        "minHeight": 360,
         "transparent": true,
         "decorations": false,
         "alwaysOnTop": true,
@@ -34,7 +36,7 @@
         "skipTaskbar": true,
         "visible": false,
         "shadow": false,
-        "resizable": false,
+        "resizable": true,
         "maximizable": false
       },
       {
