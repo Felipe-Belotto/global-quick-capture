@@ -423,98 +423,83 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Barra de Ferramentas Estilo Editorial */}
-        <div className="h-11 px-3 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between">
-          <div className="flex items-center gap-1">
+        <div className="h-11 px-3 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between overflow-x-auto no-scrollbar gap-2">
+          <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={() => selectTool("arrow")}
-              className={`px-2 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap border ${
                 activeTool === "arrow"
-                  ? "bg-[#1e222a] border border-[#ff4d4d]/60 text-[#ff4d4d]"
-                  : "text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
+                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#f5f5f7]"
+                  : "border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
               }`}
-              title="Seta (A)"
+              title="Seta indicativa [A]"
             >
-              <ArrowRight size={13} />
-              <span>seta</span>
-              <kbd className="text-[9px] bg-[#111317] px-1 py-0.2 rounded text-[#86868b] border border-[#282d37]">
-                A
-              </kbd>
+              <ArrowRight size={13} className={activeTool === "arrow" ? "text-[#ff4d4d]" : ""} />
+              <span>Seta</span>
             </button>
             <button
               onClick={() => selectTool("rect")}
-              className={`px-2 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap border ${
                 activeTool === "rect"
-                  ? "bg-[#1e222a] border border-[#ff4d4d]/60 text-[#ff4d4d]"
-                  : "text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
+                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#f5f5f7]"
+                  : "border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
               }`}
-              title="Retângulo (R)"
+              title="Retângulo de destaque [R]"
             >
-              <Square size={13} />
-              <span>retângulo</span>
-              <kbd className="text-[9px] bg-[#111317] px-1 py-0.2 rounded text-[#86868b] border border-[#282d37]">
-                R
-              </kbd>
+              <Square size={13} className={activeTool === "rect" ? "text-[#ff4d4d]" : ""} />
+              <span>Retângulo</span>
             </button>
             <button
               onClick={() => selectTool("blur")}
-              className={`px-2 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap border ${
                 activeTool === "blur"
-                  ? "bg-[#1e222a] border border-[#ff4d4d]/60 text-[#ff4d4d]"
-                  : "text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
+                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#f5f5f7]"
+                  : "border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
               }`}
-              title="Censurar / Pixelar dados sensíveis (B)"
+              title="Censurar ou pixelar dados sensíveis [B]"
             >
-              <EyeOff size={13} />
-              <span>blur</span>
-              <kbd className="text-[9px] bg-[#111317] px-1 py-0.2 rounded text-[#86868b] border border-[#282d37]">
-                B
-              </kbd>
+              <EyeOff size={13} className={activeTool === "blur" ? "text-[#ff4d4d]" : ""} />
+              <span>Blur</span>
             </button>
             <button
               onClick={() => selectTool("highlighter")}
-              className={`px-2 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap border ${
                 activeTool === "highlighter"
-                  ? "bg-[#1e222a] border border-[#ff4d4d]/60 text-[#ff4d4d]"
-                  : "text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
+                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#f5f5f7]"
+                  : "border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
               }`}
-              title="Marca-Texto (H)"
+              title="Marca-texto [H]"
             >
-              <Highlighter size={13} />
-              <span>marca-texto</span>
-              <kbd className="text-[9px] bg-[#111317] px-1 py-0.2 rounded text-[#86868b] border border-[#282d37]">
-                H
-              </kbd>
+              <Highlighter size={13} className={activeTool === "highlighter" ? "text-[#ff4d4d]" : ""} />
+              <span>Destaque</span>
             </button>
             <button
               onClick={() => selectTool("text")}
-              className={`px-2 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 ${
+              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap border ${
                 activeTool === "text"
-                  ? "bg-[#1e222a] border border-[#ff4d4d]/60 text-[#ff4d4d]"
-                  : "text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
+                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#f5f5f7]"
+                  : "border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
               }`}
-              title="Legenda / Texto (T)"
+              title="Texto / Legenda [T]"
             >
-              <Type size={13} />
-              <span>texto</span>
-              <kbd className="text-[9px] bg-[#111317] px-1 py-0.2 rounded text-[#86868b] border border-[#282d37]">
-                T
-              </kbd>
+              <Type size={13} className={activeTool === "text" ? "text-[#ff4d4d]" : ""} />
+              <span>Texto</span>
             </button>
             <button
               onClick={() => selectTool("pen")}
-              className={`px-2 py-1 rounded-md transition cursor-pointer flex items-center gap-1 ${
+              className={`px-2.5 py-1 rounded-md transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap border ${
                 activeTool === "pen"
-                  ? "bg-[#1e222a] border border-[#ff4d4d]/60 text-[#ff4d4d]"
-                  : "text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
+                  ? "bg-[#1e222a] border-[#ff4d4d]/60 text-[#f5f5f7]"
+                  : "border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a]"
               }`}
-              title="Desenho Livre"
+              title="Desenho livre com caneta"
             >
-              <Pencil size={13} />
-              <span>desenho</span>
+              <Pencil size={13} className={activeTool === "pen" ? "text-[#ff4d4d]" : ""} />
+              <span>Caneta</span>
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {/* Seletor de cores */}
             <div className="flex items-center gap-1.5 bg-[#111317] px-2 py-1 rounded-md border border-[#282d37]">
               {["#ff4d4d", "#38bdf8", "#10b981", "#f59e0b"].map((c) => (
@@ -532,14 +517,11 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
             <button
               onClick={handleUndo}
               disabled={history.length <= 1}
-              className="px-2 py-1 rounded-md text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a] disabled:opacity-30 transition cursor-pointer flex items-center gap-1.5"
+              className="px-2 py-1 rounded-md text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#1e222a] disabled:opacity-30 transition cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
               title="Desfazer (Ctrl+Z)"
             >
               <Undo2 size={12} />
-              <span>desfazer</span>
-              <kbd className="text-[9px] bg-[#111317] px-1 py-0.2 rounded text-[#86868b] border border-[#282d37]">
-                ^Z
-              </kbd>
+              <span>Desfazer</span>
             </button>
           </div>
         </div>
@@ -599,12 +581,12 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
 
         {/* Rodapé de Ações */}
         <div className="h-10 px-4 bg-[#16181d] border-t border-[#282d37] flex items-center justify-between">
-          <span className="text-[#86868b] text-[11px]">
-            {activeTool === "blur" && "arraste sobre senhas ou dados sensíveis para pixelar [B]"}
-            {activeTool === "highlighter" && "arraste sobre o texto para destacar com marca-texto [H]"}
-            {activeTool === "text" && "clique na imagem para digitar uma legenda rápida [T]"}
-            {activeTool === "arrow" && "arraste para desenhar uma seta indicativa [A]"}
-            {activeTool === "rect" && "arraste para destacar uma área com retângulo [R]"}
+          <span className="text-[#86868b] text-[11px] truncate mr-2">
+            {activeTool === "blur" && "arraste sobre senhas ou dados sensíveis para pixelar"}
+            {activeTool === "highlighter" && "arraste sobre o texto para destacar com marca-texto"}
+            {activeTool === "text" && "clique na imagem para digitar uma legenda rápida"}
+            {activeTool === "arrow" && "arraste para desenhar uma seta indicativa"}
+            {activeTool === "rect" && "arraste para destacar uma área com retângulo"}
             {activeTool === "pen" && "desenhe livremente sobre a imagem"}
           </span>
           <div className="flex items-center gap-2">

@@ -4,7 +4,6 @@ import { listen } from "@tauri-apps/api/event";
 import { AppConfig, SaveSnippetPayload } from "../../../shared/types";
 import { getTodayFormatted } from "../../../shared/lib/date";
 import { CardHeader } from "./CardHeader";
-import { ImagePreviewLightbox } from "./ImagePreviewLightbox";
 import { SettingsModal } from "../../settings";
 import { OnboardingModal } from "../../onboarding";
 import { AnnotationEditorModal } from "../../annotations";
@@ -12,14 +11,13 @@ import { useVaultAutocomplete } from "../hooks/useVaultAutocomplete";
 import { AutocompletePopover } from "./AutocompletePopover";
 import { OcrButton } from "../../ocr";
 import { AppInfoModal } from "../../updater";
-import { ArrowDownToLine, Maximize2, PenTool, Check } from "lucide-react";
+import { ArrowDownToLine, PenTool, Check } from "lucide-react";
 
 export const QuickCaptureCard: React.FC = () => {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [selectedRouteId, setSelectedRouteId] = useState<string>("daily");
   const [description, setDescription] = useState<string>("");
   const [imageBase64, setImageBase64] = useState<string>("");
-  const [showImagePreview, setShowImagePreview] = useState<boolean>(false);
   const [showAnnotationEditor, setShowAnnotationEditor] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
@@ -59,7 +57,6 @@ export const QuickCaptureCard: React.FC = () => {
         reader.onload = (event) => {
           if (event.target?.result) {
             setImageBase64(event.target.result as string);
-            setShowImagePreview(false);
           }
         };
         reader.readAsDataURL(file);
@@ -110,7 +107,6 @@ export const QuickCaptureCard: React.FC = () => {
     const unlistenLoad = listen<string>("load_snip_image", (event) => {
       setImageBase64(event.payload);
       setDescription("");
-      setShowImagePreview(false);
       setShowAnnotationEditor(false);
       setSaveSuccess(false);
       setErrorMsg(null);
@@ -184,8 +180,6 @@ export const QuickCaptureCard: React.FC = () => {
           autocomplete.close();
         } else if (showAnnotationEditor) {
           setShowAnnotationEditor(false);
-        } else if (showImagePreview) {
-          setShowImagePreview(false);
         } else if (showSettings) {
           setShowSettings(false);
         } else if (showAbout) {
@@ -203,7 +197,6 @@ export const QuickCaptureCard: React.FC = () => {
           showSettings ||
           showAbout ||
           showAnnotationEditor ||
-          showImagePreview ||
           showOnboarding;
         if (
           !hasOpenModal &&
@@ -227,7 +220,6 @@ export const QuickCaptureCard: React.FC = () => {
     showSettings,
     showAbout,
     showOnboarding,
-    showImagePreview,
     showAnnotationEditor,
     autocomplete,
   ]);
@@ -360,9 +352,9 @@ export const QuickCaptureCard: React.FC = () => {
             {/* Thumbnail do Recorte com Ações Rápidas */}
             <div className="flex flex-col gap-1.5 shrink-0">
               <div
-                onClick={() => imageBase64 && setShowImagePreview(true)}
-                className="group relative w-36 h-28 rounded-md bg-[#16181d] border border-[#282d37] hover:border-[#ff4d4d]/60 flex items-center justify-center overflow-hidden cursor-zoom-in transition"
-                title="Clique para ampliar"
+                onClick={() => imageBase64 && setShowAnnotationEditor(true)}
+                className="group relative w-36 h-28 rounded-md bg-[#16181d] border border-[#282d37] hover:border-[#ff4d4d]/60 flex items-center justify-center overflow-hidden cursor-pointer transition"
+                title="Clique para editar e anotar recorte"
               >
                 {imageBase64 ? (
                   <>
@@ -371,9 +363,9 @@ export const QuickCaptureCard: React.FC = () => {
                       alt="Recorte"
                       className="w-full h-full object-cover rounded-sm group-hover:scale-105 transition duration-200"
                     />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition font-mono text-[11px] text-[#f5f5f7] gap-1.5 backdrop-blur-[1px]">
-                      <Maximize2 className="w-3.5 h-3.5 text-[#ff4d4d]" strokeWidth={2} />
-                      <span>Ampliar</span>
+                    <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 flex items-center justify-center transition font-mono text-[11px] text-[#f5f5f7] gap-1.5 backdrop-blur-[1px]">
+                      <PenTool className="w-3.5 h-3.5 text-[#ff4d4d]" strokeWidth={2} />
+                      <span>Editar</span>
                     </div>
                   </>
                 ) : (
@@ -488,14 +480,7 @@ export const QuickCaptureCard: React.FC = () => {
         />
       )}
 
-      {/* Lightbox / Preview da Imagem Ampliada */}
-      {showImagePreview && imageBase64 && (
-        <ImagePreviewLightbox
-          imageBase64={imageBase64}
-          onClose={() => setShowImagePreview(false)}
-          onOpenAnnotation={() => setShowAnnotationEditor(true)}
-        />
-      )}
+
 
       {showSettings && config && (
         <SettingsModal
