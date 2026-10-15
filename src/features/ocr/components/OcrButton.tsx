@@ -252,7 +252,7 @@ export const OcrButton: React.FC<OcrButtonProps> = ({
                 className={`w-full py-1.5 px-2.5 rounded-md text-[11px] font-mono flex items-center justify-center gap-2 transition cursor-pointer border ${
                   insertSuccess
                     ? "bg-[#10b981]/20 border-[#10b981]/60 text-[#34d399]"
-                    : "bg-[#ff4d4d]/10 hover:bg-[#ff4d4d]/20 border-[#ff4d4d]/40 text-[#ff4d4d]"
+                    : "bg-[#16181d] hover:bg-[#1e222a] border-[#282d37] text-[#f5f5f7] hover:border-white/25"
                 }`}
               >
                 {insertSuccess ? (

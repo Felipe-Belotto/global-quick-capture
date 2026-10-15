@@ -459,15 +459,15 @@ export const QuickCaptureCard: React.FC = () => {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className={`px-4 py-1.5 rounded-md font-medium text-xs font-mono transition cursor-pointer flex items-center gap-1.5 shadow-xs active:translate-y-px ${
+                className={`px-4 py-1.5 rounded-md font-medium text-xs font-mono transition cursor-pointer flex items-center gap-1.5 active:scale-[0.98] ${
                   saveSuccess
-                    ? "bg-[#10b981] text-white"
-                    : "bg-[#ff4d4d] hover:bg-[#e03636] active:bg-[#b82323] text-white"
+                    ? "bg-[#10b981]/15 border border-[#10b981]/50 text-[#10b981]"
+                    : "bg-[#16181d] border border-[#282d37] hover:bg-white/10 hover:border-white/25 text-[#f5f5f7]"
                 }`}
               >
                 {saveSuccess ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+                    <Check className="w-3.5 h-3.5 text-[#10b981]" strokeWidth={2.5} />
                     <span>Salvo!</span>
                   </>
                 ) : (

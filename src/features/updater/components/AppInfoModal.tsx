@@ -44,6 +44,23 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
   useEffect(() => {
     fetchSystemAppInfo().then((info) => {
       setAppInfo(info);
+      const currentVer = info?.version || "0.1.4";
+      setUpdateStatus("checking");
+      checkForUpdates(currentVer, { simulate: false })
+        .then((res) => {
+          setUpdateResult(res);
+          setUpdateStatus(res.hasUpdate ? "update-available" : "up-to-date");
+        })
+        .catch((e) => {
+          setUpdateStatus("error");
+          setUpdateResult({
+            hasUpdate: false,
+            currentVersion: currentVer,
+            latestVersion: currentVer,
+            checkedAt: new Date().toLocaleTimeString(),
+            errorMessage: e?.message || "Falha na verificação de atualização.",
+          });
+        });
     });
 
     const unlistenProgress = listen<number>("update_progress", (event) => {
@@ -368,8 +385,9 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
                       {updateStatus === "update-available" && (
                         <button
                           onClick={handleStartDownload}
-                          className="flex-1 py-2 bg-[#ff4d4d] hover:bg-[#e03636] active:bg-[#b82323] text-white font-medium text-xs rounded-md transition cursor-pointer flex items-center justify-center gap-1.5 shadow-xs active:translate-y-px"
+                          className="flex-1 py-2 bg-[#16181d] border border-[#282d37] hover:bg-white/10 hover:border-white/25 text-[#f5f5f7] font-medium text-xs rounded-md transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-[0.98]"
                         >
+                          <Sparkles className="w-3.5 h-3.5 text-[#ff4d4d]" />
                           <span>Atualizar Automaticamente Agora</span>
                         </button>
                       )}

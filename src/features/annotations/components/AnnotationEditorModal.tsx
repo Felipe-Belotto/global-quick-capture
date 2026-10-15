@@ -616,7 +616,7 @@ export const AnnotationEditorModal: React.FC<AnnotationEditorModalProps> = ({
             </button>
             <button
               onClick={handleApply}
-              className="px-4 py-1 bg-[#ff4d4d] hover:bg-[#e03636] active:bg-[#b82323] text-white font-medium rounded-md transition cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-1.5 bg-[#16181d] border border-[#282d37] hover:bg-white/10 hover:border-white/25 text-[#f5f5f7] font-medium text-xs rounded-md transition cursor-pointer flex items-center gap-1.5 active:scale-[0.98]"
             >
               <Check size={13} />
               <span>Aplicar</span>
