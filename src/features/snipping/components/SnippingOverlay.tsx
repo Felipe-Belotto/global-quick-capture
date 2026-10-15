@@ -188,16 +188,16 @@ export const SnippingOverlay: React.FC = () => {
       <div className="absolute inset-0 bg-black/45 pointer-events-none" />
 
       <div
-        className={`absolute top-5 left-1/2 -translate-x-1/2 px-3.5 py-1.5 rounded-[4px] border text-xs font-mono shadow-2xl flex items-center gap-2 pointer-events-none z-50 transition-all ${
+        className={`absolute top-5 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full border text-xs font-mono shadow-2xl flex items-center gap-2 pointer-events-none z-50 transition-all ${
           isCtrlHeld
-            ? "bg-[#2b2622]/95 border-[#f7f5f0] text-[#f7f5f0] shadow-[0_0_20px_rgba(247,245,240,0.15)]"
-            : "bg-[#211d1a]/95 border-[#3f3a36] text-[#dad2c1]"
+            ? "bg-[#111317]/95 border-[#ff4d4d] text-[#ff4d4d] shadow-[0_0_20px_rgba(255,77,77,0.25)]"
+            : "bg-[#111317]/95 border-[#282d37] text-[#f5f5f7]"
         }`}
       >
         {isCtrlHeld ? (
-          <Zap size={13} className="text-[#f7f5f0] animate-pulse" />
+          <Zap size={13} className="text-[#ff4d4d] animate-pulse" />
         ) : (
-          <span className="w-1.5 h-1.5 rounded-full bg-[#dad2c1] animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#ff4d4d] animate-pulse" />
         )}
         <span>
           {isCtrlHeld
@@ -210,8 +210,8 @@ export const SnippingOverlay: React.FC = () => {
         <div
           className={`absolute border pointer-events-none transition-[border-color] ${
             isCtrlHeld
-              ? "border-[#f7f5f0] shadow-[0_0_0_9999px_rgba(0,0,0,0.65),0_0_15px_rgba(247,245,240,0.25)]"
-              : "border-[#dad2c1] shadow-[0_0_0_9999px_rgba(0,0,0,0.65)]"
+              ? "border-[#ff4d4d] shadow-[0_0_0_9999px_rgba(0,0,0,0.65),0_0_15px_rgba(255,77,77,0.3)]"
+              : "border-white/80 shadow-[0_0_0_9999px_rgba(0,0,0,0.65)]"
           }`}
           style={{
             left: `${rect.left}px`,
@@ -221,17 +221,17 @@ export const SnippingOverlay: React.FC = () => {
           }}
         >
           <div
-            className={`absolute -bottom-6 left-0 px-2 py-0.5 rounded-[3px] border text-[10px] font-mono whitespace-nowrap flex items-center gap-1.5 ${
+            className={`absolute -bottom-6 left-0 px-2 py-0.5 rounded-md border text-[10px] font-mono whitespace-nowrap flex items-center gap-1.5 ${
               isCtrlHeld
-                ? "bg-[#2b2622] border-[#f7f5f0] text-[#f7f5f0]"
-                : "bg-[#211d1a] border-[#383330] text-[#dad2c1]"
+                ? "bg-[#1e222a] border-[#ff4d4d] text-[#ff4d4d]"
+                : "bg-[#111317] border-[#282d37] text-[#f5f5f7]"
             }`}
           >
             <span>
               {rect.width} × {rect.height} px
             </span>
             {isCtrlHeld && (
-              <span className="text-[#aea69c] flex items-center gap-1">
+              <span className="text-[#ff4d4d] flex items-center gap-1">
                 <Zap size={10} />
                 <span>salvar + copiar</span>
               </span>

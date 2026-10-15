@@ -44,24 +44,24 @@ export const AutocompletePopover: React.FC<AutocompletePopoverProps> = ({
         top: `${position.top}px`,
         left: `${position.left}px`,
       }}
-      className="absolute z-50 w-68 bg-[#211d1a] border border-[#3f3a36] rounded-[4px] shadow-2xl shadow-black/90 font-mono text-xs overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-100"
+      className="absolute z-50 w-68 bg-[#111317] border border-[#282d37] rounded-xl shadow-2xl shadow-black/90 font-mono text-xs overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-100"
     >
       {/* Cabeçalho do Popover */}
-      <div className="px-2.5 py-1.5 bg-[#262320] border-b border-[#383330] flex items-center justify-between text-[10px] text-[#aea69c] select-none">
-        <span className="flex items-center gap-1.5 font-medium text-[#dad2c1]">
+      <div className="px-2.5 py-1.5 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between text-[10px] text-[#86868b] select-none">
+        <span className="flex items-center gap-1.5 font-medium text-[#f5f5f7]">
           {mode === "tag" ? (
             <>
-              <Hash className="w-3 h-3 text-[#f7f5f0]" />
+              <Hash className="w-3 h-3 text-[#ff4d4d]" />
               <span>tags do cofre</span>
             </>
           ) : (
             <>
-              <FileText className="w-3 h-3 text-[#f7f5f0]" />
+              <FileText className="w-3 h-3 text-[#ff4d4d]" />
               <span>notas & pastas [[ ]]</span>
             </>
           )}
         </span>
-        <span className="text-[9px] text-[#877e74]">↑↓ navegar • ↵/tab</span>
+        <span className="text-[9px] text-[#585e6a]">↑↓ navegar • ↵/tab</span>
       </div>
 
       {/* Lista de Sugestões */}
@@ -82,31 +82,31 @@ export const AutocompletePopover: React.FC<AutocompletePopoverProps> = ({
                 onSelect(item);
               }}
               onMouseEnter={() => onHover(idx)}
-              className={`w-full px-2 py-1.5 rounded-[3px] flex items-center justify-between gap-2 text-left transition cursor-pointer select-none ${
+              className={`w-full px-2 py-1.5 rounded-md flex items-center justify-between gap-2 text-left transition cursor-pointer select-none ${
                 isSelected
-                  ? "bg-[#383330] text-[#f7f5f0] border border-[#3f3a36]"
-                  : "text-[#dad2c1] hover:bg-[#2b2622] border border-transparent"
+                  ? "bg-[#1e222a] text-[#f5f5f7] border border-[#ff4d4d]/40"
+                  : "text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#16181d] border border-transparent"
               }`}
             >
               <div className="flex items-center gap-2 truncate">
                 {item.type === "tag" && (
                   <Hash
                     className={`w-3.5 h-3.5 shrink-0 ${
-                      isSelected ? "text-[#f7f5f0]" : "text-[#aea69c]"
+                      isSelected ? "text-[#ff4d4d]" : "text-[#86868b]"
                     }`}
                   />
                 )}
                 {item.type === "note" && (
                   <FileText
                     className={`w-3.5 h-3.5 shrink-0 ${
-                      isSelected ? "text-[#f7f5f0]" : "text-[#aea69c]"
+                      isSelected ? "text-[#ff4d4d]" : "text-[#86868b]"
                     }`}
                   />
                 )}
                 {item.type === "folder" && (
                   <Folder
                     className={`w-3.5 h-3.5 shrink-0 ${
-                      isSelected ? "text-[#f7f5f0]" : "text-[#aea69c]"
+                      isSelected ? "text-[#ff4d4d]" : "text-[#86868b]"
                     }`}
                   />
                 )}
@@ -114,7 +114,7 @@ export const AutocompletePopover: React.FC<AutocompletePopoverProps> = ({
               </div>
 
               {item.detail && (
-                <span className="text-[10px] text-[#877e74] shrink-0 truncate max-w-[80px]">
+                <span className="text-[10px] text-[#585e6a] shrink-0 truncate max-w-[80px]">
                   {item.detail}
                 </span>
               )}
@@ -124,7 +124,7 @@ export const AutocompletePopover: React.FC<AutocompletePopoverProps> = ({
       </div>
 
       {/* Dica de rodapé */}
-      <div className="px-2 py-1 bg-[#262320] border-t border-[#383330] text-[9px] text-[#877e74] flex items-center justify-between">
+      <div className="px-2 py-1 bg-[#16181d] border-t border-[#282d37] text-[9px] text-[#585e6a] flex items-center justify-between">
         <span>esc para fechar</span>
         <span>{items.length} sugestões</span>
       </div>

@@ -183,71 +183,71 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
       className={`select-none font-mono text-xs flex flex-col ${
         isWindowView
           ? "w-screen h-screen bg-transparent p-3"
-          : "fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3"
+          : "fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-3"
       }`}
     >
-      <div className="w-full max-w-[560px] h-full max-h-[540px] bg-[#211d1a] border border-[#3f3a36] rounded-[4px] shadow-2xl text-[#f7f5f0] flex flex-col overflow-hidden mx-auto font-sans">
+      <div className="w-full max-w-[560px] h-full max-h-[540px] bg-[#111317] border border-[#282d37] rounded-xl shadow-2xl text-[#f5f5f7] flex flex-col overflow-hidden mx-auto font-sans">
         {/* Terminal Header */}
         <div
           data-tauri-drag-region
           onMouseDown={handleDrag}
-          className="h-10 px-3 bg-[#1c1a18] border-b border-[#3f3a36] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-[4px] shrink-0 font-mono text-xs"
+          className="h-10 px-3 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-xl shrink-0 font-mono text-xs"
         >
-          <div className="flex items-center gap-1.5 text-[#aea69c]">
+          <div className="flex items-center gap-1.5 text-[#86868b]">
             <DragHandle />
-            <span className="text-[#2dd4bf] font-bold">❯</span>
+            <span className="text-[#ff4d4d] font-bold">❯</span>
             <span>quick-capture</span>
-            <span className="text-[#544e48]">/</span>
-            <span className="text-[#dad2c1]">device-info & updater</span>
+            <span className="text-[#363d4a]">/</span>
+            <span className="text-[#f5f5f7]">device-info & updater</span>
           </div>
           <button
             onClick={handleClose}
-            className="text-[#aea69c] hover:text-[#f43f5e] p-1 rounded-[3px] hover:bg-[#383330] transition cursor-pointer flex items-center justify-center"
-            title="Fechar (Esc)"
+            className="text-[#86868b] hover:text-[#ff4d4d] p-1 rounded-md hover:bg-[#1e222a] transition cursor-pointer flex items-center justify-center"
+            title="Fechar"
           >
             <X className="w-3.5 h-3.5" strokeWidth={1.75} />
           </button>
         </div>
 
         {/* Top App Banner */}
-        <div className="px-5 py-3.5 bg-[#262320] border-b border-[#3f3a36] flex items-center justify-between shrink-0">
+        <div className="px-5 py-3.5 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-[3px] bg-[#383330] border border-[#4f4843] flex items-center justify-center text-[#2dd4bf] shadow-inner">
+            <div className="w-9 h-9 rounded-md bg-[#1e222a] border border-[#282d37] flex items-center justify-center text-[#ff4d4d] shadow-inner">
               <Terminal className="w-4 h-4" strokeWidth={2} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm text-[#f7f5f0] tracking-tight">
+                <span className="font-semibold text-sm text-[#f5f5f7] tracking-tight">
                   Global Quick Capture
                 </span>
-                <span className="px-1.5 py-0.5 text-[10px] rounded-[2px] bg-[#2dd4bf]/15 text-[#2dd4bf] border border-[#2dd4bf]/30 font-mono font-medium">
-                  v{appInfo?.version || "0.1.3"}
+                <span className="px-1.5 py-0.5 text-[10px] rounded-md bg-[#ff4d4d]/10 text-[#ff4d4d] border border-[#ff4d4d]/30 font-mono font-medium">
+                  v{appInfo?.version || "0.1.4"}
                 </span>
               </div>
-              <p className="text-[11px] text-[#aea69c] mt-0.5">
+              <p className="text-[11px] text-[#86868b] mt-0.5">
                 Snipping tool global & captura rápida para Obsidian
               </p>
             </div>
           </div>
 
           {/* Abas */}
-          <div className="flex bg-[#1c1a18] p-0.5 rounded-[3px] border border-[#3f3a36] gap-1 font-mono text-xs">
+          <div className="flex bg-[#111317] p-0.5 rounded-md border border-[#282d37] gap-1 font-mono text-xs">
             <button
               onClick={() => setActiveTab("updater")}
-              className={`px-2.5 py-1 rounded-[2px] transition cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
                 activeTab === "updater"
-                  ? "bg-[#383330] text-[#f7f5f0] border border-[#4f4843]"
-                  : "text-[#aea69c] hover:text-[#f7f5f0]"
+                  ? "bg-[#1e222a] text-[#f5f5f7] border border-[#363d4a]"
+                  : "text-[#86868b] hover:text-[#f5f5f7]"
               }`}
             >
               Atualizações
             </button>
             <button
               onClick={() => setActiveTab("system")}
-              className={`px-2.5 py-1 rounded-[2px] transition cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md transition cursor-pointer ${
                 activeTab === "system"
-                  ? "bg-[#383330] text-[#f7f5f0] border border-[#4f4843]"
-                  : "text-[#aea69c] hover:text-[#f7f5f0]"
+                  ? "bg-[#1e222a] text-[#f5f5f7] border border-[#363d4a]"
+                  : "text-[#86868b] hover:text-[#f5f5f7]"
               }`}
             >
               Dispositivo
@@ -286,8 +286,8 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
 
               {/* Resultado da Checagem / Download */}
               {updateStatus === "checking" && (
-                <div className="p-4 rounded-[4px] bg-[#262320] border border-[#2dd4bf]/40 flex items-center gap-2.5 text-[#2dd4bf]">
-                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#2dd4bf]" strokeWidth={2} />
+                <div className="p-4 rounded-md bg-[#16181d] border border-[#ff4d4d]/40 flex items-center gap-2.5 text-[#ff4d4d]">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#ff4d4d]" strokeWidth={2} />
                   <span>Verificando novas versões no repositório GitHub...</span>
                 </div>
               )}
@@ -368,7 +368,7 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
                       {updateStatus === "update-available" && (
                         <button
                           onClick={handleStartDownload}
-                          className="flex-1 py-2 bg-[#f7f5f0] hover:bg-[#eae6de] text-[#211d1a] font-medium text-xs rounded-[3px] transition cursor-pointer flex items-center justify-center gap-1.5 shadow-sm active:translate-y-px"
+                          className="flex-1 py-2 bg-[#ff4d4d] hover:bg-[#e03636] active:bg-[#b82323] text-white font-medium text-xs rounded-md transition cursor-pointer flex items-center justify-center gap-1.5 shadow-xs active:translate-y-px"
                         >
                           <span>Atualizar Automaticamente Agora</span>
                         </button>
@@ -377,7 +377,7 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
                       {updateStatus === "downloading" && (
                         <button
                           disabled
-                          className="flex-1 py-2 bg-[#2b2622] border border-[#38bdf8]/50 text-[#38bdf8] font-medium text-xs rounded-[3px] flex items-center justify-center gap-2"
+                          className="flex-1 py-2 bg-[#1e222a] border border-[#ff4d4d]/50 text-[#ff4d4d] font-medium text-xs rounded-md flex items-center justify-center gap-2"
                         >
                           <RefreshCw className="w-3.5 h-3.5 animate-spin" strokeWidth={2} />
                           <span>Baixando atualização ({downloadProgress}%)...</span>
@@ -387,7 +387,7 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
                       {updateStatus === "downloaded" && (
                         <button
                           disabled
-                          className="flex-1 py-2 bg-[#1c2923] border border-[#10b981] text-[#10b981] font-medium text-xs rounded-[3px] flex items-center justify-center gap-1.5"
+                          className="flex-1 py-2 bg-[#10b981]/15 border border-[#10b981] text-[#10b981] font-medium text-xs rounded-md flex items-center justify-center gap-1.5"
                         >
                           <Check className="w-3.5 h-3.5" strokeWidth={2} />
                           <span>Iniciando instalador e reiniciando...</span>
@@ -396,7 +396,7 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
 
                       <button
                         onClick={() => openExternalLink(updateResult.release!.htmlUrl)}
-                        className="px-3 py-2 bg-[#383330] hover:bg-[#4f4843] border border-[#3f3a36] text-[#dad2c1] hover:text-[#f7f5f0] rounded-[3px] transition cursor-pointer flex items-center gap-1.5 text-xs"
+                        className="px-3 py-2 bg-[#1e222a] hover:bg-[#282d37] border border-[#282d37] text-[#86868b] hover:text-[#f5f5f7] rounded-md transition cursor-pointer flex items-center gap-1.5 text-xs"
                         title="Ver release completa no GitHub"
                       >
                         <ExternalLink className="w-3 h-3" strokeWidth={1.75} />
@@ -411,10 +411,10 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
                 <button
                   onClick={() => handleCheckUpdate(false)}
                   disabled={updateStatus === "checking" || updateStatus === "downloading"}
-                  className="flex-1 py-2.5 bg-[#262320] hover:bg-[#383330] border border-[#3f3a36] text-[#f7f5f0] font-medium rounded-[3px] transition cursor-pointer flex items-center justify-center gap-2 text-xs"
+                  className="flex-1 py-2.5 bg-[#16181d] hover:bg-[#1e222a] border border-[#282d37] text-[#f5f5f7] font-medium rounded-md transition cursor-pointer flex items-center justify-center gap-2 text-xs"
                 >
                   <RefreshCw
-                    className={`w-3.5 h-3.5 ${updateStatus === "checking" ? "animate-spin" : ""}`}
+                    className={`w-3.5 h-3.5 ${updateStatus === "checking" ? "animate-spin text-[#ff4d4d]" : ""}`}
                     strokeWidth={1.75}
                   />
                   <span>
@@ -432,10 +432,10 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
                     setSimulateMode(next);
                     handleCheckUpdate(next);
                   }}
-                  className={`px-3 py-2.5 rounded-[3px] border transition cursor-pointer text-[11px] ${
+                  className={`px-3 py-2.5 rounded-md border transition cursor-pointer text-[11px] ${
                     simulateMode
-                      ? "bg-[#38bdf8]/15 border-[#38bdf8]/50 text-[#38bdf8]"
-                      : "bg-[#262320] border-[#3f3a36] text-[#aea69c] hover:text-[#f7f5f0]"
+                      ? "bg-[#ff4d4d]/15 border-[#ff4d4d]/50 text-[#ff4d4d]"
+                      : "bg-[#16181d] border-[#282d37] text-[#86868b] hover:text-[#f5f5f7]"
                   }`}
                   title="Simula a detecção da versão v0.1.4 para testes da UI"
                 >
@@ -475,7 +475,7 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
                     <Keyboard className="w-3 h-3 text-[#aea69c]" strokeWidth={1.75} />
                     <span>Atalho Global de Recorte:</span>
                   </div>
-                  <div className="text-[#2dd4bf] font-bold flex items-center justify-between">
+                  <div className="text-[#ff4d4d] font-bold flex items-center justify-between">
                     <span>{appInfo?.global_shortcut || "Win + Alt + S"}</span>
                     <span className="text-[10px] text-[#10b981] bg-[#10b981]/15 px-1.5 py-0.5 rounded-[2px]">
                       Ativo no Windows
@@ -483,26 +483,26 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
                   </div>
                 </div>
 
-                <div className="p-2.5 bg-[#1c1a18] rounded-[3px] border border-[#3f3a36] flex flex-col gap-1 text-[11px]">
-                  <div className="text-[#aea69c] flex items-center gap-1.5">
-                    <Folder className="w-3 h-3 text-[#aea69c]" strokeWidth={1.75} />
+                <div className="p-2.5 bg-[#16181d] rounded-md border border-[#282d37] flex flex-col gap-1 text-[11px]">
+                  <div className="text-[#86868b] flex items-center gap-1.5">
+                    <Folder className="w-3 h-3 text-[#86868b]" strokeWidth={1.75} />
                     <span>Cofre do Obsidian (Vault):</span>
                   </div>
-                  <div className="text-[#dad2c1] truncate font-mono text-[10px]">
+                  <div className="text-[#f5f5f7] truncate font-mono text-[10px]">
                     {appInfo?.vault_path || "Não configurado"}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  <div className="p-2.5 bg-[#1c1a18] rounded-[3px] border border-[#3f3a36]">
-                    <div className="text-[#aea69c]">Rota Padrão:</div>
-                    <div className="text-[#f7f5f0] font-medium">
+                  <div className="p-2.5 bg-[#16181d] rounded-md border border-[#282d37]">
+                    <div className="text-[#86868b]">Rota Padrão:</div>
+                    <div className="text-[#f5f5f7] font-medium">
                       {appInfo?.default_route_id || "daily"}
                     </div>
                   </div>
-                  <div className="p-2.5 bg-[#1c1a18] rounded-[3px] border border-[#3f3a36]">
-                    <div className="text-[#aea69c]">Rotas Cadastradas:</div>
-                    <div className="text-[#f7f5f0] font-medium">
+                  <div className="p-2.5 bg-[#16181d] rounded-md border border-[#282d37]">
+                    <div className="text-[#86868b]">Rotas Cadastradas:</div>
+                    <div className="text-[#f5f5f7] font-medium">
                       {appInfo?.routes_count ?? 2} rotas ativas
                     </div>
                   </div>
@@ -513,16 +513,16 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
               <div className="flex gap-2">
                 <button
                   onClick={handleTriggerCapture}
-                  className="flex-1 py-2 bg-[#262320] hover:bg-[#383330] border border-[#3f3a36] text-[#f7f5f0] rounded-[3px] transition cursor-pointer flex items-center justify-center gap-2 text-xs"
+                  className="flex-1 py-2 bg-[#16181d] hover:bg-[#1e222a] border border-[#282d37] text-[#f5f5f7] rounded-md transition cursor-pointer flex items-center justify-center gap-2 text-xs"
                 >
-                  <Camera className="w-3.5 h-3.5 text-[#2dd4bf]" strokeWidth={1.75} />
+                  <Camera className="w-3.5 h-3.5 text-[#ff4d4d]" strokeWidth={1.75} />
                   <span>Disparar Captura</span>
                 </button>
                 <button
                   onClick={handleOpenSettings}
-                  className="flex-1 py-2 bg-[#262320] hover:bg-[#383330] border border-[#3f3a36] text-[#f7f5f0] rounded-[3px] transition cursor-pointer flex items-center justify-center gap-2 text-xs"
+                  className="flex-1 py-2 bg-[#16181d] hover:bg-[#1e222a] border border-[#282d37] text-[#f5f5f7] rounded-md transition cursor-pointer flex items-center justify-center gap-2 text-xs"
                 >
-                  <Settings className="w-3.5 h-3.5 text-[#aea69c]" strokeWidth={1.75} />
+                  <Settings className="w-3.5 h-3.5 text-[#86868b]" strokeWidth={1.75} />
                   <span>Configurações</span>
                 </button>
               </div>
@@ -531,12 +531,12 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
         </div>
 
         {/* Rodapé */}
-        <div className="h-11 px-5 bg-[#1c1a18] border-t border-[#3f3a36] flex items-center justify-between text-[11px] text-[#aea69c] shrink-0 font-mono">
+        <div className="h-11 px-5 bg-[#16181d] border-t border-[#282d37] flex items-center justify-between text-[11px] text-[#86868b] shrink-0 font-mono">
           <div className="flex items-center gap-2">
             <span>Repositório:</span>
             <button
               onClick={() => openExternalLink("https://github.com/Felipe-Belotto/global-quick-capture")}
-              className="text-[#2dd4bf] hover:underline cursor-pointer flex items-center gap-1"
+              className="text-[#ff4d4d] hover:underline cursor-pointer flex items-center gap-1"
             >
               <span>Felipe-Belotto/global-quick-capture</span>
               <ExternalLink className="w-2.5 h-2.5" strokeWidth={1.75} />
@@ -544,9 +544,9 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
           </div>
           <button
             onClick={handleClose}
-            className="px-3 py-1 bg-[#262320] hover:bg-[#383330] border border-[#3f3a36] text-[#dad2c1] rounded-[3px] transition cursor-pointer text-xs"
+            className="px-3 py-1 bg-[#1e222a] hover:bg-[#282d37] border border-[#282d37] text-[#f5f5f7] rounded-md transition cursor-pointer text-xs"
           >
-            fechar (Esc)
+            Fechar
           </button>
         </div>
       </div>

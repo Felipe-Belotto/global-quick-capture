@@ -164,31 +164,31 @@ export const OcrButton: React.FC<OcrButtonProps> = ({
         type="button"
         onClick={handleStartOcr}
         disabled={isLoading || !imageBase64}
-        className={`w-full py-1 px-2 rounded bg-[#162725] hover:bg-[#1a3834] border border-[#2dd4bf]/40 text-[#2dd4bf] text-[11px] font-mono flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
-        title="Extrair texto da imagem via OCR (Tesseract.js)"
+        className={`w-full py-1 px-2 rounded-md bg-[#16181d] hover:bg-[#1e222a] border border-[#282d37] hover:border-[#ff4d4d]/50 text-[#f5f5f7] text-[11px] font-mono flex items-center justify-center gap-1.5 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+        title="Extrair texto da imagem via OCR"
       >
         {isLoading ? (
           <>
-            <Loader2 className="w-3 h-3 animate-spin text-[#2dd4bf]" />
-            <span className="truncate max-w-[110px]">{loadingStatus}</span>
+            <Loader2 className="w-3 h-3 animate-spin text-[#ff4d4d]" />
+            <span className="truncate max-w-[65px]">{loadingStatus.includes("reconhec") ? "lendo..." : loadingStatus}</span>
           </>
         ) : (
           <>
-            <ScanText className="w-3.5 h-3.5 text-[#2dd4bf]" strokeWidth={1.75} />
-            <span>OCR / Copiar Texto</span>
+            <ScanText className="w-3 h-3 text-[#ff4d4d]" strokeWidth={2} />
+            <span>OCR</span>
           </>
         )}
       </button>
 
       {/* Fallback elegante em caso de ausência de texto legível ou erro */}
       {errorMessage && (
-        <div className="absolute left-0 top-full mt-1.5 z-40 w-56 p-2 rounded bg-[#2a1318] border border-[#f43f5e]/50 text-[#fda4af] text-[10px] font-mono shadow-xl flex items-start gap-1.5">
-          <AlertCircle className="w-3.5 h-3.5 shrink-0 text-[#f43f5e] mt-0.5" />
+        <div className="absolute left-0 top-full mt-1.5 z-40 w-56 p-2 rounded-md bg-[#1e222a] border border-[#ff4d4d]/40 text-[#ff4d4d] text-[10px] font-mono shadow-xl flex items-start gap-1.5">
+          <AlertCircle className="w-3.5 h-3.5 shrink-0 text-[#ff4d4d] mt-0.5" />
           <span className="leading-tight flex-1">{errorMessage}</span>
           <button
             type="button"
             onClick={() => setErrorMessage(null)}
-            className="text-[#fda4af]/70 hover:text-[#fda4af] cursor-pointer"
+            className="text-[#ff4d4d]/70 hover:text-[#ff4d4d] cursor-pointer"
           >
             <X className="w-3 h-3" />
           </button>
@@ -197,25 +197,25 @@ export const OcrButton: React.FC<OcrButtonProps> = ({
 
       {/* Popover / Menu de Ações com o Texto Extraído */}
       {showPopover && extractedText && (
-        <div className="absolute left-0 top-full mt-1.5 z-50 w-72 sm:w-80 p-3 rounded-lg bg-[#14151d] border border-[#2e3142] shadow-2xl backdrop-blur-md text-[#d4d4d8] flex flex-col gap-2.5 font-mono">
+        <div className="absolute left-0 top-full mt-1.5 z-50 w-72 sm:w-80 p-3 rounded-xl bg-[#111317] border border-[#282d37] shadow-2xl backdrop-blur-md text-[#f5f5f7] flex flex-col gap-2.5 font-mono">
           {/* Cabeçalho do Popover */}
-          <div className="flex items-center justify-between pb-1.5 border-b border-[#232530]">
-            <div className="flex items-center gap-1.5 text-xs text-[#2dd4bf] font-medium">
-              <span>📋</span>
+          <div className="flex items-center justify-between pb-1.5 border-b border-[#282d37]">
+            <div className="flex items-center gap-1.5 text-xs text-[#ff4d4d] font-medium">
+              <ScanText className="w-3.5 h-3.5 text-[#ff4d4d]" />
               <span>Texto Reconhecido</span>
             </div>
             <button
               type="button"
               onClick={() => setShowPopover(false)}
-              className="text-[#71717a] hover:text-[#e4e4e7] p-0.5 rounded transition cursor-pointer"
-              title="Fechar [esc]"
+              className="text-[#86868b] hover:text-[#f5f5f7] p-0.5 rounded transition cursor-pointer"
+              title="Fechar"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
 
           {/* Preview do Texto Extraído com Rolagem */}
-          <div className="max-h-28 overflow-y-auto bg-[#0d0e12] border border-[#232530] rounded p-2 text-[11px] leading-relaxed text-[#a1a1aa] whitespace-pre-wrap select-text selection:bg-[#2dd4bf]/20 selection:text-[#2dd4bf]">
+          <div className="max-h-28 overflow-y-auto bg-[#16181d] border border-[#282d37] rounded-md p-2 text-[11px] leading-relaxed text-[#f5f5f7] whitespace-pre-wrap select-text selection:bg-[#ff4d4d]/30 selection:text-white">
             {extractedText}
           </div>
 
@@ -225,10 +225,10 @@ export const OcrButton: React.FC<OcrButtonProps> = ({
             <button
               type="button"
               onClick={handleCopyClipboard}
-              className={`w-full py-1.5 px-2.5 rounded text-[11px] font-mono flex items-center justify-center gap-2 transition cursor-pointer border ${
+              className={`w-full py-1.5 px-2.5 rounded-md text-[11px] font-mono flex items-center justify-center gap-2 transition cursor-pointer border ${
                 copySuccess
                   ? "bg-[#10b981]/20 border-[#10b981]/60 text-[#34d399]"
-                  : "bg-[#1a1d29] hover:bg-[#232738] border-[#2e3245] text-[#d4d4d8] hover:text-white"
+                  : "bg-[#16181d] hover:bg-[#1e222a] border-[#282d37] text-[#f5f5f7] hover:border-[#ff4d4d]/40"
               }`}
             >
               {copySuccess ? (
@@ -238,7 +238,7 @@ export const OcrButton: React.FC<OcrButtonProps> = ({
                 </>
               ) : (
                 <>
-                  <Copy className="w-3.5 h-3.5 text-[#2dd4bf]" />
+                  <Copy className="w-3.5 h-3.5 text-[#ff4d4d]" />
                   <span>Copiar para Área de Transferência</span>
                 </>
               )}
@@ -249,10 +249,10 @@ export const OcrButton: React.FC<OcrButtonProps> = ({
               <button
                 type="button"
                 onClick={handleInsertMarkdown}
-                className={`w-full py-1.5 px-2.5 rounded text-[11px] font-mono flex items-center justify-center gap-2 transition cursor-pointer border ${
+                className={`w-full py-1.5 px-2.5 rounded-md text-[11px] font-mono flex items-center justify-center gap-2 transition cursor-pointer border ${
                   insertSuccess
                     ? "bg-[#10b981]/20 border-[#10b981]/60 text-[#34d399]"
-                    : "bg-[#162725] hover:bg-[#1d3532] border-[#2dd4bf]/40 text-[#2dd4bf]"
+                    : "bg-[#ff4d4d]/10 hover:bg-[#ff4d4d]/20 border-[#ff4d4d]/40 text-[#ff4d4d]"
                 }`}
               >
                 {insertSuccess ? (
@@ -262,7 +262,7 @@ export const OcrButton: React.FC<OcrButtonProps> = ({
                   </>
                 ) : (
                   <>
-                    <FileCode className="w-3.5 h-3.5 text-[#2dd4bf]" />
+                    <FileCode className="w-3.5 h-3.5 text-[#ff4d4d]" />
                     <span>Inserir no campo de anotações</span>
                   </>
                 )}

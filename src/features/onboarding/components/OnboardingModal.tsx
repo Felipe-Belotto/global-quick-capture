@@ -119,25 +119,25 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
 
   return (
     <div className="w-full h-full flex items-center justify-center p-4 select-none">
-      <div className="w-full max-w-[640px] bg-[#211d1a] border border-[#3f3a36] rounded-[4px] shadow-2xl text-[#dad2c1] flex flex-col font-sans">
-        {/* Header estilo terminal Warp (arrastável nativo) */}
+      <div className="w-full max-w-[640px] bg-[#111317] border border-[#282d37] rounded-xl shadow-2xl text-[#f5f5f7] flex flex-col font-sans">
+        {/* Header estilo terminal editorial */}
         <div
           data-tauri-drag-region
           onMouseDown={handleDrag}
-          className="h-10 px-3 bg-[#262320] border-b border-[#383330] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-[4px] select-none"
+          className="h-10 px-3 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-xl select-none"
         >
-          <div className="flex items-center gap-2 font-mono text-xs text-[#aea69c]">
+          <div className="flex items-center gap-2 font-mono text-xs text-[#86868b]">
             <DragHandle />
-            <span className="text-[#dad2c1] font-semibold">❯</span>
+            <span className="text-[#ff4d4d] font-bold">❯</span>
             <span>quick-capture</span>
-            <span className="text-[#5c544d]">/</span>
-            <span className="text-[#f7f5f0] font-medium">setup</span>
+            <span className="text-[#363d4a]">/</span>
+            <span className="text-[#f5f5f7] font-medium">setup</span>
           </div>
 
           <div className="flex items-center gap-1.5 opacity-60">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#383330]" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#383330]" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#f7f5f0]" />
+            <span className="w-2 h-2 rounded-full bg-[#282d37]" />
+            <span className="w-2 h-2 rounded-full bg-[#282d37]" />
+            <span className="w-2 h-2 rounded-full bg-[#ff4d4d]" />
           </div>
         </div>
 
@@ -146,11 +146,11 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
           {step === "pick" && (
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <span className="font-mono text-xs text-[#aea69c]">01 // SELECT_VAULT</span>
-                <h2 className="text-sm font-medium text-[#f7f5f0] tracking-tight">
+                <span className="font-mono text-xs text-[#ff4d4d]">01 // SELECT_VAULT</span>
+                <h2 className="text-sm font-medium text-[#f5f5f7] tracking-tight">
                   Selecione o diretório do seu Cofre do Obsidian (Local ou Google Drive)
                 </h2>
-                <p className="text-xs text-[#aea69c] leading-relaxed">
+                <p className="text-xs text-[#86868b] leading-relaxed">
                   O aplicativo salvará as imagens e fará o append das notas diretamente no cofre selecionado.
                 </p>
               </div>
@@ -160,14 +160,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
                   type="text"
                   readOnly
                   value={vaultPath || "Nenhum diretório selecionado..."}
-                  className="flex-1 bg-[#1a1715] border border-[#383330] rounded-[3px] px-3 py-2 text-xs font-mono text-[#dad2c1] outline-none"
+                  className="flex-1 bg-[#16181d] border border-[#282d37] rounded-md px-3 py-2 text-xs font-mono text-[#f5f5f7] outline-none"
                 />
                 <button
                   onClick={handlePickFolder}
                   disabled={isScanning}
-                  className="px-4 py-2 bg-[#2b2622] hover:bg-[#383330] active:bg-[#1a1715] border border-[#3f3a36] text-[#f7f5f0] rounded-[3px] text-xs font-mono transition cursor-pointer flex items-center gap-1.5"
+                  className="px-4 py-2 bg-[#1e222a] hover:bg-[#262b35] active:bg-[#16181d] border border-[#282d37] text-[#f5f5f7] rounded-md text-xs font-mono transition cursor-pointer flex items-center gap-1.5"
                 >
-                  <FolderOpen size={13} className="text-[#dad2c1]" />
+                  <FolderOpen size={13} className="text-[#ff4d4d]" />
                   <span>{isScanning ? "Escaneando..." : "Procurar..."}</span>
                 </button>
               </div>
@@ -177,22 +177,22 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
           {step === "review" && (
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
-                <span className="font-mono text-xs text-[#aea69c]">02 // DETECTED_FOLDERS</span>
-                <h2 className="text-sm font-medium text-[#f7f5f0] tracking-tight">
+                <span className="font-mono text-xs text-[#ff4d4d]">02 // DETECTED_FOLDERS</span>
+                <h2 className="text-sm font-medium text-[#f5f5f7] tracking-tight">
                   Pastas identificadas no cofre
                 </h2>
-                <p className="text-xs text-[#aea69c]">
+                <p className="text-xs text-[#86868b]">
                   Selecione quais pastas devem virar rotas de atalho rápido (
-                  <kbd className="font-mono text-[10px] text-[#dad2c1]">1</kbd>-
-                  <kbd className="font-mono text-[10px] text-[#dad2c1]">9</kbd>).
+                  <kbd className="font-mono text-[10px] text-[#f5f5f7]">1</kbd>-
+                  <kbd className="font-mono text-[10px] text-[#f5f5f7]">9</kbd>).
                 </p>
               </div>
 
-              <div className="flex items-center justify-between px-3 py-2 bg-[#1a1715] border border-[#383330] rounded-[3px] text-xs font-mono text-[#dad2c1]">
+              <div className="flex items-center justify-between px-3 py-2 bg-[#16181d] border border-[#282d37] rounded-md text-xs font-mono text-[#f5f5f7]">
                 <span className="truncate max-w-[460px]">{vaultPath}</span>
                 <button
                   onClick={handlePickFolder}
-                  className="text-xs text-[#dad2c1] hover:text-[#f7f5f0] hover:underline ml-2 cursor-pointer"
+                  className="text-xs text-[#86868b] hover:text-[#ff4d4d] hover:underline ml-2 cursor-pointer"
                 >
                   alterar
                 </button>
@@ -206,34 +206,34 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({ onComplete }) 
                       <button
                         key={folder}
                         onClick={() => toggleFolder(folder)}
-                        className={`px-3 py-2.5 rounded-[3px] border text-left text-xs font-mono transition cursor-pointer flex items-center justify-between ${
+                        className={`px-3 py-2.5 rounded-md border text-left text-xs font-mono transition cursor-pointer flex items-center justify-between ${
                           isSelected
-                            ? "bg-[#2b2622] border-[#3f3a36] text-[#f7f5f0]"
-                            : "bg-[#262320] border-[#383330] text-[#aea69c] hover:text-[#dad2c1] hover:border-[#3f3a36]"
+                            ? "bg-[#ff4d4d]/10 border-[#ff4d4d]/40 text-[#f5f5f7]"
+                            : "bg-[#16181d] border-[#282d37] text-[#86868b] hover:text-[#f5f5f7] hover:border-[#363d4a]"
                         }`}
                       >
                         <div className="flex items-center gap-1.5 truncate">
-                          <Folder size={12} className={isSelected ? "text-[#f7f5f0]" : "text-[#877e74]"} />
+                          <Folder size={12} className={isSelected ? "text-[#ff4d4d]" : "text-[#585e6a]"} />
                           <span className="truncate">{folder}/</span>
                         </div>
-                        {isSelected && <Check size={12} className="text-[#f7f5f0] shrink-0" />}
+                        {isSelected && <Check size={12} className="text-[#ff4d4d] shrink-0" />}
                       </button>
                     );
                   })
                 ) : (
-                  <div className="col-span-2 py-4 text-center text-xs font-mono text-[#877e74]">
+                  <div className="col-span-2 py-4 text-center text-xs font-mono text-[#585e6a]">
                     Nenhuma subpasta encontrada. Usando Daily Note e Inbox como padrão.
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-[#383330] text-xs font-mono text-[#aea69c]">
+              <div className="flex items-center justify-between pt-2 border-t border-[#282d37] text-xs font-mono text-[#86868b]">
                 <span>
-                  Atalho global padrão: <span className="text-[#f7f5f0]">Win + Alt + S</span>
+                  Atalho global padrão: <span className="text-[#f5f5f7]">Win + Alt + S</span>
                 </span>
                 <button
                   onClick={handleFinish}
-                  className="px-4 py-2 bg-[#f7f5f0] hover:bg-white text-[#211d1a] font-medium text-xs rounded-[3px] transition cursor-pointer flex items-center gap-1.5"
+                  className="px-4 py-2 bg-[#ff4d4d] hover:bg-[#e03636] active:bg-[#b82323] text-white font-medium text-xs rounded-md transition cursor-pointer flex items-center gap-1.5"
                 >
                   <Check size={13} />
                   <span>Salvar e Continuar</span>

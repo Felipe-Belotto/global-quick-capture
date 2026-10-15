@@ -149,24 +149,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 select-none">
-      <div className="w-full max-w-[620px] max-h-[92vh] bg-[#211d1a] border border-[#3f3a36] rounded-[4px] shadow-2xl text-[#dad2c1] flex flex-col font-mono text-xs overflow-hidden">
-        {/* Header estilo terminal Warp (arrastável com startDragging nativo) */}
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-3 select-none">
+      <div className="w-full max-w-[620px] max-h-[92vh] bg-[#111317] border border-[#282d37] rounded-xl shadow-2xl text-[#f5f5f7] flex flex-col font-mono text-xs overflow-hidden">
+        {/* Header estilo terminal editorial */}
         <div
           data-tauri-drag-region
           onMouseDown={handleDrag}
-          className="h-10 px-3 bg-[#262320] border-b border-[#383330] flex items-center justify-between cursor-grab active:cursor-grabbing shrink-0 select-none"
+          className="h-10 px-3 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between cursor-grab active:cursor-grabbing shrink-0 select-none"
         >
-          <div className="flex items-center gap-2 text-[#aea69c]">
+          <div className="flex items-center gap-2 text-[#86868b]">
             <DragHandle />
-            <span className="text-[#dad2c1] font-semibold">❯</span>
+            <span className="text-[#ff4d4d] font-bold">❯</span>
             <span>quick-capture</span>
-            <span className="text-[#5c544d]">/</span>
-            <span className="text-[#f7f5f0] font-medium">settings</span>
+            <span className="text-[#363d4a]">/</span>
+            <span className="text-[#f5f5f7] font-medium">settings</span>
           </div>
           <button
             onClick={onClose}
-            className="text-[#aea69c] hover:text-[#f7f5f0] p-1 rounded-[3px] hover:bg-[#383330] transition cursor-pointer"
+            className="text-[#86868b] hover:text-[#f5f5f7] p-1 rounded-md hover:bg-[#1e222a] transition cursor-pointer"
             title="Fechar"
           >
             <X size={14} />
@@ -177,20 +177,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
         <div className="p-5 overflow-y-auto flex flex-col gap-4 no-scrollbar">
           {/* Caminho do Vault */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[#aea69c]">vault_path (Cofre Obsidian / Google Drive):</label>
+            <label className="text-[#86868b]">vault_path (Cofre Obsidian / Google Drive):</label>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={vaultPath}
                 onChange={(e) => setVaultPath(e.target.value)}
                 placeholder="C:\Users\...\ObsidianVault ou G:\Meu Drive\Obsidian"
-                className="flex-1 bg-[#1a1715] border border-[#383330] focus:border-[#aea69c] rounded-[3px] px-3 py-2 text-[#f7f5f0] outline-none transition"
+                className="flex-1 bg-[#16181d] border border-[#282d37] focus:border-[#ff4d4d]/60 rounded-md px-3 py-2 text-[#f5f5f7] outline-none transition"
               />
               <button
                 onClick={handlePickFolder}
-                className="px-3 py-2 bg-[#2b2622] hover:bg-[#383330] border border-[#3f3a36] text-[#f7f5f0] rounded-[3px] transition cursor-pointer flex items-center gap-1.5"
+                className="px-3 py-2 bg-[#1e222a] hover:bg-[#262b35] border border-[#282d37] text-[#f5f5f7] rounded-md transition cursor-pointer flex items-center gap-1.5"
               >
-                <FolderOpen size={13} className="text-[#dad2c1]" />
+                <FolderOpen size={13} className="text-[#ff4d4d]" />
                 <span>procurar...</span>
               </button>
             </div>
@@ -199,48 +199,48 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
           {/* Atalho & Anexos */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[#aea69c]">attachments_dir:</label>
+              <label className="text-[#86868b]">attachments_dir:</label>
               <input
                 type="text"
                 value={attachmentsFolder}
                 onChange={(e) => setAttachmentsFolder(e.target.value)}
                 placeholder="_attachments"
-                className="w-full bg-[#1a1715] border border-[#383330] focus:border-[#aea69c] rounded-[3px] px-3 py-2 text-[#f7f5f0] outline-none transition"
+                className="w-full bg-[#16181d] border border-[#282d37] focus:border-[#ff4d4d]/60 rounded-md px-3 py-2 text-[#f5f5f7] outline-none transition"
               />
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-[#aea69c]">global_shortcut:</label>
+              <label className="text-[#86868b]">global_shortcut:</label>
               <input
                 type="text"
                 value={globalShortcut}
                 onChange={(e) => setGlobalShortcut(e.target.value)}
                 placeholder="Super+Alt+S"
-                className="w-full bg-[#1a1715] border border-[#383330] focus:border-[#aea69c] rounded-[3px] px-3 py-2 text-[#f7f5f0] outline-none transition"
+                className="w-full bg-[#16181d] border border-[#282d37] focus:border-[#ff4d4d]/60 rounded-md px-3 py-2 text-[#f5f5f7] outline-none transition"
               />
             </div>
           </div>
 
           {/* Rotas de Projetos */}
-          <div className="flex flex-col gap-2 pt-1 border-t border-[#383330]">
-            <div className="flex items-center justify-between text-[#aea69c]">
+          <div className="flex flex-col gap-2 pt-1 border-t border-[#282d37]">
+            <div className="flex items-center justify-between text-[#86868b]">
               <span>project_routes:</span>
               <div className="flex items-center gap-2 text-xs">
                 <button
                   type="button"
                   onClick={handleScanFolders}
                   disabled={isScanning}
-                  className="text-[#dad2c1] hover:text-[#f7f5f0] flex items-center gap-1 cursor-pointer transition disabled:opacity-50"
+                  className="text-[#86868b] hover:text-[#f5f5f7] flex items-center gap-1 cursor-pointer transition disabled:opacity-50"
                   title="Detecta novas pastas sem apagar as existentes"
                 >
-                  <Sparkles size={12} />
+                  <Sparkles size={12} className="text-[#ff4d4d]" />
                   <span>{isScanning ? "escaneando..." : "detectar"}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => rescanFolders(vaultPath, true)}
                   disabled={isScanning}
-                  className="text-[#aea69c] hover:text-[#f7f5f0] flex items-center gap-1 cursor-pointer transition disabled:opacity-50"
+                  className="text-[#86868b] hover:text-[#f5f5f7] flex items-center gap-1 cursor-pointer transition disabled:opacity-50"
                   title="Limpa as rotas antigas e recria a partir deste cofre"
                 >
                   <RefreshCcw size={11} />
@@ -253,19 +253,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
               {projectRoutes.map((route, idx) => (
                 <div
                   key={route.id}
-                  className="flex items-center justify-between bg-[#262320] border border-[#383330] px-3 py-1.5 rounded-[3px] text-xs"
+                  className="flex items-center justify-between bg-[#16181d] border border-[#282d37] px-3 py-1.5 rounded-md text-xs"
                 >
                   <div className="flex items-center gap-2 truncate">
-                    <span className="text-[#877e74] font-mono">[{route.keyShortcut || idx + 1}]</span>
-                    <span className="text-[#f7f5f0] truncate">{route.label}</span>
-                    <span className="text-[#877e74] truncate">
+                    <span className="text-[#585e6a] font-mono">[{route.keyShortcut || idx + 1}]</span>
+                    <span className="text-[#f5f5f7] truncate">{route.label}</span>
+                    <span className="text-[#585e6a] truncate">
                       ({route.folderPath || route.filePath || "Daily"})
                     </span>
                   </div>
                   {route.id !== "daily" && route.id !== "inbox" && (
                     <button
                       onClick={() => handleDeleteRoute(route.id)}
-                      className="text-[#877e74] hover:text-[#f87171] transition cursor-pointer p-0.5 rounded"
+                      className="text-[#585e6a] hover:text-[#ff4d4d] transition cursor-pointer p-0.5 rounded"
                       title="Remover rota"
                     >
                       <Trash2 size={12} />
@@ -282,18 +282,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
                 value={newRouteLabel}
                 onChange={(e) => setNewRouteLabel(e.target.value)}
                 placeholder="nome (ex: QA/Bugs)"
-                className="w-1/3 bg-[#1a1715] border border-[#383330] rounded-[3px] px-2.5 py-1.5 text-[#f7f5f0] outline-none"
+                className="w-1/3 bg-[#16181d] border border-[#282d37] rounded-md px-2.5 py-1.5 text-[#f5f5f7] outline-none"
               />
               <input
                 type="text"
                 value={newRoutePath}
                 onChange={(e) => setNewRoutePath(e.target.value)}
                 placeholder="pasta (ex: Projects/QA)"
-                className="flex-1 bg-[#1a1715] border border-[#383330] rounded-[3px] px-2.5 py-1.5 text-[#f7f5f0] outline-none"
+                className="flex-1 bg-[#16181d] border border-[#282d37] rounded-md px-2.5 py-1.5 text-[#f5f5f7] outline-none"
               />
               <button
                 onClick={handleAddRoute}
-                className="px-3 py-1.5 bg-[#2b2622] hover:bg-[#383330] border border-[#3f3a36] text-[#f7f5f0] rounded-[3px] transition cursor-pointer flex items-center gap-1"
+                className="px-3 py-1.5 bg-[#1e222a] hover:bg-[#262b35] border border-[#282d37] text-[#f5f5f7] rounded-md transition cursor-pointer flex items-center gap-1"
               >
                 <Plus size={12} />
                 <span>add</span>
@@ -302,10 +302,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
           </div>
 
           {/* Versão e Verificação de Atualizações */}
-          <div className="pt-3 border-t border-[#383330] flex items-center justify-between text-xs">
+          <div className="pt-3 border-t border-[#282d37] flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
-              <span className="text-[#aea69c]">versão_instalada:</span>
-              <span className="text-[#f7f5f0] font-mono bg-[#262320] px-2 py-0.5 rounded-[3px] border border-[#383330]">
+              <span className="text-[#86868b]">versão_instalada:</span>
+              <span className="text-[#f5f5f7] font-mono bg-[#16181d] px-2 py-0.5 rounded-md border border-[#282d37]">
                 v0.1.4
               </span>
             </div>
@@ -318,7 +318,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
                   window.open("https://github.com/felipe-belotto/global-quick-capture/releases", "_blank");
                 }
               }}
-              className="text-[#dad2c1] hover:text-[#f7f5f0] cursor-pointer flex items-center gap-1.5 transition"
+              className="text-[#86868b] hover:text-[#ff4d4d] cursor-pointer flex items-center gap-1.5 transition"
             >
               <RefreshCw size={12} />
               <span>verificar atualizações & status</span>
@@ -327,20 +327,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ config, onClose, o
         </div>
 
         {/* Rodapé */}
-        <div className="h-12 px-5 bg-[#262320] border-t border-[#383330] flex items-center justify-end gap-2 shrink-0">
+        <div className="h-12 px-5 bg-[#16181d] border-t border-[#282d37] flex items-center justify-end gap-2 shrink-0">
           <button
             onClick={onClose}
-            className="px-3 py-1.5 text-[#aea69c] hover:text-[#f7f5f0] rounded-[3px] transition cursor-pointer"
+            className="px-3 py-1.5 text-[#86868b] hover:text-[#f5f5f7] rounded-md transition cursor-pointer"
           >
-            cancelar
+            Cancelar
           </button>
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="px-4 py-1.5 bg-[#f7f5f0] hover:bg-white text-[#211d1a] font-medium rounded-[3px] transition cursor-pointer flex items-center gap-1.5"
+            className="px-4 py-1.5 bg-[#ff4d4d] hover:bg-[#e03636] active:bg-[#b82323] text-white font-medium rounded-md transition cursor-pointer flex items-center gap-1.5"
           >
             <Check size={13} />
-            <span>salvar</span>
+            <span>Salvar</span>
           </button>
         </div>
       </div>

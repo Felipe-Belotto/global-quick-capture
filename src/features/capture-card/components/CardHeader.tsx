@@ -27,12 +27,12 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
     <div
       data-tauri-drag-region
       onMouseDown={handleDrag}
-      className="h-10 px-3 bg-[#211d1a] border-b border-[#3f3a36] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-[4px] select-none"
+      className="h-10 px-3 bg-[#111317] border-b border-[#282d37] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-xl select-none"
     >
-      {/* Alça de Arraste + Rotas de projetos estilo abas de terminal Warp */}
+      {/* Alça de Arraste + Rotas de projetos estilo abas de terminal editorial */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
         <DragHandle />
-        <span className="font-mono text-xs text-[#2dd4bf] mr-1 select-none font-bold">❯</span>
+        <span className="font-mono text-xs text-[#ff4d4d] mr-1 select-none font-bold">❯</span>
 
         {config?.projectRoutes.map((route, idx) => {
           const isSelected = route.id === selectedRouteId;
@@ -40,10 +40,10 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
             <button
               key={route.id}
               onClick={() => onSelectRoute(route.id)}
-              className={`px-2.5 py-1 rounded-[3px] text-xs font-mono transition cursor-pointer flex items-center gap-1.5 shrink-0 border ${
+              className={`px-2.5 py-1 rounded-md text-xs font-mono transition cursor-pointer flex items-center gap-1.5 shrink-0 border ${
                 isSelected
-                  ? "bg-[#383330] border-[#4f4843] text-[#f7f5f0] shadow-sm"
-                  : "bg-transparent border-transparent text-[#aea69c] hover:text-[#dad2c1] hover:bg-[#2b2622]"
+                  ? "bg-[#1e222a] border-[#363d4a] text-[#f5f5f7] shadow-xs"
+                  : "bg-transparent border-transparent text-[#86868b] hover:text-[#f5f5f7] hover:bg-[#16181d]"
               }`}
             >
               <span className="opacity-50">{route.keyShortcut || idx + 1}:</span>
@@ -53,28 +53,28 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
         })}
       </div>
 
-      {/* Ações da Janela com ícones SVG nativos */}
+      {/* Ações da Janela */}
       <div className="flex items-center gap-1.5 pl-2 shrink-0">
         {onOpenAbout && (
           <button
             onClick={onOpenAbout}
-            className="text-[11px] font-mono text-[#aea69c] hover:text-[#2dd4bf] px-1.5 py-0.5 rounded-[3px] hover:bg-[#383330] transition cursor-pointer"
+            className="text-[11px] font-mono text-[#86868b] hover:text-[#ff4d4d] px-2 py-0.5 rounded-md hover:bg-[#1e222a] transition cursor-pointer"
             title="Sobre, Versão & Atualizações"
           >
-            v0.1.3
+            v0.1.4
           </button>
         )}
         <button
           onClick={onOpenSettings}
-          className="text-[#aea69c] hover:text-[#f7f5f0] p-1 rounded-[3px] hover:bg-[#383330] transition cursor-pointer flex items-center justify-center"
+          className="text-[#86868b] hover:text-[#f5f5f7] p-1 rounded-md hover:bg-[#1e222a] transition cursor-pointer flex items-center justify-center"
           title="Configurações (Vault e Atalhos)"
         >
           <Settings className="w-3.5 h-3.5" strokeWidth={1.75} />
         </button>
         <button
           onClick={onClose}
-          className="text-[#aea69c] hover:text-[#f43f5e] p-1 rounded-[3px] hover:bg-[#383330] transition cursor-pointer flex items-center justify-center"
-          title="Fechar (Esc)"
+          className="text-[#86868b] hover:text-[#ff4d4d] p-1 rounded-md hover:bg-[#1e222a] transition cursor-pointer flex items-center justify-center"
+          title="Fechar"
         >
           <X className="w-3.5 h-3.5" strokeWidth={1.75} />
         </button>
