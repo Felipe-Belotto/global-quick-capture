@@ -15,7 +15,6 @@ import {
   Keyboard,
   Folder,
 } from "lucide-react";
-import { DragHandle } from "../../../shared/components/DragHandle";
 import { useDraggableWindow } from "../../../shared/hooks/useDraggableWindow";
 import { SystemAppInfo, UpdateCheckResult, UpdateStatus } from "../types";
 import {
@@ -208,10 +207,9 @@ export const AppInfoModal: React.FC<AppInfoModalProps> = ({ isWindowView = false
         <div
           data-tauri-drag-region
           onMouseDown={handleDrag}
-          className="h-10 px-3 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between cursor-grab active:cursor-grabbing rounded-t-md shrink-0 font-mono text-xs"
+          className="h-10 px-3.5 bg-[#16181d] border-b border-[#282d37] flex items-center justify-between cursor-default rounded-t-md shrink-0 font-mono text-xs select-none"
         >
-          <div className="flex items-center gap-1.5 text-[#86868b]">
-            <DragHandle />
+          <div className="flex items-center gap-2 text-[#86868b]" data-tauri-drag-region>
             <span className="text-[#ff4d4d] font-black text-sm select-none">❯</span>
             <span className="text-[#f5f5f7] font-semibold">qcap</span>
             <span className="text-[#363d4a]">/</span>

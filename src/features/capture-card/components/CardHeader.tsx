@@ -1,7 +1,6 @@
 import React from "react";
 import { Settings, X, Minus, Square } from "lucide-react";
 import { AppConfig } from "../../../shared/types";
-import { DragHandle } from "../../../shared/components/DragHandle";
 import { useDraggableWindow } from "../../../shared/hooks/useDraggableWindow";
 
 interface CardHeaderProps {
@@ -34,15 +33,15 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
       data-tauri-drag-region
       onMouseDown={handleDrag}
       onDoubleClick={onToggleMaximize}
-      className={`h-10 pl-3 pr-0 bg-[#111317] border-b border-[#282d37] flex items-center justify-between cursor-grab active:cursor-grabbing select-none ${
+      className={`h-10 pl-3 pr-0 bg-[#111317] border-b border-[#282d37] flex items-center justify-between select-none cursor-default ${
         isMaximized ? "rounded-none" : "rounded-t-md"
       }`}
     >
-      {/* Alça de Arraste + Logo Seta Vermelha do QCap + Rotas de projetos */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
-        <DragHandle />
+      {/* Logo Seta Vermelha do QCap + Rotas de Projetos */}
+      <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-0.5">
+        {/* Logo Oficial QCap: Seta Vermelha da UI */}
         <span
-          className="font-mono text-sm text-[#ff4d4d] select-none font-black tracking-tight flex items-center gap-1"
+          className="font-mono text-base text-[#ff4d4d] select-none font-black tracking-tight flex items-center shrink-0 pr-0.5"
           title="QCap"
         >
           ❯
@@ -66,6 +65,9 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
           );
         })}
       </div>
+
+      {/* Área útil central para arrastar a janela (padrão nativo do Windows) */}
+      <div className="flex-1 h-full min-w-[24px]" data-tauri-drag-region />
 
       {/* Ações da Janela e Controles Nativos do Windows (Minimizar, Maximizar, Fechar) */}
       <div className="flex items-center h-full shrink-0" data-no-drag>
