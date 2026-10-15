@@ -462,15 +462,20 @@ export const QuickCaptureCard: React.FC = () => {
               </div>
 
               {/* Botão de OCR limpo embaixo da imagem */}
+              {/* Botão de OCR limpo embaixo da imagem: insere direto na anotação ao lado */}
               {imageBase64 && (
                 <div className="w-36">
                   <OcrButton
                     imageBase64={imageBase64}
                     className="w-full"
-                    onInsertMarkdown={(codeBlock) => {
-                      setDescription((prev) => (prev.trim() ? `${prev}\n\n${codeBlock}` : codeBlock));
+                    onInsertText={(text) => {
+                      setDescription((prev) => (prev.trim() ? `${prev}\n\n${text}` : text));
                       setTimeout(() => {
-                        descInputRef.current?.focus();
+                        const textarea = descInputRef.current;
+                        if (textarea) {
+                          textarea.focus();
+                          textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+                        }
                       }, 50);
                     }}
                   />
