@@ -354,6 +354,57 @@ fn quick_save_and_copy_cmd(app: tauri::AppHandle, cropped_base64: String) -> Res
 }
 
 #[tauri::command]
+fn copy_image_to_clipboard_cmd(app: tauri::AppHandle, cropped_base64: String) -> Result<(), String> {
+    if let Some(overlay) = app.get_webview_window("snipping_overlay") {
+        let _ = overlay.hide();
+    }
+    std::thread::spawn(move || {
+        let clean_base64 = if let Some(pos) = cropped_base64.find("base64,") {
+            &cropped_base64[pos + 7..]
+        } else {
+            &cropped_base64
+        };
+        use base64::Engine;
+        if let Ok(bytes) = base64::engine::general_purpose::STANDARD.decode(clean_base64.trim()) {
+            if let Err(e) = obsidian::copy_image_to_clipboard(&bytes) {
+                eprintln!("Erro ao copiar imagem para clipboard: {}", e);
+            }
+        }
+    });
+    Ok(())
+}
+
+#[tauri::command]
+fn save_image_to_disk_cmd(app: tauri::AppHandle, cropped_base64: String) -> Result<String, String> {
+    if let Some(overlay) = app.get_webview_window("snipping_overlay") {
+        let _ = overlay.hide();
+    }
+    let save_dir = dirs::picture_dir()
+        .or_else(dirs::download_dir)
+        .unwrap_or_else(|| std::path::PathBuf::from("."));
+
+    let screenshots_dir = save_dir.join("Screenshots");
+    let _ = std::fs::create_dir_all(&screenshots_dir);
+
+    let now = chrono::Local::now();
+    let filename = format!("clip-{}.png", now.format("%Y%m%d-%H%M%S"));
+    let target_path = screenshots_dir.join(&filename);
+
+    let clean_base64 = if let Some(pos) = cropped_base64.find("base64,") {
+        &cropped_base64[pos + 7..]
+    } else {
+        &cropped_base64
+    };
+    use base64::Engine;
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(clean_base64.trim())
+        .map_err(|e| format!("Erro ao decodificar base64: {}", e))?;
+
+    std::fs::write(&target_path, bytes).map_err(|e| format!("Erro ao salvar arquivo: {}", e))?;
+    Ok(target_path.to_string_lossy().to_string())
+}
+
+#[tauri::command]
 fn select_vault_folder() -> Option<String> {
     let folder = rfd::FileDialog::new()
         .set_title("Selecione a pasta raiz do seu Cofre do Obsidian")
@@ -537,6 +588,8 @@ pub fn run() {
             finish_snip,
             cancel_snip,
             quick_save_and_copy_cmd,
+            copy_image_to_clipboard_cmd,
+            save_image_to_disk_cmd,
             get_system_app_info,
             show_about_window,
             hide_about_window,
