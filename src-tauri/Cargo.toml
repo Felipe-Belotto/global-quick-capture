@@ -1,6 +1,6 @@
 [package]
 name = "global-quick-capture"
-version = "0.1.3"
+version = "0.1.4"
 description = "Global Quick Capture for Windows & Obsidian"
 authors = ["Felipe"]
 edition = "2021"
